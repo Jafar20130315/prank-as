@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Prank Scanner с камерой</title>
+<style>
+  body {
+    margin: 0;
+    background: #121212;
+    color: #eee;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: radial-gradient(circle at center, #1e1e1e 0%, #121212 80%);
+  }
+  h1 {
+    color: #4caf50;
+    margin-bottom: 20px;
+  }
+  #camera-container {
+    position: relative;
+    width: 320px;
+    height: 240px;
+    border: 4px solid #4caf50;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  video {
+    width: 320px;
+    height: 240px;
+    object-fit: cover;
+    filter: contrast(1.2) brightness(1.1);
+  }
+  #scanner-frame {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    box-sizing: border-box;
+    border: 4px solid #4caf50;
+    border-radius: 12px;
+    animation: scanline 2s infinite;
+  }
+  @keyframes scanline {
+    0% {
+      box-shadow: inset 0 0 0 0 #4caf50;
+    }
+    50% {
+      box-shadow: inset 0 120px 30px -60px #4caf50;
+    }
+    100% {
+      box-shadow: inset 0 0 0 0 #4caf50;
+    }
+  }
+  #msg {
+    white-space: pre-wrap;
+    background: rgba(0,0,0,0.6);
+    padding: 16px;
+    border-radius: 10px;
+    width: 320px;
+    min-height: 120px;
+    font-size: 1.1rem;
+    line-height: 1.4;
+    margin-bottom: 20px;
+    user-select: none;
+  }
+  #scanBtn {
+    background-color: #4caf50;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: background-color 0.3s ease;
+  }
+  #scanBtn:hover {
+    background-color: #43a047;
+  }
+  #secret-section {
+    margin-top: 30px;
+    background: rgba(30,30,30,0.8);
+    padding: 20px;
+    border-radius: 12px;
+    width: 340px;
+    box-sizing: border-box;
+    display: none; /* Скрытый раздел */
+  }
+  #secret-section label {
+    display: block;
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #aaa;
+  }
+  #secret-section input {
+    width: 100%;
+    padding: 8px 10px;
+    margin-top: 4px;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background: #222;
+    color: #eee;
+    font-size: 1rem;
+    box-sizing: border-box;
+  }
+  #secretToggle {
+    margin-bottom: 15px;
+    cursor: pointer;
+    color: #888;
+    font-size: 0.85rem;
+    user-select: none;
+    text-decoration: underline;
+  }
+</style>
+</head>
+<body>
+
+<h1>Skan</h1>
+
+<div id="camera-container" style="display:none;">
+  <video id="video" autoplay muted playsinline></video>
+  <div id="scanner-frame"></div>
+</div>
+
+<div id="msg">Iltimos kameraga qarang</div>
+
+<button id="scanBtn">Boshlash</button>
+
+<div id="secretToggle">.</div>
+
+<div id="secret-section">
+  <label for="nameInput">Ism</label>
+  <input type="text" id="nameInput" placeholder="Bobur" />
+
+  <label for="surnameInput">Familiya</label>
+  <input type="text" id="surnameInput" placeholder="Kamolov" />
+
+  <label for="patronymicInput">Otasining ismi</label>
+  <input type="text" id="patronymicInput" placeholder="Shuxratovich" />
+
+  <label for="ageInput">Yoshi</label>
+  <input type="number" id="ageInput" placeholder="25" min="1" max="120" />
+</div>
+
+<script>
+  const video = document.getElementById('video');
+  const scanBtn = document.getElementById('scanBtn');
+  const msg = document.getElementById('msg');
+  const cameraContainer = document.getElementById('camera-container');
+
+  const secretToggle = document.getElementById('secretToggle');
+  const secretSection = document.getElementById('secret-section');
+
+  // Переключение видимости секретного раздела
+  secretToggle.addEventListener('click', () => {
+    if (secretSection.style.display === 'none' || secretSection.style.display === '') {
+      secretSection.style.display = 'block';
+      secretToggle.textContent = 'Yopish';
+    } else {
+      secretSection.style.display = 'none';
+      secretToggle.textContent = '.';
+    }
+  });
+
+  let stream = null;
+
+  async function startCamera() {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      video.srcObject = stream;
+      cameraContainer.style.display = 'block';
+    } catch (e) {
+      msg.textContent = 'Ошибка доступа к камере: ' + e.message;
+      scanBtn.disabled = true;
+    }
+  }
+
+  function stopCamera() {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      stream = null;
+      video.srcObject = null;
+      cameraContainer.style.display = 'none';
+    }
+  }
+
+  scanBtn.addEventListener('click', async () => {
+    // Если камера не запущена — сначала запускаем
+    if (!stream) {
+      msg.textContent = 'Запрос доступа к камере...';
+      await startCamera();
+    }
+
+    msg.textContent = 'Aniqlanmoqda...🔍';
+    scanBtn.disabled = true;
+
+    // Имитация сканирования 3 секунды
+    setTimeout(() => {
+      // Получаем данные из секретного раздела или дефолтные рандомные
+      const name = document.getElementById('nameInput').value.trim() || 'Bobur';
+      const surname = document.getElementById('surnameInput').value.trim() || 'Kamolov';
+      const patronymic = document.getElementById('patronymicInput').value.trim() || 'Shuxratovich';
+      const ageVal = document.getElementById('ageInput').value.trim();
+      const age = (ageVal && !isNaN(ageVal)) ? ageVal : (20 + Math.floor(Math.random() * 30));
+
+      // Вывод результата
+      msg.textContent = `SHAXS ANIQLANDI !\n\n` +
+                        `Ism: ${name}\n` +
+                        `Familiya: ${surname}\n` +
+                        `Otasining ismi: ${patronymic}\n` +
+                        `Yosh: ${age}`;
+
+      // Останавливаем камеру и скрываем контейнер с ней
+      stopCamera();
+
+      scanBtn.disabled = false;
+      scanBtn.textContent = 'Qayta urinish';
+
+    }, 3000);
+  });
+</script>
+
+</body>
+</html>
