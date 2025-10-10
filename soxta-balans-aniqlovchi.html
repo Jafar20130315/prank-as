@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soxta balans Detektori Prank</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
+
+        :root {
+            --bg-color: #1a1a1a;
+            --primary-color: #00ff9d;
+            --text-color: #e0e0e0;
+            --input-bg: #2a2a2a;
+            --border-color: #444;
+            --link-color: #4da6ff;
+            --secondary-btn-bg: #333;
+        }
+
+        body {
+            font-family: 'Roboto Mono', monospace;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: #222222;
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 0 25px rgba(0, 255, 157, 0.1);
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            color: var(--primary-color);
+            text-shadow: 0 0 5px var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            color: #aaa;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        input[type="tel"], input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            border-radius: 6px;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1rem;
+            text-align: center;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(0, 255, 157, 0.3);
+        }
+
+        button {
+            padding: 12px;
+            width: 100%;
+            border: 1px solid var(--primary-color);
+            border-radius: 6px;
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+            font-size: 1rem;
+            font-weight: bold;
+            font-family: 'Roboto Mono', monospace;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+        }
+        
+        button:hover {
+            background-color: #222;
+            color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(0, 255, 157, 0.5);
+        }
+
+        #result-container {
+            margin-top: 1.5rem;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem 1rem;
+            min-height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #result {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            word-wrap: break-word;
+        }
+
+        .section-toggle {
+            margin-top: 1.5rem;
+            color: var(--link-color);
+            cursor: pointer;
+            font-weight: 500;
+            display: inline-block;
+            font-size: 1.2rem;
+        }
+        
+        #setup-section { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="main-section">
+        <h1>Balans Detektori</h1>
+        <p>Istalgan raqamning balansini bilib oling</p>
+        <input type="tel" id="phone-input" placeholder="+998 XX XXX XX XX" value="+998">
+        <button onclick="checkBalance()">Tekshirish</button>
+        <div id="result-container">
+            <div id="result">...</div>
+        </div>
+        <div class="section-toggle" onclick="toggleSection()">/</div>
+    </div>
+
+    <div id="setup-section">
+        <h1>Maxfiy Sozlamalar</h1>
+        <p>Balansni kerakli raqamga bog'lang</p>
+        <input type="tel" id="setup-phone" placeholder="Telefon raqam">
+        <input type="number" id="setup-balance" placeholder="Balansni kiriting">
+        <button onclick="linkBalance()">Saqlash</button>
+        <div class="section-toggle" onclick="toggleSection()">[ Orqaga ]</div>
+    </div>
+</div>
+
+<script>
+    const mainSection = document.getElementById('main-section');
+    const setupSection = document.getElementById('setup-section');
+    const resultDiv = document.getElementById('result');
+    
+    function toggleSection() {
+        if (mainSection.style.display === 'none') {
+            mainSection.style.display = 'block';
+            setupSection.style.display = 'none';
+        } else {
+            mainSection.style.display = 'none';
+            setupSection.style.display = 'block';
+        }
+    }
+
+    function runAnimation(finalText) {
+        let counter = 0;
+        const duration = 20;
+        const interval = setInterval(() => {
+            counter++;
+            resultDiv.innerText = Math.random().toString(36).substring(2, 10);
+            if (counter >= duration) {
+                clearInterval(interval);
+                resultDiv.innerText = finalText;
+            }
+        }, 50);
+    }
+
+    function checkBalance() {
+        const phone = document.getElementById('phone-input').value;
+        if (phone.length < 13) {
+            alert('Telefon raqami noto\'g\'ri kiritildi.');
+            return;
+        }
+
+        const linkedBalance = localStorage.getItem(phone);
+        let finalText;
+
+        if (linkedBalance !== null) {
+            finalText = `${parseFloat(linkedBalance).toFixed(2)} so'm`;
+        } else {
+            const randomBalance = (Math.random() * 2000000 - 500000).toFixed(2);
+            finalText = `${randomBalance} so'm`;
+        }
+        runAnimation(finalText);
+    }
+
+    function linkBalance() {
+        const phone = document.getElementById('setup-phone').value;
+        const balance = document.getElementById('setup-balance').value;
+        if (!phone || !balance) {
+            alert("Bog'lash uchun ikkala maydonni to'ldiring.");
+            return;
+        }
+        localStorage.setItem(phone, balance);
+        alert(`Ma'lumotlar saqlandi!`);
+        document.getElementById('setup-phone').value = '';
+        document.getElementById('setup-balance').value = '';
+        toggleSection();
+    }
+</script>
+
+</body>
+</html>
