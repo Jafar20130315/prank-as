@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ru-uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Генератор Узбекских Автономеров</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&display=swap" rel="stylesheet" />
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    .license-plate {
+      font-family: 'Oswald', sans-serif;
+      width: 100%;
+      max-width: 520px;
+      height: 112px;
+      background: white;
+      border: 3px solid black;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      user-select: none;
+      box-sizing: border-box;
+    }
+
+    .plate-region {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      padding: 0 5px;
+      min-width: 60px;
+    }
+
+    .plate-region svg {
+      width: 50px;
+      height: 25px;
+    }
+
+    .plate-uz {
+      font-weight: 600;
+      font-size: 24px;
+      margin-top: 4px;
+    }
+
+    .plate-main {
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 80px;
+      letter-spacing: 2px;
+      color: black;
+      line-height: 1;
+      --offset-y: 0px;
+      transform: translateY(var(--offset-y));
+      transition: transform 0.1s ease-out;
+      padding: 0 5px;
+    }
+
+    .plate-divider {
+      width: 3px;
+      height: 80%;
+      background: black;
+      margin: 0 10px;
+    }
+
+    .editable {
+      padding: 0 5px;
+      outline: none;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background-color 0.2s;
+    }
+
+    .editable:hover,
+    .editable:focus {
+      background-color: #e0f2fe;
+    }
+
+    .tab {
+      transition: all 0.2s;
+    }
+
+    .tab.active {
+      background-color: #1d4ed8;
+      color: white;
+    }
+
+    @media (max-width: 600px) {
+      .license-plate {
+        height: 80px;
+        padding: 5px;
+        border-width: 2px;
+      }
+
+      .plate-region {
+        min-width: 45px;
+      }
+
+      .plate-region svg {
+        width: 35px;
+        height: 17px;
+      }
+
+      .plate-uz {
+        font-size: 16px;
+        margin-top: 2px;
+      }
+
+      .plate-main {
+        font-size: 55px;
+        padding: 0 3px;
+      }
+
+      .plate-divider {
+        width: 2px;
+        height: 70%;
+        margin: 0 6px;
+      }
+
+      .editable {
+        padding: 0 2px;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .license-plate {
+        height: 70px;
+        padding: 4px;
+      }
+
+      .plate-region svg {
+        width: 30px;
+        height: 15px;
+      }
+
+      .plate-uz {
+        font-size: 14px;
+      }
+
+      .plate-main {
+        font-size: 45px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="hidden sm:block text-center text-red-600 font-bold text-lg mt-4">Beta</div>
+
+  <div class="w-full max-w-lg mx-auto bg-white p-6 rounded-xl shadow-lg">
+    <h1 class="text-2xl font-bold text-center text-gray-800 mb-4">Avtoraqam rasm generatori</h1>
+
+    <div class="flex justify-center border border-gray-300 rounded-lg p-1 mb-6 bg-gray-50">
+      <button id="tab-individual" class="tab active w-1/2 p-2 rounded-md font-semibold">Jismoniy shaxs</button>
+      <button id="tab-legal" class="tab w-1/2 p-2 rounded-md font-semibold">Yuridik shaxs</button>
+    </div>
+
+    <div id="plate-container" class="flex justify-center mb-6">
+      <div id="individual-plate" class="license-plate">
+        <div class="plate-main">
+          <span class="editable" contenteditable="true" data-type="number" data-length="2">01</span>
+          <div class="plate-divider"></div>
+          <span class="editable" contenteditable="true" data-type="letter" data-length="1">A</span>
+          <span class="editable ml-3" contenteditable="true" data-type="number" data-length="3">123</span>
+          <span class="editable ml-3" contenteditable="true" data-type="letter" data-length="2">BC</span>
+        </div>
+        <div class="plate-region">
+          <!-- SVG FLAG -->
+          <svg viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg">
+            <rect fill="#1EB53A" width="1000" height="500" />
+            <rect fill="#FFFFFF" width="1000" height="180" y="160" />
+            <rect fill="#0099FF" width="1000" height="160" />
+            <rect fill="#CE1126" width="1000" height="20" y="150" />
+            <rect fill="#CE1126" width="1000" height="20" y="330" />
+            <g fill="#FFFFFF">
+              <path d="M150 40 a60 60 0 1 0 0 120 a50 50 0 1 1 0 -120" />
+              <circle cx="280" cy="80" r="8" /><circle cx="300" cy="80" r="8" /><circle cx="320" cy="80" r="8" />
+              <circle cx="340" cy="80" r="8" /><circle cx="290" cy="100" r="8" /><circle cx="310" cy="100" r="8" />
+              <circle cx="330" cy="100" r="8" /><circle cx="350" cy="100" r="8" /><circle cx="300" cy="120" r="8" />
+              <circle cx="320" cy="120" r="8" /><circle cx="340" cy="120" r="8" /><circle cx="360" cy="120" r="8" />
+              <circle cx="380" cy="120" r="8" />
+            </g>
+          </svg>
+          <div class="plate-uz">UZ</div>
+        </div>
+      </div>
+
+      <div id="legal-plate" class="license-plate hidden">
+        <div class="plate-main">
+          <span class="editable" contenteditable="true" data-type="number" data-length="2">01</span>
+          <div class="plate-divider"></div>
+          <span class="editable" contenteditable="true" data-type="number" data-length="3">123</span>
+          <span class="editable ml-3" contenteditable="true" data-type="letter" data-length="3">ABC</span>
+        </div>
+        <div class="plate-region">
+          <svg viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg">
+            <rect fill="#1EB53A" width="1000" height="500" />
+            <rect fill="#FFFFFF" width="1000" height="180" y="160" />
+            <rect fill="#0099FF" width="1000" height="160" />
+            <rect fill="#CE1126" width="1000" height="20" y="150" />
+            <rect fill="#CE1126" width="1000" height="20" y="330" />
+            <g fill="#FFFFFF">
+              <path d="M150 40 a60 60 0 1 0 0 120 a50 50 0 1 1 0 -120" />
+              <circle cx="280" cy="80" r="8" /><circle cx="300" cy="80" r="8" /><circle cx="320" cy="80" r="8" />
+              <circle cx="340" cy="80" r="8" /><circle cx="290" cy="100" r="8" /><circle cx="310" cy="100" r="8" />
+              <circle cx="330" cy="100" r="8" /><circle cx="350" cy="100" r="8" /><circle cx="300" cy="120" r="8" />
+              <circle cx="320" cy="120" r="8" /><circle cx="340" cy="120" r="8" /><circle cx="360" cy="120" r="8" />
+              <circle cx="380" cy="120" r="8" />
+            </g>
+          </svg>
+          <div class="plate-uz">UZ</div>
+        </div>
+      </div>
+    </div>
+
+    <button id="download-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 ease-in-out flex items-center justify-center">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+      </svg>
+      Rasm sifatida yuklash
+    </button>
+  </div>
+
+  <script>
+    const tabIndividual = document.getElementById('tab-individual');
+    const tabLegal = document.getElementById('tab-legal');
+    const individualPlate = document.getElementById('individual-plate');
+    const legalPlate = document.getElementById('legal-plate');
+    const downloadBtn = document.getElementById('download-btn');
+    const editableElements = document.querySelectorAll('.editable');
+
+    function switchTab(activeTab) {
+      if (activeTab === 'individual') {
+        tabIndividual.classList.add('active');
+        tabLegal.classList.remove('active');
+        individualPlate.classList.remove('hidden');
+        legalPlate.classList.add('hidden');
+      } else {
+        tabLegal.classList.add('active');
+        tabIndividual.classList.remove('active');
+        legalPlate.classList.remove('hidden');
+        individualPlate.classList.add('hidden');
+      }
+    }
+
+    tabIndividual.addEventListener('click', () => switchTab('individual'));
+    tabLegal.addEventListener('click', () => switchTab('legal'));
+
+    downloadBtn.addEventListener('click', () => {
+      const activePlate = individualPlate.classList.contains('hidden') ? legalPlate : individualPlate;
+      const activePlateMain = activePlate.querySelector('.plate-main');
+
+      const isMobile = window.innerWidth <= 600;
+      const offsetY = isMobile ? '-18px' : '-25px';
+
+      activePlateMain.style.setProperty('--offset-y', offsetY);
+
+      html2canvas(activePlate, {
+        backgroundColor: null,
+        scale: 3,
+      }).then((canvas) => {
+        activePlateMain.style.setProperty('--offset-y', '0px');
+        const link = document.createElement('a');
+        link.download = 'avtoraqam-shunchaki-rasm.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      });
+    });
+
+    editableElements.forEach((el) => {
+      el.addEventListener('keydown', (e) => {
+        const type = el.dataset.type;
+        const maxLength = parseInt(el.dataset.length, 10);
+        const currentLength = el.textContent.length;
+
+        const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
+        if (allowedKeys.includes(e.key)) return;
+
+        if (currentLength >= maxLength) {
+          e.preventDefault();
+          return;
+        }
+
+        if (type === 'number' && !/^[0-9]$/.test(e.key)) e.preventDefault();
+        if (type === 'letter' && !/^[a-zA-Z]$/.test(e.key)) e.preventDefault();
+      });
+
+      el.addEventListener('input', () => {
+        if (el.dataset.type === 'letter') {
+          const selection = window.getSelection();
+          const range = selection.getRangeAt(0);
+          const offset = range.startOffset;
+
+          el.textContent = el.textContent.toUpperCase();
+
+          const newRange = document.createRange();
+          if (el.childNodes.length > 0) {
+            newRange.setStart(el.childNodes[0], Math.min(offset, el.textContent.length));
+            newRange.collapse(true);
+            selection.removeAllRanges();
+            selection.addRange(newRange);
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>
