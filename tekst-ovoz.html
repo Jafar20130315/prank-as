@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Озвучка текста</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
+  body {
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    margin: 0;
+    padding: 2rem;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  .container {
+    background: rgba(255 255 255 / 0.1);
+    border-radius: 15px;
+    padding: 2rem;
+    max-width: 600px;
+    width: 100%;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(8px);
+  }
+
+  h1 {
+    text-align: center;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  }
+
+  label {
+    display: block;
+    margin-top: 1.2rem;
+    font-weight: 600;
+    color: #e0e0ff;
+  }
+
+  select, input[type=range], textarea {
+    width: 100%;
+    margin-top: 0.3rem;
+    padding: 8px;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    background: rgba(255 255 255 / 0.3);
+    color: #fff;
+    font-family: 'Roboto', sans-serif;
+    appearance: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  select:hover, input[type=range]:hover, textarea:hover {
+    background: rgba(255 255 255 / 0.5);
+  }
+
+  select:disabled {
+    color: #999;
+    background: rgba(0,0,0,0.1);
+    cursor: not-allowed;
+  }
+
+  select option {
+    color: #000;
+    background: #fff;
+  }
+
+  textarea {
+    height: 130px;
+    resize: vertical;
+  }
+  textarea:focus {
+    outline: none;
+    box-shadow: 0 0 10px #fff;
+  }
+
+  .buttons {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  button {
+    flex: 1 1 120px;
+    padding: 12px;
+    font-size: 1.1rem;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    background: #4caf50;
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(76,175,80,0.6);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  button:hover:not(:disabled) {
+    background: #45a049;
+    transform: scale(1.05);
+  }
+  button:disabled {
+    background: #999;
+    cursor: not-allowed;
+  }
+
+  #rate-value {
+    font-weight: 700;
+    margin-left: 10px;
+    color: #fff;
+  }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    height: 8px;
+    background: linear-gradient(to right, #fff 0%, #fff 50%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0.3) 100%);
+    border-radius: 5px;
+    outline: none;
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    background: #4caf50;
+    cursor: pointer;
+    border-radius: 50%;
+    border: 2px solid white;
+    margin-top: -7px;
+    transition: background-color 0.3s ease;
+  }
+  input[type=range]:hover::-webkit-slider-thumb {
+    background: #45a049;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Tekst --> Ovoz</h1>
+
+  <label for="language">Tilni tanlang:</label>
+  <select id="language" aria-label="Выберите язык">
+    <option value="ru-RU">Русский</option>
+    <option value="en-US">English</option>
+    <option value="uz-UZ">O‘zbekcha</option>
+  </select>
+
+  <label for="voice">Ovozni tanlang:</label>
+  <select id="voice" disabled><option>Yuklanmoqda...</option></select>
+
+  <label for="rate">Ozvuchka tezligi: <span id="rate-value">1</span></label>
+  <input type="range" id="rate" min="0.5" max="2" step="0.1" value="1" />
+
+  <label for="text-input">Ozvuchka qilish uchun, tekstni kiriting:</label>
+  <textarea id="text-input" placeholder="Tekstni yozing...">Salom</textarea>
+
+  <div class="buttons">
+    <button id="play-btn">Boshlash</button>
+    <button id="pause-btn" disabled>Pauza</button>
+    <button id="resume-btn" disabled>Davom etish</button>
+    <button id="stop-btn" disabled>To'xtatish</button>
+  </div>
+
+  <p id="note" style="margin-top:1rem; font-style: italic; color: #ffcc00;"></p>
+</div>
+
+<script>
+  const synth = window.speechSynthesis;
+  const languageSelect = document.getElementById('language');
+  const voiceSelect = document.getElementById('voice');
+  const rateInput = document.getElementById('rate');
+  const rateValue = document.getElementById('rate-value');
+  const textInput = document.getElementById('text-input');
+
+  const playBtn = document.getElementById('play-btn');
+  const pauseBtn = document.getElementById('pause-btn');
+  const resumeBtn = document.getElementById('resume-btn');
+  const stopBtn = document.getElementById('stop-btn');
+  const note = document.getElementById('note');
+
+  let voices = [];
+  let utterance;
+
+  function updateSliderBackground() {
+    const min = rateInput.min;
+    const max = rateInput.max;
+    const val = rateInput.value;
+    const percent = ((val - min) / (max - min)) * 100;
+    rateInput.style.background = `linear-gradient(to right, #fff 0%, #fff ${percent}%, rgba(255,255,255,0.3) ${percent}%, rgba(255,255,255,0.3) 100%)`;
+  }
+
+  rateInput.addEventListener('input', () => {
+    rateValue.textContent = rateInput.value;
+    updateSliderBackground();
+  });
+  updateSliderBackground();
+
+  function loadVoices() {
+    voices = synth.getVoices();
+
+    if (!voices.length) {
+      voiceSelect.innerHTML = '<option>Ovozlar topolmadi</option>';
+      voiceSelect.disabled = true;
+      playBtn.disabled = true;
+      return;
+    }
+
+    updateVoiceList();
+  }
+
+  function updateVoiceList() {
+    const lang = languageSelect.value;
+    voiceSelect.innerHTML = '';
+
+    // Фильтр голосов по языку, максимум 4
+    let filtered = voices.filter(v => v.lang.toLowerCase().startsWith(lang.toLowerCase())).slice(0, 4);
+
+    // Для узбекского языка голосов почти нет, показать подсказку и предложить голоса других языков
+    if(lang === 'uz-uz' || lang === 'uz-UZ') {
+      note.textContent = "O'zbek tili uchun ovozlar kam yoki umuman yo'q.Ingliz va Rus tili ovozlarini tanlang.Talaffuz noto'g'ri bo'lishi mumkin";
+      filtered = voices.filter(v => v.lang.toLowerCase().startsWith('ru') || v.lang.toLowerCase().startsWith('en')).slice(0,4);
+    } else {
+      note.textContent = '';
+    }
+
+    if (filtered.length === 0) {
+      voiceSelect.innerHTML = '<option>Ovozlar topilmadi</option>';
+      voiceSelect.disabled = true;
+      playBtn.disabled = true;
+    } else {
+      voiceSelect.disabled = false;
+      playBtn.disabled = false;
+      filtered.forEach(voice => {
+        const option = document.createElement('option');
+        option.value = voice.name;
+        option.textContent = `${voice.name} (${voice.lang})`;
+        voiceSelect.appendChild(option);
+      });
+    }
+  }
+
+  languageSelect.addEventListener('change', () => {
+    updateVoiceList();
+  });
+
+  function speak() {
+    // Отмена предыдущей речи, чтобы не было конфликта
+    if (synth.speaking) {
+      synth.cancel();
+    }
+
+    const text = textInput.value.trim();
+    if (!text) {
+      alert('Iltimos, matnni kiriting');
+      return;
+    }
+
+    utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = languageSelect.value;
+
+    const selectedVoiceName = voiceSelect.value;
+    utterance.voice = voices.find(v => v.name === selectedVoiceName) || null;
+
+    utterance.rate = parseFloat(rateInput.value);
+    utterance.pitch = 1;
+    utterance.volume = 1;
+
+    utterance.onstart = () => {
+      playBtn.disabled = true;
+      pauseBtn.disabled = false;
+      stopBtn.disabled = false;
+      resumeBtn.disabled = true;
+    };
+
+    utterance.onend = () => {
+      playBtn.disabled = false;
+      pauseBtn.disabled = true;
+      stopBtn.disabled = true;
+      resumeBtn.disabled = true;
+    };
+
+    utterance.onerror = (e) => {
+      alert('Xatolik yuz berdi: ' + e.error);
+      playBtn.disabled = false;
+      pauseBtn.disabled = true;
+      stopBtn.disabled = true;
+      resumeBtn.disabled = true;
+    };
+
+    synth.speak(utterance);
+  }
+
+  function pauseSpeech() {
+    if (synth.speaking && !synth.paused) {
+      synth.pause();
+      pauseBtn.disabled = true;
+      resumeBtn.disabled = false;
+    }
+  }
+
+  function resumeSpeech() {
+    if (synth.paused) {
+      synth.resume();
+      pauseBtn.disabled = false;
+      resumeBtn.disabled = true;
+    }
+  }
+
+  function stopSpeech() {
+    if (synth.speaking) {
+      synth.cancel();
+      playBtn.disabled = false;
+      pauseBtn.disabled = true;
+      resumeBtn.disabled = true;
+      stopBtn.disabled = true;
+    }
+  }
+
+  playBtn.addEventListener('click', speak);
+  pauseBtn.addEventListener('click', pauseSpeech);
+  resumeBtn.addEventListener('click', resumeSpeech);
+  stopBtn.addEventListener('click', stopSpeech);
+
+  if (synth.onvoiceschanged !== undefined) {
+    synth.onvoiceschanged = loadVoices;
+  }
+  loadVoices();
+</script>
+
+</body>
+</html>
