@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Звукомер</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap');
+
+  body {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    height: 100vh;
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    user-select: none;
+  }
+
+  .sound-meter {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 25px;
+    padding: 40px 60px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    width: 350px;
+    text-align: center;
+  }
+
+  .title {
+    font-size: 1.8rem;
+    margin-bottom: 25px;
+    letter-spacing: 1.2px;
+  }
+
+  .meter-bar {
+    width: 100%;
+    height: 30px;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+    box-shadow: inset 0 2px 5px rgba(255,255,255,0.3);
+  }
+
+  .meter-fill {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, #f7971e, #ffd200);
+    border-radius: 15px 0 0 15px;
+    transition: width 0.1s ease-out;
+    box-shadow: 0 0 10px #ffd200;
+  }
+
+  .db-value {
+    margin-top: 15px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 8px #ffd200;
+  }
+
+  .footer {
+    margin-top: 30px;
+    font-size: 0.8rem;
+    opacity: 0.6;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="sound-meter">
+  <div class="title">Звукомер</div>
+  <div class="meter-bar">
+    <div class="meter-fill" id="meterFill"></div>
+  </div>
+  <div class="db-value" id="dbValue">— dB</div>
+  <div class="footer">Разрешите доступ к микрофону</div>
+</div>
+
+<script>
+  const meterFill = document.getElementById('meterFill');
+  const dbValue = document.getElementById('dbValue');
+  const footer = document.querySelector('.footer');
+
+  // Нормализуем уровень громкости для отображения в процентах
+  function normalizeVolume(volume) {
+    return Math.min(Math.max(volume * 100, 0), 100);
+  }
+
+  async function setupAudio() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      footer.textContent = 'Микрофон подключен';
+
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioContext.createMediaStreamSource(stream);
+      const analyser = audioContext.createAnalyser();
+
+      analyser.fftSize = 512;
+      source.connect(analyser);
+
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+      function getVolume() {
+        analyser.getByteTimeDomainData(dataArray);
+        let sum = 0;
+        for(let i = 0; i < dataArray.length; i++) {
+          let value = (dataArray[i] - 128) / 128;
+          sum += value * value;
+        }
+        let rms = Math.sqrt(sum / dataArray.length);
+        return rms;
+      }
+
+      function animate() {
+        const volume = getVolume();
+        const normalized = normalizeVolume(volume);
+        meterFill.style.width = normalized + '%';
+
+        // Пример преобразования RMS в dB (приблизительно)
+        let dB = (20 * Math.log10(volume)).toFixed(1);
+        if (volume < 0.01) {
+          dbValue.textContent = `— dB`;
+        } else {
+          dbValue.textContent = `${dB} dB`;
+        }
+
+        requestAnimationFrame(animate);
+      }
+
+      animate();
+    } catch (e) {
+      footer.textContent = 'Ошибка доступа к микрофону';
+      console.error(e);
+    }
+  }
+
+  setupAudio();
+</script>
+
+</body>
+</html>
