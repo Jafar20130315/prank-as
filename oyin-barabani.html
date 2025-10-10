@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aylanuvchi o'yin uchun baraban</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@700&display=swap');
+
+        :root {
+            --bg-color: #1a1b26;
+            --wheel-bg: #282a3f;
+            --pointer-color: #ff79c6;
+            --shadow-color: rgba(255, 121, 198, 0.4);
+            --red-color: #ff5555;
+            --green-color: #50fa7b;
+            --yellow-color: #f1fa8c;
+        }
+
+        body {
+            font-family: 'Exo 2', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: var(--bg-color);
+            color: #f8f8f2;
+            overflow: hidden;
+            margin: 0;
+        }
+
+        .wheel-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin-bottom: 40px;
+        }
+
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            background: conic-gradient(
+                var(--red-color) 0deg 120deg,
+                var(--green-color) 120deg 240deg,
+                var(--yellow-color) 240deg 360deg
+            );
+            border: 5px solid var(--wheel-bg);
+            box-shadow: 0 0 20px rgba(0,0,0,0.5), inset 0 0 30px rgba(0,0,0,0.4);
+            transition: transform 5s cubic-bezier(0.25, 1, 0.5, 1);
+            transform: rotate(0deg);
+        }
+
+        .outcome {
+            position: absolute;
+            width: 100%; height: 100%;
+            color: rgba(0,0,0,0.7);
+            font-weight: 700;
+            font-size: 22px;
+            text-align: center;
+            padding-top: 20px;
+            box-sizing: border-box;
+            transform-origin: center center;
+        }
+        .outcome:nth-child(1) { transform: rotate(60deg); }
+        .outcome:nth-child(2) { transform: rotate(180deg); }
+        .outcome:nth-child(3) { transform: rotate(300deg); }
+
+        /* Указатель слева, как ты и просил в прошлый раз */
+        .pointer {
+            width: 0; height: 0;
+            border-top: 20px solid transparent;
+            border-bottom: 20px solid transparent;
+            border-left: 35px solid var(--pointer-color);
+            position: absolute;
+            top: 50%;
+            left: -20px;
+            transform: translateY(-50%);
+            z-index: 10;
+            filter: drop-shadow(0 0 10px var(--shadow-color));
+        }
+
+        button {
+            margin-top: 40px;
+            padding: 15px 40px;
+            font-size: 24px;
+            font-family: 'Exo 2', sans-serif;
+            cursor: pointer;
+            border-radius: 10px;
+            border: 2px solid var(--pointer-color);
+            background-color: transparent;
+            color: var(--pointer-color);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            text-shadow: 0 0 10px var(--shadow-color);
+            box-shadow: 0 0 15px var(--shadow-color);
+        }
+        button:hover {
+            background-color: var(--pointer-color);
+            color: #fff;
+            box-shadow: 0 0 30px var(--shadow-color);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .confetti, .modal-overlay, .modal-box, .modal-box p, .modal-box button {
+            /* Стили для этих элементов не менялись */
+        }
+        .confetti { width: 10px; height: 10px; background-color: red; position: absolute; will-change: transform; pointer-events: none; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 100; }
+        .modal-box { background: var(--wheel-bg); padding: 2rem; border-radius: 12px; border: 2px solid var(--pointer-color); box-shadow: 0 0 25px var(--shadow-color); text-align: center; color: #f8f8f2; }
+        .modal-box p { font-size: 1.5rem; margin: 0; margin-bottom: 1.5rem; text-shadow: 0 0 5px #fff; }
+        .modal-box button { box-shadow: none; }
+    </style>
+</head>
+<body>
+
+<div class="wheel-container">
+    <div class="wheel" id="wheel">
+        <div class="outcome">Yomon</div>
+        <div class="outcome">Yaxshi</div>
+        <div class="outcome">O'rtacha</div>
+    </div>
+    <div class="pointer"></div>
+</div>
+
+<button id="spinButton" onclick="spinWheel()">Aylantirish!</button>
+
+<div class="modal-overlay" id="modal-overlay">
+    <div class="modal-box">
+        <p id="modal-message"></p>
+        <button id="modal-close-btn">OK</button>
+    </div>
+</div>
+
+<script>
+    const wheel = document.getElementById('wheel');
+    const spinButton = document.getElementById('spinButton');
+    
+    // Этот массив теперь нужен только для отображения текста
+    const outcomes = ["Yomon", "Yaxshi", "O'rtacha"];
+    let currentRotation = 0;
+    
+    const modalOverlay = document.getElementById('modal-overlay');
+    const modalMessage = document.getElementById('modal-message');
+    const modalCloseBtn = document.getElementById('modal-close-btn');
+
+    function showModal(message) {
+        modalMessage.innerText = message;
+        modalOverlay.style.display = 'flex';
+    }
+
+    function hideModal() {
+        modalOverlay.style.display = 'none';
+    }
+
+    modalCloseBtn.addEventListener('click', hideModal);
+    modalOverlay.addEventListener('click', (event) => {
+        if (event.target === modalOverlay) {
+            hideModal();
+        }
+    });
+
+    function spinWheel() {
+        spinButton.disabled = true;
+
+        // ==================================================================
+        // НОВАЯ ЛОГИКА "РЕАЛЬНОЙ СЛУЧАЙНОСТИ"
+        // ==================================================================
+        
+        // 1. Задаем случайную силу вращения
+        const randomSpins = 5 + Math.random() * 5; // от 5 до 10 оборотов
+        const randomExtraAngle = Math.random() * 360;
+        const totalRandomRotation = (randomSpins * 360) + randomExtraAngle;
+        
+        // Добавляем к текущему повороту, чтобы вращение продолжалось
+        currentRotation += totalRandomRotation;
+        
+        // 2. Запускаем анимацию вращения на это случайное значение
+        wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+        // 3. Ждем окончания анимации
+        setTimeout(() => {
+            // 4. После остановки вычисляем, где мы оказались
+            // Нормализуем огромный угол вращения до значения от 0 до 360
+            const finalAngle = currentRotation % 360;
+
+            // 5. Вычисляем, на какой сектор указывает стрелка слева (180 градусов)
+            // Формула: (360 - угол_остановки + позиция_стрелки) % 360
+            const pointerPosition = 180;
+            const winningAngle = (360 - finalAngle + pointerPosition) % 360;
+
+            let selectedOutcome;
+            if (winningAngle >= 0 && winningAngle < 120) {
+                selectedOutcome = outcomes[0]; // "Unchalik..." (Красный сектор)
+            } else if (winningAngle >= 120 && winningAngle < 240) {
+                selectedOutcome = outcomes[1]; // "Yaxshi" (Зеленый сектор)
+            } else {
+                selectedOutcome = outcomes[2]; // "O'rtacha" (Желтый сектор)
+            }
+            
+            // 6. Показываем РЕАЛЬНЫЙ результат
+            showModal(`Bugungi kuningiz ${selectedOutcome} o'tadi`);
+            launchConfetti();
+            spinButton.disabled = false;
+        }, 5000); // Это время должно совпадать со временем transition в CSS
+    }
+    
+    function launchConfetti() {
+        const colors = ["#ff5555", "#50fa7b", "#8be9fd", "#ff79c6", "#f1fa8c"];
+        for (let i = 0; i < 100; i++) {
+            const confetti = document.createElement('div');
+            confetti.classList.add('confetti');
+            confetti.style.left = (window.innerWidth / 2) + 'px';
+            confetti.style.top = (window.innerHeight / 2) + 'px';
+            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            const angle = Math.random() * Math.PI * 2;
+            const velocity = 50 + Math.random() * 100;
+            const gravity = 0.5;
+            let x = Math.cos(angle) * velocity;
+            let y = Math.sin(angle) * velocity;
+            let t = 0;
+            document.body.appendChild(confetti);
+            const animate = () => {
+                t++; y += gravity;
+                confetti.style.transform = `translate(${x*t}px, ${y*t}px) rotateZ(${t*10}deg)`;
+                if (t < 100) { requestAnimationFrame(animate); } else { confetti.remove(); }
+            };
+            animate();
+        }
+    }
+</script>
+
+</body>
+</html>
