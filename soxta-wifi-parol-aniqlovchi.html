@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wi-Fi Skanneri</title>
+    <style>
+        :root {
+            --primary: #00e676;
+            --dark-bg: #121212;
+            --card-bg: rgba(30, 30, 30, 0.8);
+            --text-light: rgba(255, 255, 255, 0.9);
+            --text-dim: rgba(255, 255, 255, 0.6);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            touch-action: manipulation;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(0, 230, 118, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(0, 150, 255, 0.1) 0%, transparent 50%);
+        }
+
+        .scanner-container {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            width: 95%;
+            max-width: 420px;
+            max-height: 95vh;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: fadeIn 0.4s ease-out;
+            will-change: transform, opacity;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .scanner-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-shrink: 0;
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .scan-btn {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: transform 0.1s ease;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .scan-btn:active {
+            transform: scale(0.96);
+        }
+
+        .wifi-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin: 10px 0;
+            overscroll-behavior: contain;
+            scrollbar-width: none;
+        }
+
+        .wifi-list::-webkit-scrollbar {
+            display: none;
+        }
+
+        .wifi-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.15s ease;
+            will-change: transform;
+        }
+
+        .wifi-info {
+            flex-grow: 1;
+            min-width: 0;
+        }
+
+        .wifi-name {
+            font-weight: 500;
+            font-size: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+        }
+
+        .wifi-details {
+            display: flex;
+            gap: 12px;
+            margin-top: 5px;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+
+        .wifi-strength, .wifi-lock {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .signal-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            height: 14px;
+        }
+
+        .signal-bar {
+            width: 3px;
+            background: var(--text-dim);
+            border-radius: 2px;
+        }
+
+        .signal-bar:nth-child(1) { height: 25%; }
+        .signal-bar:nth-child(2) { height: 50%; }
+        .signal-bar:nth-child(3) { height: 75%; }
+        .signal-bar:nth-child(4) { height: 100%; }
+
+        .strong .signal-bar { background: var(--primary); }
+        .medium .signal-bar:nth-child(-n+3) { background: orange; }
+        .weak .signal-bar:nth-child(-n+2) { background: #ff5252; }
+
+        .action-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: background 0.15s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .action-btn:active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .password-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 10px;
+            text-align: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .password-title {
+            color: var(--primary);
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+
+        .password-value {
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 8px 0;
+            word-break: break-all;
+            border: 1px dashed var(--primary);
+        }
+
+        .copy-btn {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 10px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.1s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .copy-btn:active {
+            transform: scale(0.98);
+        }
+
+        .permission-request {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-out;
+            padding: 20px;
+        }
+        
+        .permission-box {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            width: 100%;
+            max-width: 300px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+        
+        .permission-title {
+            color: var(--primary);
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+        }
+        
+        .permission-text {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            margin-bottom: 16px;
+        }
+        
+        .permission-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        
+        .permission-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+        
+        .permission-deny {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .permission-allow {
+            background: var(--primary);
+            color: black;
+        }
+        
+        .permission-btn:active {
+            transform: scale(0.96);
+        }
+        
+        .loading-bar {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            margin: 12px 0;
+            overflow: hidden;
+        }
+        
+        .loading-progress {
+            height: 100%;
+            width: 0%;
+            background: var(--primary);
+            border-radius: 2px;
+            transition: width 2.5s linear;
+        }
+
+        @media (max-width: 480px) {
+            .scanner-container {
+                padding: 16px;
+                max-height: 90vh;
+            }
+            .wifi-item {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="scanner-container">
+        <div class="scanner-header">
+            <h1>Wi-Fi Tarmoqlari</h1>
+            <button class="scan-btn" id="scanBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                </svg>
+                Skanerlash
+            </button>
+        </div>
+
+        <div class="wifi-list" id="wifiList">
+            <div style="text-align: center; color: var(--text-dim); padding: 20px;">
+                Wi-Fi tarmoqlarini topish uchun "Skanerlash" tugmasini bosing...
+            </div>
+        </div>
+
+        <div id="passwordContainer" class="password-container" style="display: none;">
+            <div class="password-title" id="passwordTitle">Wi-Fi paroli:</div>
+            <div class="password-value" id="passwordValue"></div>
+            <button class="copy-btn" id="copyBtn">
+                Parolni nusxalash
+            </button>
+        </div>
+    </div>
+
+    <div id="permissionRequest" class="permission-request" style="display: none;">
+        <div class="permission-box">
+            <h3 class="permission-title">Wi-Fi ruxsati kerak</h3>
+            <p class="permission-text">
+                "Wi-Fi Skanneri" dasturi yaqin atrofdagi tarmoqlarni aniqlash uchun Wi-Fi sozlamalariga kirish huquqini so'raydi.
+            </p>
+            <div class="loading-bar">
+                <div class="loading-progress" id="loadingProgress"></div>
+            </div>
+            <div class="permission-buttons">
+                <button class="permission-btn permission-deny" id="denyBtn">Rad etish</button>
+                <button class="permission-btn permission-allow" id="allowBtn">Ruxsat berish</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM elementlari
+        const wifiList = document.getElementById('wifiList');
+        const passwordContainer = document.getElementById('passwordContainer');
+        const passwordTitle = document.getElementById('passwordTitle');
+        const passwordValue = document.getElementById('passwordValue');
+        const copyBtn = document.getElementById('copyBtn');
+        const scanBtn = document.getElementById('scanBtn');
+        const permissionRequest = document.getElementById('permissionRequest');
+        const loadingProgress = document.getElementById('loadingProgress');
+        const denyBtn = document.getElementById('denyBtn');
+        const allowBtn = document.getElementById('allowBtn');
+
+        // Ma'lumotlar
+        const wifiNames = [
+            "Uy Wi-Fi", "TP-Link_5G", "Uztelecom", "Merosiy", "OFIS_NET",
+            "Toshkent_WiFi", "Beeline_Home", "Ucell_4G", "Mobiuz",
+            "Qo'shni_123", "FBI_Kuzatuv", "ParolTopolmaysiz", "WiFiSizHayotYo'q",
+            "YashirinTarmoq", "SizniKuzatmoqda", "HakerMan", "InternetBormi?",
+            "O'zingBilasmi", "Tezlik5G", "QalampirWiFi", "NonushtaWiFi"
+        ];
+
+        const passwordExamples = [
+            "12345678", "parol123", "qwerty", "uzbekistan", "toshkent",
+            "samarqand", "buxoro", "navoiy", "wi-fi", "internet",
+            "o'zbekiston", "yangi123", "eski456", "parol789", "skaner2023"
+        ];
+
+        // Tarmoqlarni generatsiya qilish
+        function generateNetworks() {
+            const fragment = document.createDocumentFragment();
+            const networksCount = Math.min(12, wifiNames.length);
+            
+            for (let i = 0; i < networksCount; i++) {
+                const name = wifiNames[i];
+                const isProtected = Math.random() > 0.2;
+                const strengthTypes = ["strong", "medium", "weak"];
+                const strength = strengthTypes[i % strengthTypes.length];
+                
+                const wifiItem = document.createElement('div');
+                wifiItem.className = 'wifi-item';
+                wifiItem.innerHTML = `
+                    <div class="wifi-info">
+                        <span class="wifi-name">${name}</span>
+                        <div class="wifi-details">
+                            <span class="wifi-strength ${strength}">
+                                <div class="signal-bars">
+                                    <div class="signal-bar"></div>
+                                    <div class="signal-bar"></div>
+                                    <div class="signal-bar"></div>
+                                    <div class="signal-bar"></div>
+                                </div>
+                                ${strength === 'strong' ? 'Kuchli' : strength === 'medium' ? 'O\'rtacha' : 'Zaif'}
+                            </span>
+                            <span class="wifi-lock">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    ${isProtected ? 
+                                        '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>' : 
+                                        '<path d="M5.52 19c.64-2.2 1.84-3 3.22-3h6.52c1.38 0 2.58.8 3.22 3"></path><circle cx="12" cy="10" r="3"></circle><circle cx="12" cy="12" r="10"></circle>'}
+                                </svg>
+                                ${isProtected ? 'Himoyalangan' : 'Himoyalanmagan'}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="wifi-actions">
+                        <button class="action-btn" ${!isProtected ? 'disabled' : ''} onclick="showPassword('${name.replace(/'/g, "\\'")}')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                ${isProtected ? 
+                                    '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>' : 
+                                    '<path d="M5 12h14"></path>'}
+                            </svg>
+                        </button>
+                    </div>
+                `;
+                fragment.appendChild(wifiItem);
+            }
+            
+            wifiList.innerHTML = '';
+            wifiList.appendChild(fragment);
+        }
+
+        // Parolni ko'rsatish
+        function showPassword(wifiName) {
+            const password = passwordExamples[Math.floor(Math.random() * passwordExamples.length)];
+            
+            requestAnimationFrame(() => {
+                passwordTitle.textContent = `${wifiName} paroli:`;
+                passwordValue.textContent = password;
+                passwordContainer.style.display = 'block';
+                
+                setTimeout(() => {
+                    passwordContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 50);
+            });
+        }
+
+        // Parolni nusxalash
+        copyBtn.addEventListener('click', () => {
+            const password = passwordValue.textContent;
+            navigator.clipboard.writeText(password).then(() => {
+                copyBtn.textContent = 'Nusxalandi!';
+                setTimeout(() => {
+                    copyBtn.textContent = 'Parolni nusxalash';
+                }, 2000);
+            });
+        });
+
+        // Ruxsat so'rovi
+        scanBtn.addEventListener('click', () => {
+            permissionRequest.style.display = 'flex';
+            loadingProgress.style.width = '100%';
+        });
+
+        // Ruxsat rad etish
+        denyBtn.addEventListener('click', () => {
+            permissionRequest.style.display = 'none';
+            wifiList.innerHTML = '<div style="text-align: center; color: var(--text-dim); padding: 20px;">Ruxsat berilmadi. Iltimos, ruxsat bering.</div>';
+        });
+
+        // Ruxsat berish
+        allowBtn.addEventListener('click', () => {
+            permissionRequest.style.display = 'none';
+            
+            wifiList.innerHTML = `
+                <div style="text-align: center; color: var(--text-dim); padding: 20px;">
+                    <div class="signal-bars" style="justify-content: center; margin-bottom: 10px;">
+                        <div class="signal-bar"></div>
+                        <div class="signal-bar"></div>
+                        <div class="signal-bar"></div>
+                        <div class="signal-bar"></div>
+                    </div>
+                    Tarmoqlar skanerlanmoqda...
+                </div>
+            `;
+            
+            setTimeout(generateNetworks, 1500);
+        });
+
+        // Dastur yuklanganda animatsiya
+        setTimeout(() => {
+            document.body.style.animation = 'none';
+        }, 500);
+    </script>
+</body>
+</html>
