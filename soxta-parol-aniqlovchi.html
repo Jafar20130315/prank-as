@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Фейковый детектор паролей для пранка</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
+
+        :root {
+            --bg-color: #1a1a1a;
+            --primary-color: #00ff9d;
+            --text-color: #e0e0e0;
+            --input-bg: #2a2a2a;
+            --border-color: #444;
+            --warning-color: #ffc107;
+            --success-color: #00ff9d;
+            --link-color: #4da6ff;
+            --secondary-btn-bg: #333;
+        }
+
+        body {
+            font-family: 'Roboto Mono', monospace;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: #222222;
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 0 25px rgba(0, 255, 157, 0.1);
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            color: var(--primary-color);
+            text-shadow: 0 0 5px var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            color: #aaa;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        input[type="tel"], input[type="text"] {
+            width: calc(100% - 24px);
+            padding: 12px;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border-color);
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            border-radius: 6px;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        input:disabled {
+            background-color: #252525;
+            color: #666;
+            cursor: not-allowed;
+        }
+        
+        input[type="tel"]:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(0, 255, 157, 0.3);
+        }
+
+        .button-group, .setup-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .button-group { margin-bottom: 1rem; }
+        .setup-buttons { margin-top: 1.5rem; }
+
+        button {
+            padding: 12px;
+            border: 1px solid var(--primary-color);
+            border-radius: 6px;
+            background-color: transparent;
+            color: var(--primary-color);
+            font-size: 1rem;
+            font-weight: bold;
+            font-family: 'Roboto Mono', monospace;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s, text-shadow 0.3s;
+        }
+        
+        button:hover {
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+            text-shadow: none;
+        }
+        
+        button.secondary {
+            background-color: var(--secondary-btn-bg);
+            border-color: #555;
+            color: #ccc;
+        }
+        button.secondary:hover {
+            background-color: #444;
+            border-color: #666;
+            color: white;
+        }
+
+        button.auto, button.save {
+            grid-column: 1 / -1;
+        }
+        
+        #result-container {
+            margin-top: 1.5rem;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        #result {
+            font-size: 1.2rem;
+            font-weight: bold;
+            word-wrap: break-word;
+            transition: color 0.3s ease;
+            width: 100%;
+        }
+
+        .pattern-svg {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto;
+        }
+        #setup-pattern-grid .pattern-svg {
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+        #setup-pattern-grid.disabled .pattern-svg {
+            opacity: 0.3;
+            pointer-events: none;
+        }
+        .pattern-svg .dot {
+            fill: #444;
+            transition: fill 0.2s;
+        }
+        .pattern-svg .dot.active, .pattern-svg .dot.selected { fill: var(--success-color); }
+        .pattern-svg .line {
+            stroke: var(--success-color);
+            stroke-width: 4px;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+            filter: drop-shadow(0 0 3px var(--success-color));
+        }
+
+        .no-protection-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+        #no-protection-checkbox {
+            margin-right: 10px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+
+        .section-toggle {
+            margin-top: 1.5rem;
+            color: var(--link-color);
+            cursor: pointer;
+            font-weight: 500;
+            display: inline-block;
+        }
+        
+        #setup-section { display: none; }
+        
+        /* --- СТИЛИ ДЛЯ АДАПТАЦИИ (ДЛЯ МАЛЕНЬКИХ ЭКРАНОВ) --- */
+        
+        @media (max-width: 480px) {
+            body {
+                /* Убираем align-items, чтобы на маленьких экранах блок прижимался к верху */
+                align-items: flex-start;
+                padding: 0;
+            }
+
+            .container {
+                /* Уменьшаем отступы и убираем лишнее */
+                padding: 1.5rem 1rem;
+                margin-top: 15px;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                min-height: calc(100vh - 30px);
+            }
+
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            p {
+                font-size: 0.85rem;
+                margin-bottom: 1rem;
+            }
+
+            button {
+                font-size: 0.9rem;
+                padding: 10px;
+            }
+
+            #result-container {
+                min-height: 120px;
+            }
+
+            .pattern-svg {
+                width: 110px;
+                height: 110px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="main-section">
+            <h1>Parol aniqlovchi</h1>
+            <p>Sizga kerak bo'lgan parolni aniqlang</p>
+            <input type="tel" id="phone-input" placeholder="+998 XX XXX XX XX" value="+998">
+            <div class="button-group">
+                <button onclick="startPrank('pattern')">Grafik kalit</button>
+                <button onclick="startPrank('pin')">Pin-kod</button>
+                <button onclick="startPrank('password')">Parol</button>
+                <button class="auto" onclick="startPrank('auto')">Avto-aniqlash</button>
+            </div>
+            <div id="result-container">
+                <div id="result">Buyruq kutilmoqda...</div>
+            </div>
+            <div class="section-toggle" onclick="toggleSection()">/</div>
+        </div>
+
+        <div id="setup-section">
+            <h1>2-bo'lim</h1>
+            <input type="tel" id="setup-phone" placeholder="Telefon raqam">
+            
+            <div class="no-protection-container">
+                <input type="checkbox" id="no-protection-checkbox">
+                <label for="no-protection-checkbox">Ximoyasiz</label>
+            </div>
+
+            <div id="setup-pattern-grid"></div>
+            <input type="text" id="setup-password" placeholder="Parol/Pin-kod" style="margin-top: 1rem;">
+
+            <div class="setup-buttons">
+                 <button class="secondary" onclick="clearSetupPattern()">Bekor qilish</button>
+                 <button class="save" onclick="savePassword()">Saqlash</button>
+            </div>
+            
+            <div class="section-toggle" onclick="toggleSection()">/</div>
+        </div>
+    </div>
+
+    <script>
+        const linkedPasswords = {};
+        // DOM Elements
+        const mainSection = document.getElementById('main-section');
+        const setupSection = document.getElementById('setup-section');
+        const resultDiv = document.getElementById('result');
+        const phoneInput = document.getElementById('phone-input');
+        const setupPhoneInput = document.getElementById('setup-phone');
+        const setupPatternGrid = document.getElementById('setup-pattern-grid');
+        const setupPasswordInput = document.getElementById('setup-password');
+        const noProtectionCheckbox = document.getElementById('no-protection-checkbox');
+        
+        let animationInterval;
+        let setupSequence = [];
+        
+        const SVG_COORDS = {
+            1: [20, 20], 2: [60, 20], 3: [100, 20],
+            4: [20, 60], 5: [60, 60], 6: [100, 60],
+            7: [20, 100], 8: [60, 100], 9: [100, 100]
+        };
+
+        function toggleSection() {
+            if (mainSection.style.display === 'none') {
+                mainSection.style.display = 'block';
+                setupSection.style.display = 'none';
+            } else {
+                mainSection.style.display = 'none';
+                setupSection.style.display = 'block';
+            }
+        }
+        
+        function savePassword() {
+            const phone = setupPhoneInput.value;
+            if (!phone) {
+                alert('Xatolik: Telefon raqamini kiriting');
+                return;
+            }
+
+            if (noProtectionCheckbox.checked) {
+                linkedPasswords[phone] = { type: 'none', value: 'Ushbu telefon ximoyasiz' };
+                alert(`${phone} raqamiga "Ximoyasiz" rejimi o'rnatildi.`);
+            } else {
+                const passwordValue = setupPasswordInput.value;
+                if (!passwordValue) {
+                    alert('Xatolik: Birornima kiriting, yoki "Ximoyasiz" ni belgilang.');
+                    return;
+                }
+                let passwordType;
+                if (setupSequence.length > 0 && setupSequence.join('') === passwordValue) {
+                    passwordType = 'pattern';
+                } else if (/^\d{4,6}$/.test(passwordValue)) {
+                    passwordType = 'pin';
+                } else {
+                    passwordType = 'password';
+                }
+                
+                linkedPasswords[phone] = { type: passwordType, value: passwordValue };
+                alert(`${phone} telefon raqami uchun ma'lumotlar saqlandi`);
+            }
+            
+            // Reset fields
+            setupPhoneInput.value = '';
+            noProtectionCheckbox.checked = false;
+            toggleNoProtection(false);
+            clearSetupPattern();
+            toggleSection();
+        }
+        
+        function initializeSetupGrid() {
+            const dots = Array.from({length: 9}, (_, i) => `<circle data-dot="${i + 1}" cx="${SVG_COORDS[i + 1][0]}" cy="${SVG_COORDS[i + 1][1]}" r="8" class="dot" />`).join('');
+            setupPatternGrid.innerHTML = `<svg class="pattern-svg" id="setup-svg" viewBox="0 0 120 120"><g id="setup-lines"></g><g id="setup-dots">${dots}</g></svg>`;
+            document.getElementById('setup-svg').addEventListener('click', handleSetupPatternClick);
+            setupPasswordInput.addEventListener('input', () => { if(setupSequence.length > 0) { setupSequence = []; updateSetupGrid(); }});
+            noProtectionCheckbox.addEventListener('change', (e) => toggleNoProtection(e.target.checked));
+        }
+        
+        function toggleNoProtection(isDisabled) {
+            setupPasswordInput.disabled = isDisabled;
+            setupPatternGrid.classList.toggle('disabled', isDisabled);
+            if(isDisabled) {
+                clearSetupPattern();
+                setupPasswordInput.value = '';
+                setupPasswordInput.placeholder = 'Ximoya aktiv emas';
+            } else {
+                setupPasswordInput.placeholder = 'Parol/Pin-kod';
+            }
+        }
+
+        function handleSetupPatternClick(e) {
+            if (e.target.tagName !== 'circle') return;
+            const dotNumber = e.target.dataset.dot;
+            if (!setupSequence.includes(dotNumber)) {
+                setupSequence.push(dotNumber);
+                updateSetupGrid();
+            }
+        }
+        
+        function updateSetupGrid() {
+            const svg = document.getElementById('setup-svg');
+            svg.querySelectorAll('.dot').forEach(dot => dot.classList.toggle('selected', setupSequence.includes(dot.dataset.dot)));
+            const pathPoints = setupSequence.map(num => SVG_COORDS[num].join(',')).join(' L ');
+            document.getElementById('setup-lines').innerHTML = pathPoints ? `<path d="M ${pathPoints}" class="line" />` : '';
+            setupPasswordInput.value = setupSequence.join('');
+        }
+        
+        function clearSetupPattern() {
+            setupSequence = [];
+            updateSetupGrid();
+            if (document.activeElement !== setupPasswordInput) setupPasswordInput.value = '';
+        }
+        
+        function startPrank(clickedType) {
+            if (phoneInput.value.length < 13) {
+                alert('Telefon raqamida xato');
+                return;
+            }
+            clearInterval(animationInterval);
+            resultDiv.className = '';
+            
+            const savedData = linkedPasswords[phoneInput.value];
+            let finalType, finalPassword;
+
+            if (savedData) {
+                finalType = savedData.type;
+                finalPassword = savedData.value;
+            } else {
+                finalType = clickedType === 'auto' ? ['pattern', 'pin', 'password'][Math.floor(Math.random() * 3)] : clickedType;
+                if (finalType === 'pattern') {
+                    const patternSet = new Set();
+                    while(patternSet.size < 5) patternSet.add(Math.floor(Math.random() * 9) + 1);
+                    finalPassword = Array.from(patternSet).join('');
+                } else if (finalType === 'pin') {
+                    finalPassword = String(Math.floor(1000 + Math.random() * 9000));
+                } else {
+                    finalPassword = Math.random().toString(36).slice(-8);
+                }
+            }
+            runHackingAnimation(finalType, finalPassword);
+        }
+
+        function runHackingAnimation(finalType, finalPassword) {
+            let counter = 0;
+            const duration = 30;
+            const generators = {
+                pin: () => String(Math.floor(1000 + Math.random() * 9000)),
+                password: () => Math.random().toString(36).slice(-8),
+                patternAnimation: () => `[Aniqlandi: ${Math.random().toString(16).slice(2, 8)}]`
+            };
+
+            resultDiv.classList.add('hacking');
+            animationInterval = setInterval(() => {
+                counter++;
+                const randomType = ['pin', 'password', 'patternAnimation'][Math.floor(Math.random() * 3)];
+                resultDiv.innerHTML = generators[randomType]();
+
+                if (counter >= duration) {
+                    clearInterval(animationInterval);
+                    resultDiv.className = 'found';
+                    
+                    if (finalType === 'none') {
+                        resultDiv.innerHTML = `<span style="font-size: 1.1rem; color: var(--warning-color);">DIQQAT:<br>${finalPassword}</span>`;
+                    } else if (finalType === 'pattern') {
+                        resultDiv.innerHTML = `Aniqlandi:<br>${createPatternSVG(finalPassword)}`;
+                    } else {
+                        resultDiv.innerHTML = `Aniqlandi:<br><span style="font-size: 1.6rem;">${finalPassword}</span>`;
+                    }
+                }
+            }, 100);
+        }
+
+        function createPatternSVG(sequence) {
+            const activeDots = new Set(sequence.split('').map(Number));
+            const dots = Array.from({length: 9}, (_, i) => `<circle cx="${SVG_COORDS[i + 1][0]}" cy="${SVG_COORDS[i + 1][1]}" r="8" class="dot ${activeDots.has(i + 1) ? 'active' : ''}" />`).join('');
+            const pathPoints = sequence.split('').map(num => SVG_COORDS[num].join(',')).join(' L ');
+            const path = `<path d="M ${pathPoints}" class="line" />`;
+            return `<svg class="pattern-svg" viewBox="0 0 120 120">${dots}${path}</svg>`;
+        }
+        
+        document.addEventListener('DOMContentLoaded', initializeSetupGrid);
+    </script>
+
+</body>
+</html>
