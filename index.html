@@ -1,31 +1,100 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-  <meta charset="UTF-8">
-  <title>Prank-as</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prank‑as</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     body {
-      background: #111;
+      font-family: 'Poppins', sans-serif;
+      line-height: 1.6;
       color: #fff;
-      font-family: sans-serif;
+      background: linear-gradient(120deg, #1f1f1f, #111) fixed;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 40px;
       text-align: center;
-      padding: 40px;
+      position: relative;
+      z-index: 1;
     }
-    a {
+    .button-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      width: 100%;
+      max-width: 400px;
+    }
+    .btn {
       display: block;
-      margin: 10px;
-      color: #00f7ff;
+      padding: 16px 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid rgba(255,255,255,0.5);
+      border-radius: 8px;
+      color: #fff;
       text-decoration: none;
+      font-weight: 600;
+      transition: transform 0.3s, background 0.3s, color 0.3s;
+      position: relative;
+      overflow: hidden;
     }
-    a:hover {
-      text-decoration: underline;
+    .btn::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.2);
+      transition: left 0.4s;
+    }
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.9);
+      color: #111;
+      transform: scale(1.02);
+    }
+    .btn:hover::before {
+      left: 0;
+    }
+    @media (max-width: 500px) {
+      h1 {
+        font-size: 2rem;
+      }
+      .btn {
+        padding: 14px 16px;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Prank-as orqali do‘stlaringiz bilan hazillashing!</h1>
-  <a href="soxta-ulan.html">Soxta ulanish</a>
-  <a href="karta.html">Bank kartasi</a>
-  <a href="wifi.html">Wi-Fi Parol</a>
+  <h1>Prank_as orqali do‘stlaringiz bilan hazillashing!</h1>
+  <div class="button-container">
+    <a class="btn" href="soxta-ulanish-sistemasi">Soxta ulanish sistemasi</a>
+    <a class="btn" href="soxta-uyin-bank-kartasi.html">Soxta o‘yin bank kartasi</a>
+    <a class="btn" href="soxta-wifi-parol-aniqlovchi.html">Soxta Wi-Fi parol aniqlovchi</a>
+    <a class="btn" href="soxta-joylashuv-aniqlovchi.html">Soxta joylashuv aniqlovchi</a>
+    <a class="btn" href="soxta-random-yashash-joyi.html">Soxta random yashash joyi</a>
+    <a class="btn" href="soxta-shaxs-aniqlovchi.html">Soxta shaxs aniqlovchi</a>
+    <a class="btn" href="avtoraqam-rasm-generatoritml">Avtoraqam rasm generatori</a>
+    <a class="btn" href="soxta-parol-aniqlovchi.html">Soxta parol aniqlovchi</a>
+    <a class="btn" href="soxta-balans-aniqlovchi.html">Soxta balans aniqlovchi</a>
+    <a class="btn" href="oyin-barabani.html">O‘yin barabani</a>
+    <a class="btn" href="bizneschi-oka.html">“Bizneschi oka” o‘yini</a>
+    <a class="btn" href="tekst-ovoz.html">[NEW] Tekst → Ovo‍z</a>
+    <a class="btn" href="ovoz-olchovchi.html">Ovoz o‘lchovchi</a>
+    <!-- сюда можно вставить остальные кнопки, если их больше -->
+  </div>
 </body>
 </html>
