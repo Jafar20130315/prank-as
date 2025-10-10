@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qayerda Yashayman?</title>
+    <style>
+        :root {
+            --primary: #FF5722;
+            --secondary: #4CAF50;
+            --dark-bg: #121212;
+            --card-bg: rgba(30, 30, 30, 0.9);
+            --text-light: rgba(255, 255, 255, 0.95);
+            --text-dim: rgba(255, 255, 255, 0.7);
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-light);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(255, 87, 34, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(33, 150, 243, 0.15) 0%, transparent 40%);
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        .container {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            width: 95%;
+            max-width: 500px;
+            margin: 20px auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: center;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: var(--primary);
+            margin-bottom: 24px;
+            font-size: 1.8rem;
+        }
+
+        .globe-container {
+            height: 250px;
+            width: 250px;
+            margin: 0 auto 30px;
+            position: relative;
+            perspective: 1000px;
+        }
+
+        .globe {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+
+        .country-display {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 20px 0;
+            min-height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .compatibility {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 20px 0;
+        }
+
+        .rating {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .rating-bar {
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        .rating-fill {
+            height: 100%;
+            background: var(--secondary);
+            border-radius: 5px;
+            transition: width 1s ease;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background: #E64A19;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 87, 34, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .flag {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes rotate {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 16px;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            .globe-container {
+                height: 200px;
+                width: 200px;
+            }
+            .country-display {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app">
+        <h1>Men kelajakda qayerda yashayman ?</h1>
+        
+        <div class="globe-container">
+            <div class="globe" id="globe">
+                <div class="flag" id="flag">🌍</div>
+            </div>
+        </div>
+        
+        <div class="country-display" id="countryDisplay">
+            Tugmani bosing!
+        </div>
+        
+        <div class="compatibility" id="compatibility" style="display: none;">
+            <div>Sizga mosligi: <span id="ratingValue">0</span>/10</div>
+            <div id="comment" style="font-size: 0.9rem; color: var(--text-dim); margin-top: 5px;"></div>
+            <div class="rating">
+                <div class="rating-bar">
+                    <div class="rating-fill" id="ratingFill" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+        
+        <button class="btn" id="spinBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+            </svg>
+            Aylantirish
+        </button>
+    </div>
+
+    <script>
+        // Davlatlar ro'yxati
+        const countries = [
+            { name: "O'zbekiston", flag: "🇺🇿", comment: "Vataningizda yashash — eng yaxshi tanlov!" },
+            { name: "Qozog'iston", flag: "🇰🇿", comment: "Qo'shni davlat — o'xshash madaniyat!" },
+            { name: "Rossiya", flag: "🇷🇺", comment: "Katta imkoniyatlar, ammo sovuq iqlim!" },
+            { name: "AQSh", flag: "🇺🇸", comment: "Amerika orzusi — ish bilen bog'liq!" },
+            { name: "Yaponiya", flag: "🇯🇵", comment: "Texnologiya va an'analar uyg'unligi!" },
+            { name: "Germaniya", flag: "🇩🇪", comment: "Ishchilar uchun ajoyib shartlar!" },
+            { name: "Fransiya", flag: "🇫🇷", comment: "Romantika va vinolar mamlakati!" },
+            { name: "Birlashgan Qirollik", flag: "🇬🇧", comment: "Qirollik hayoti — ammo yomg'ir ko'p!" },
+            { name: "Kanada", flag: "🇨🇦", comment: "Tinchlik va tabiat — ajoyib kombinatsiya!" },
+            { name: "Avstraliya", flag: "🇦🇺", comment: "Kengashlar va kangurular bilan hayot!" }
+        ];
+
+        // DOM elementlari
+        const spinBtn = document.getElementById('spinBtn');
+        const countryDisplay = document.getElementById('countryDisplay');
+        const flag = document.getElementById('flag');
+        const globe = document.getElementById('globe');
+        const compatibility = document.getElementById('compatibility');
+        const ratingValue = document.getElementById('ratingValue');
+        const ratingFill = document.getElementById('ratingFill');
+        const comment = document.getElementById('comment');
+
+        // Aylantirish funktsiyasi
+        spinBtn.addEventListener('click', function() {
+            // Tugmani o'chirib qo'yamiz
+            spinBtn.disabled = true;
+            spinBtn.innerHTML = `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin">
+                    <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+                </svg>
+                Aylanmoqda...
+            `;
+            
+            // Globe animatsiyasini ishga tushiramiz
+            globe.style.animation = "rotate 1s linear infinite";
+            countryDisplay.textContent = "Izlanyapti...";
+            countryDisplay.classList.add('pulse');
+            flag.textContent = "🌎";
+            compatibility.style.display = "none";
+            
+            // 3-5 soniya oralig'ida tasodifiy to'xtash
+            const spinDuration = 3000 + Math.random() * 2000;
+            
+            setTimeout(() => {
+                // Tasodifiy davlatni tanlaymiz
+                const randomCountry = countries[Math.floor(Math.random() * countries.length)];
+                const rating = Math.floor(Math.random() * 10) + 1; // 1-10 oralig'ida
+                
+                // Natijani ko'rsatamiz
+                globe.style.animation = "none";
+                countryDisplay.classList.remove('pulse');
+                countryDisplay.innerHTML = `
+                    <div>
+                        <div style="font-size:1.5rem;">${randomCountry.flag}</div>
+                        <div>${randomCountry.name}</div>
+                    </div>
+                `;
+                flag.textContent = randomCountry.flag;
+                
+                // Reytngni ko'rsatamiz
+                ratingValue.textContent = rating;
+                ratingFill.style.width = `${rating * 10}%`;
+                comment.textContent = randomCountry.comment;
+                compatibility.style.display = "block";
+                
+                // Tugmani qayta yoqamiz
+                spinBtn.disabled = false;
+                spinBtn.innerHTML = `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+                    </svg>
+                    Qayta aylantirish
+                `;
+                
+                // Avtomatik skroll
+                setTimeout(() => {
+                    document.getElementById('compatibility').scrollIntoView({ 
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                }, 500);
+            }, spinDuration);
+        });
+
+        // CSS animation for spinner
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+            .spin {
+                animation: spin 1s linear infinite;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
