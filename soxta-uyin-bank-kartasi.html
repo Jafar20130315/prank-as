@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>O'yin Bank Kartasi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 10px;
+            position: relative;
+            -webkit-text-size-adjust: 100%;
+        }
+        .game-card {
+            background: linear-gradient(135deg, #6e48aa, #9d50bb);
+            color: white;
+            width: 100%;
+            max-width: 400px;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .watermark {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: white;
+            color: #6e48aa;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 2px 10px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            z-index: 100;
+            opacity: 0.9;
+            white-space: nowrap;
+        }
+        .language-switcher {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 101;
+        }
+        .language-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+        .language-btn.active {
+            background: gold;
+            color: #6e48aa;
+            font-weight: bold;
+        }
+        h2 {
+            font-size: 1.3rem;
+            margin: 10px 0;
+        }
+        .card-number {
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            margin: 10px 0;
+        }
+        .balance {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin: 12px 0;
+            position: relative;
+        }
+        .balance-animation {
+            position: absolute;
+            right: 0;
+            color: red;
+            font-weight: bold;
+            opacity: 0;
+            transform: translateY(0);
+            animation: moneyFly 1s forwards;
+            font-size: 0.9rem;
+        }
+        @keyframes moneyFly {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-30px); }
+        }
+        .shop {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px;
+            border-radius: 8px;
+            margin-top: 12px;
+            max-height: 40vh;
+            overflow-y: auto;
+        }
+        .shop h3 {
+            font-size: 1.1rem;
+            margin: 5px 0 8px;
+        }
+        .item {
+            background: white;
+            color: black;
+            padding: 8px;
+            margin: 6px 0;
+            border-radius: 5px;
+            transition: transform 0.2s;
+            font-size: 0.85rem;
+        }
+        .item-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            flex-wrap: wrap;
+        }
+        .item-info span {
+            margin-right: 5px;
+        }
+        .item-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .quantity-control {
+            display: flex;
+            align-items: center;
+        }
+        .quantity-btn {
+            width: 22px;
+            height: 22px;
+            background: gold;
+            border: none;
+            border-radius: 3px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .quantity-input {
+            width: 35px;
+            text-align: center;
+            margin: 0 3px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            padding: 2px;
+            font-size: 0.8rem;
+        }
+        .buy-btn {
+            background: gold;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.8rem;
+            min-width: 60px;
+            transition: background 0.3s;
+        }
+        .purchase-history {
+            margin-top: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px;
+            border-radius: 8px;
+            max-height: 15vh;
+            overflow-y: auto;
+            font-size: 0.8rem;
+        }
+        .purchase-history h3 {
+            font-size: 1rem;
+            margin: 3px 0 6px;
+        }
+        .purchase-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px;
+            margin: 2px 0;
+            border-radius: 3px;
+            font-size: 0.75rem;
+        }
+
+        @media (max-width: 360px) {
+            .game-card {
+                padding: 12px;
+            }
+            h2 {
+                font-size: 1.2rem;
+            }
+            .watermark {
+                font-size: 10px;
+                padding: 1px 8px;
+            }
+            .item {
+                padding: 6px;
+                font-size: 0.8rem;
+            }
+            .buy-btn {
+                padding: 4px 8px;
+                min-width: 50px;
+            }
+            .shop {
+                max-height: 35vh;
+            }
+            .purchase-history {
+                max-height: 12vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-card">
+        <div class="language-switcher">
+            <button class="language-btn active" data-lang="uz">UZ</button>
+            <button class="language-btn" data-lang="ru">RU</button>
+        </div>
+        
+        <h2 data-i18n="bank_card">BANK KARTASI</h2>
+        <div class="card-number">VISA</div>
+        <div class="balance" id="balance">
+            <span data-i18n="balance">BALANS</span>: <span id="balance-amount">10 000 000</span> $
+            <div class="balance-animation" id="balance-animation"></div>
+        </div>
+        
+        <div class="shop" id="shop">
+            <h3 data-i18n="shop">Do'kon</h3>
+            
+            <div class="item">
+                <div class="item-info">
+                    <span data-i18n="ferrari">Ferrari</span> — 250 000 $
+                </div>
+                <div class="item-controls">
+                    <div class="quantity-control">
+                        <button class="quantity-btn" onclick="changeQuantity(this, -1)">-</button>
+                        <input type="number" class="quantity-input" value="1" min="1">
+                        <button class="quantity-btn" onclick="changeQuantity(this, 1)">+</button>
+                    </div>
+                    <button class="buy-btn" onclick="buyItem(250000, 'ferrari', this)" data-i18n="buy">Sotib olish</button>
+                </div>
+            </div>
+            
+            <div class="item">
+                <div class="item-info">
+                    <span data-i18n="helicopter">Vertalyot</span> — 500 000 $
+                </div>
+                <div class="item-controls">
+                    <div class="quantity-control">
+                        <button class="quantity-btn" onclick="changeQuantity(this, -1)">-</button>
+                        <input type="number" class="quantity-input" value="1" min="1">
+                        <button class="quantity-btn" onclick="changeQuantity(this, 1)">+</button>
+                    </div>
+                    <button class="buy-btn" onclick="buyItem(500000, 'helicopter', this)" data-i18n="buy">Sotib olish</button>
+                </div>
+            </div>
+            
+            <div class="item">
+                <div class="item-info">
+                    <span>BYD — 25 000 $</span>
+                </div>
+                <div class="item-controls">
+                    <div class="quantity-control">
+                        <button class="quantity-btn" onclick="changeQuantity(this, -1)">-</button>
+                        <input type="number" class="quantity-input" value="1" min="1">
+                        <button class="quantity-btn" onclick="changeQuantity(this, 1)">+</button>
+                    </div>
+                    <button class="buy-btn" onclick="buyItem(25000, 'BYD', this)" data-i18n="buy">Sotib olish</button>
+                </div>
+            </div>
+            
+            <div class="item">
+                <div class="item-info">
+                    <span>Damas — 11 000 $</span>
+                </div>
+                <div class="item-controls">
+                    <div class="quantity-control">
+                        <button class="quantity-btn" onclick="changeQuantity(this, -1)">-</button>
+                        <input type="number" class="quantity-input" value="1" min="1">
+                        <button class="quantity-btn" onclick="changeQuantity(this, 1)">+</button>
+                    </div>
+                    <button class="buy-btn" onclick="buyItem(11000, 'Damas', this)" data-i18n="buy">Sotib olish</button>
+                </div>
+            </div>
+            
+            <div class="item">
+                <div class="item-info">
+                    <span>Cobalt — 12 000 $</span>
+                </div>
+                <div class="item-controls">
+                    <div class="quantity-control">
+                        <button class="quantity-btn" onclick="changeQuantity(this, -1)">-</button>
+                        <input type="number" class="quantity-input" value="1" min="1">
+                        <button class="quantity-btn" onclick="changeQuantity(this, 1)">+</button>
+                    </div>
+                    <button class="buy-btn" onclick="buyItem(12000, 'Cobalt', this)" data-i18n="buy">Sotib olish</button>
+                </div>
+            </div>
+            
+            <div class="item">
+                <div class="item-info">
+                    <span>Nexia 3 — 12 000 $</span>
+                </div>
+                <div class="item-controls">
+                    <div class="quantity-control">
+                        <button class="quantity-btn" onclick="changeQuantity(this, -1)">-</button>
+                        <input type="number" class="quantity-input" value="1" min="1">
+                        <button class="quantity-btn" onclick="changeQuantity(this, 1)">+</button>
+                    </div>
+                    <button class="buy-btn" onclick="buyItem(12000, 'Nexia 3', this)" data-i18n="buy">Sotib olish</button>
+                </div>
+            </div>
+            
+            <div class="item">
+                <div class="item-info">
+                    <span data-i18n="yacht">Yaxta</span> — 600 000 $
+                </div>
+                <div class="item-controls">
+                    <div class="quantity-control">
+                        <button class="quantity-btn" onclick="changeQuantity(this, -1)">-</button>
+                        <input type="number" class="quantity-input" value="1" min="1">
+                        <button class="quantity-btn" onclick="changeQuantity(this, 1)">+</button>
+                    </div>
+                    <button class="buy-btn" onclick="buyItem(600000, 'yacht', this)" data-i18n="buy">Sotib olish</button>
+                </div>
+            </div>
+            
+            <div class="item">
+                <div class="item-info">
+                    <span data-i18n="mansion">Hashamatli uy</span> — 750 000 $
+                </div>
+                <div class="item-controls">
+                    <div class="quantity-control">
+                        <button class="quantity-btn" onclick="changeQuantity(this, -1)">-</button>
+                        <input type="number" class="quantity-input" value="1" min="1">
+                        <button class="quantity-btn" onclick="changeQuantity(this, 1)">+</button>
+                    </div>
+                    <button class="buy-btn" onclick="buyItem(750000, 'mansion', this)" data-i18n="buy">Sotib olish</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="purchase-history" id="purchase-history">
+            <h3 data-i18n="purchases">Sotib olinganlar</h3>
+            <div id="history-list"></div>
+        </div>
+        
+        <div class="watermark">Prank-as</div>
+    </div>
+
+    <audio id="cash-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-cash-register-purchase-887.mp3" preload="auto"></audio>
+    <audio id="error-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-warning-alarm-688.mp3" preload="auto"></audio>
+
+    <script>
+        // Языковые настройки
+        const translations = {
+            uz: {
+                bank_card: "BANK KARTASI",
+                balance: "BALANS",
+                shop: "Do'kon",
+                ferrari: "Ferrari",
+                helicopter: "Vertalyot",
+                yacht: "Yaxta",
+                mansion: "Hashamatli uy",
+                buy: "Sotib olish",
+                purchases: "Sotib olinganlar",
+                insufficient_funds: "Balansda mablag' yetarli emas!",
+                purchased: "Siz {quantity} ta {item} {price} $ ga sotib oldingiz!"
+            },
+            ru: {
+                bank_card: "БАНКОВСКАЯ КАРТА",
+                balance: "БАЛАНС",
+                shop: "Магазин",
+                ferrari: "Феррари",
+                helicopter: "Вертолет",
+                yacht: "Яхта",
+                mansion: "Роскошный дом",
+                buy: "Купить",
+                purchases: "Покупки",
+                insufficient_funds: "Недостаточно средств на балансе!",
+                purchased: "Вы купили {quantity} шт. {item} за {price} $!"
+            }
+        };
+
+        // Текущий язык
+        let currentLanguage = 'uz';
+        
+        // Функция смены языка
+        function changeLanguage(lang) {
+            currentLanguage = lang;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                el.textContent = translations[lang][key] || translations['uz'][key];
+            });
+            
+            // Обновляем активные кнопки языка
+            document.querySelectorAll('.language-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
+        }
+        
+        // Обработчики кнопок языка
+        document.querySelectorAll('.language-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                changeLanguage(btn.dataset.lang);
+            });
+        });
+
+        let currentBalance = 10000000; // Boshlang'ich balans
+        const purchaseHistory = [];
+        
+        function changeQuantity(btn, change) {
+            const input = btn.parentElement.querySelector('.quantity-input');
+            let newValue = parseInt(input.value) + change;
+            if (newValue < 1) newValue = 1;
+            input.value = newValue;
+        }
+        
+        function buyItem(price, itemName, btn) {
+            const quantity = parseInt(btn.parentElement.querySelector('.quantity-input').value);
+            const totalPrice = price * quantity;
+            
+            if (currentBalance >= totalPrice) {
+                // Animatsiya
+                const animation = document.getElementById('balance-animation');
+                animation.textContent = `-${totalPrice.toLocaleString()}$`;
+                animation.style.opacity = 1;
+                animation.style.animation = 'none';
+                void animation.offsetWidth; // Trigger reflow
+                animation.style.animation = 'moneyFly 1s forwards';
+                
+                // Ovoz effekti
+                document.getElementById('cash-sound').play();
+                
+                // Balansni yangilash
+                currentBalance -= totalPrice;
+                document.getElementById('balance-amount').textContent = currentBalance.toLocaleString();
+                
+                // Tarixga qo'shish
+                const purchase = {
+                    item: translations[currentLanguage][itemName] || itemName,
+                    quantity: quantity,
+                    price: totalPrice,
+                    date: new Date().toLocaleTimeString()
+                };
+                purchaseHistory.unshift(purchase);
+                updateHistory();
+                
+                const itemTranslated = translations[currentLanguage][itemName] || itemName;
+                const message = translations[currentLanguage]['purchased']
+                    .replace('{quantity}', quantity)
+                    .replace('{item}', itemTranslated)
+                    .replace('{price}', totalPrice.toLocaleString());
+                
+                alert(message);
+            } else {
+                document.getElementById('error-sound').play();
+                alert(translations[currentLanguage]['insufficient_funds']);
+            }
+        }
+        
+        function updateHistory() {
+            const historyList = document.getElementById('history-list');
+            historyList.innerHTML = '';
+            
+            purchaseHistory.slice(0, 5).forEach(purchase => {
+                const item = document.createElement('div');
+                item.className = 'purchase-item';
+                item.textContent = `${purchase.quantity}x ${purchase.item} - ${purchase.price.toLocaleString()}$ (${purchase.date})`;
+                historyList.appendChild(item);
+            });
+        }
+    </script>
+</body>
+</html>
