@@ -185,50 +185,6 @@
       height: 26px;
     }
 
-    /* ==================== ВЫПАДАЮЩЕЕ МЕНЮ ==================== */
-
-    .dropdown-menu-small {
-      position: fixed;
-      top: 70px;
-      left: 15px;
-      width: 220px;
-      background: rgba(20, 20, 20, 0.95);
-      backdrop-filter: blur(12px);
-      border-radius: 12px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.7);
-      padding: 15px 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      opacity: 0;
-      pointer-events: none;
-      transform: translateY(-10px);
-      transition: opacity 0.35s ease, transform 0.35s ease;
-      z-index: 1999;
-    }
-
-    .dropdown-menu-small.show {
-      opacity: 1;
-      pointer-events: auto;
-      transform: translateY(0);
-    }
-
-    .dropdown-menu-small a {
-      color: #fff;
-      font-weight: 600;
-      text-decoration: none;
-      font-size: 1rem;
-      padding: 8px 12px;
-      border-radius: 8px;
-      transition: background 0.3s, color 0.3s;
-      user-select: none;
-    }
-    .dropdown-menu-small a:hover,
-    .dropdown-menu-small a:focus {
-      background: rgba(255, 255, 255, 0.12);
-      color: #f0f0f0;
-      outline: none;
-    }
     }
   </style>
 </head>
