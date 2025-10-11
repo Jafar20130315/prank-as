@@ -3,183 +3,37 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Генератор Узбекских Автономеров</title>
+  <title>Avtoraqam rasm generatori</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-link rel="icon" type="image/x-icon" href="favicon.png">
+  <link rel="icon" type="image/x-icon" href="favicon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&display=swap" rel="stylesheet" />
-
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-    }
-
-    .license-plate {
-      font-family: 'Oswald', sans-serif;
-      width: 100%;
-      max-width: 520px;
-      height: 112px;
-      background: white;
-      border: 3px solid black;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-      user-select: none;
-      box-sizing: border-box;
-    }
-
-    .plate-region {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      padding: 0 5px;
-      min-width: 60px;
-    }
-
-    .plate-region svg {
-      width: 50px;
-      height: 25px;
-    }
-
-    .plate-uz {
-      font-weight: 600;
-      font-size: 24px;
-      margin-top: 4px;
-    }
-
-    .plate-main {
-      flex-grow: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 80px;
-      letter-spacing: 2px;
-      color: black;
-      line-height: 1;
-      --offset-y: 0px;
-      transform: translateY(var(--offset-y));
-      transition: transform 0.1s ease-out;
-      padding: 0 5px;
-    }
-
-    .plate-divider {
-      width: 3px;
-      height: 80%;
-      background: black;
-      margin: 0 10px;
-    }
-
-    .editable {
-      padding: 0 5px;
-      outline: none;
-      cursor: pointer;
-      border-radius: 5px;
-      transition: background-color 0.2s;
-    }
-
-    .editable:hover,
-    .editable:focus {
-      background-color: #e0f2fe;
-    }
-
-    .tab {
-      transition: all 0.2s;
-    }
-
-    .tab.active {
-      background-color: #1d4ed8;
-      color: white;
-    }
-
-    @media (max-width: 600px) {
-      .license-plate {
-        height: 80px;
-        padding: 5px;
-        border-width: 2px;
-      }
-
-      .plate-region {
-        min-width: 45px;
-      }
-
-      .plate-region svg {
-        width: 35px;
-        height: 17px;
-      }
-
-      .plate-uz {
-        font-size: 16px;
-        margin-top: 2px;
-      }
-
-      .plate-main {
-        font-size: 55px;
-        padding: 0 3px;
-      }
-
-      .plate-divider {
-        width: 2px;
-        height: 70%;
-        margin: 0 6px;
-      }
-
-      .editable {
-        padding: 0 2px;
-      }
-    }
-
-    @media (max-width: 400px) {
-      .license-plate {
-        height: 70px;
-        padding: 4px;
-      }
-
-      .plate-region svg {
-        width: 30px;
-        height: 15px;
-      }
-
-      .plate-uz {
-        font-size: 14px;
-      }
-
-      .plate-main {
-        font-size: 45px;
-      }
-    }
-  </style>
 </head>
-<body>
+<body class="font-sans bg-gray-100 text-gray-900">
   <div class="hidden sm:block text-center text-red-600 font-bold text-lg mt-4">Beta</div>
-
-  <div class="w-full max-w-lg mx-auto bg-white p-6 rounded-xl shadow-lg">
+  <main class="w-full max-w-lg mx-auto bg-white p-6 rounded-xl shadow-lg">
     <h1 class="text-2xl font-bold text-center text-gray-800 mb-4">Avtoraqam rasm generatori</h1>
 
-    <div class="flex justify-center border border-gray-300 rounded-lg p-1 mb-6 bg-gray-50">
-      <button id="tab-individual" class="tab active w-1/2 p-2 rounded-md font-semibold">Jismoniy shaxs</button>
-      <button id="tab-legal" class="tab w-1/2 p-2 rounded-md font-semibold">Yuridik shaxs</button>
-    </div>
+    <nav class="flex justify-center border border-gray-300 rounded-lg p-1 mb-6 bg-gray-50" role="tablist" aria-label="Типы пользователей">
+      <button id="tab-individual" class="tab active w-1/2 p-2 rounded-md font-semibold" role="tab" aria-selected="true" aria-controls="individual-plate">Jismoniy shaxs</button>
+      <button id="tab-legal" class="tab w-1/2 p-2 rounded-md font-semibold" role="tab" aria-selected="false" aria-controls="legal-plate">Yuridik shaxs</button>
+    </nav>
 
-    <div id="plate-container" class="flex justify-center mb-6">
-      <div id="individual-plate" class="license-plate">
+    <section id="plate-container" class="flex justify-center mb-6">
+      <article id="individual-plate" class="license-plate" role="tabpanel" tabindex="0" aria-labelledby="tab-individual">
         <div class="plate-main">
-          <span class="editable" contenteditable="true" data-type="number" data-length="2">01</span>
-          <div class="plate-divider"></div>
-          <span class="editable" contenteditable="true" data-type="letter" data-length="1">A</span>
-          <span class="editable ml-3" contenteditable="true" data-type="number" data-length="3">123</span>
-          <span class="editable ml-3" contenteditable="true" data-type="letter" data-length="2">BC</span>
+          <span class="editable" contenteditable="true" data-type="number" data-length="2" aria-label="Region raqami">01</span>
+          <div class="plate-divider" aria-hidden="true"></div>
+          <span class="editable" contenteditable="true" data-type="letter" data-length="1" aria-label="Harflar">A</span>
+          <span class="editable ml-3" contenteditable="true" data-type="number" data-length="3" aria-label="Raqamlar">123</span>
+          <span class="editable ml-3" contenteditable="true" data-type="letter" data-length="2" aria-label="Harflar">BC</span>
         </div>
-        <div class="plate-region">
+        <div class="plate-region" aria-hidden="true">
           <!-- SVG FLAG -->
-          <svg viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg">
+          <svg viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
             <rect fill="#1EB53A" width="1000" height="500" />
             <rect fill="#FFFFFF" width="1000" height="180" y="160" />
             <rect fill="#0099FF" width="1000" height="160" />
@@ -187,26 +41,34 @@ link rel="icon" type="image/x-icon" href="favicon.png">
             <rect fill="#CE1126" width="1000" height="20" y="330" />
             <g fill="#FFFFFF">
               <path d="M150 40 a60 60 0 1 0 0 120 a50 50 0 1 1 0 -120" />
-              <circle cx="280" cy="80" r="8" /><circle cx="300" cy="80" r="8" /><circle cx="320" cy="80" r="8" />
-              <circle cx="340" cy="80" r="8" /><circle cx="290" cy="100" r="8" /><circle cx="310" cy="100" r="8" />
-              <circle cx="330" cy="100" r="8" /><circle cx="350" cy="100" r="8" /><circle cx="300" cy="120" r="8" />
-              <circle cx="320" cy="120" r="8" /><circle cx="340" cy="120" r="8" /><circle cx="360" cy="120" r="8" />
+              <circle cx="280" cy="80" r="8" />
+              <circle cx="300" cy="80" r="8" />
+              <circle cx="320" cy="80" r="8" />
+              <circle cx="340" cy="80" r="8" />
+              <circle cx="290" cy="100" r="8" />
+              <circle cx="310" cy="100" r="8" />
+              <circle cx="330" cy="100" r="8" />
+              <circle cx="350" cy="100" r="8" />
+              <circle cx="300" cy="120" r="8" />
+              <circle cx="320" cy="120" r="8" />
+              <circle cx="340" cy="120" r="8" />
+              <circle cx="360" cy="120" r="8" />
               <circle cx="380" cy="120" r="8" />
             </g>
           </svg>
           <div class="plate-uz">UZ</div>
         </div>
-      </div>
+      </article>
 
-      <div id="legal-plate" class="license-plate hidden">
+      <article id="legal-plate" class="license-plate hidden" role="tabpanel" tabindex="0" aria-labelledby="tab-legal" aria-hidden="true">
         <div class="plate-main">
-          <span class="editable" contenteditable="true" data-type="number" data-length="2">01</span>
-          <div class="plate-divider"></div>
-          <span class="editable" contenteditable="true" data-type="number" data-length="3">123</span>
-          <span class="editable ml-3" contenteditable="true" data-type="letter" data-length="3">ABC</span>
+          <span class="editable" contenteditable="true" data-type="number" data-length="2" aria-label="Region raqami">01</span>
+          <div class="plate-divider" aria-hidden="true"></div>
+          <span class="editable" contenteditable="true" data-type="number" data-length="3" aria-label="Raqamlar">123</span>
+          <span class="editable ml-3" contenteditable="true" data-type="letter" data-length="3" aria-label="Harflar">ABC</span>
         </div>
-        <div class="plate-region">
-          <svg viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg">
+        <div class="plate-region" aria-hidden="true">
+          <svg viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
             <rect fill="#1EB53A" width="1000" height="500" />
             <rect fill="#FFFFFF" width="1000" height="180" y="160" />
             <rect fill="#0099FF" width="1000" height="160" />
@@ -214,17 +76,25 @@ link rel="icon" type="image/x-icon" href="favicon.png">
             <rect fill="#CE1126" width="1000" height="20" y="330" />
             <g fill="#FFFFFF">
               <path d="M150 40 a60 60 0 1 0 0 120 a50 50 0 1 1 0 -120" />
-              <circle cx="280" cy="80" r="8" /><circle cx="300" cy="80" r="8" /><circle cx="320" cy="80" r="8" />
-              <circle cx="340" cy="80" r="8" /><circle cx="290" cy="100" r="8" /><circle cx="310" cy="100" r="8" />
-              <circle cx="330" cy="100" r="8" /><circle cx="350" cy="100" r="8" /><circle cx="300" cy="120" r="8" />
-              <circle cx="320" cy="120" r="8" /><circle cx="340" cy="120" r="8" /><circle cx="360" cy="120" r="8" />
+              <circle cx="280" cy="80" r="8" />
+              <circle cx="300" cy="80" r="8" />
+              <circle cx="320" cy="80" r="8" />
+              <circle cx="340" cy="80" r="8" />
+              <circle cx="290" cy="100" r="8" />
+              <circle cx="310" cy="100" r="8" />
+              <circle cx="330" cy="100" r="8" />
+              <circle cx="350" cy="100" r="8" />
+              <circle cx="300" cy="120" r="8" />
+              <circle cx="320" cy="120" r="8" />
+              <circle cx="340" cy="120" r="8" />
+              <circle cx="360" cy="120" r="8" />
               <circle cx="380" cy="120" r="8" />
             </g>
           </svg>
           <div class="plate-uz">UZ</div>
         </div>
-      </div>
-    </div>
+      </article>
+    </section>
 
     <button id="download-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 ease-in-out flex items-center justify-center">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -232,7 +102,7 @@ link rel="icon" type="image/x-icon" href="favicon.png">
       </svg>
       Rasm sifatida yuklash
     </button>
-  </div>
+  </main>
 
   <script>
     const tabIndividual = document.getElementById('tab-individual');
@@ -245,14 +115,24 @@ link rel="icon" type="image/x-icon" href="favicon.png">
     function switchTab(activeTab) {
       if (activeTab === 'individual') {
         tabIndividual.classList.add('active');
+        tabIndividual.setAttribute('aria-selected', 'true');
         tabLegal.classList.remove('active');
+        tabLegal.setAttribute('aria-selected', 'false');
+
         individualPlate.classList.remove('hidden');
+        individualPlate.removeAttribute('aria-hidden');
         legalPlate.classList.add('hidden');
+        legalPlate.setAttribute('aria-hidden', 'true');
       } else {
         tabLegal.classList.add('active');
+        tabLegal.setAttribute('aria-selected', 'true');
         tabIndividual.classList.remove('active');
+        tabIndividual.setAttribute('aria-selected', 'false');
+
         legalPlate.classList.remove('hidden');
+        legalPlate.removeAttribute('aria-hidden');
         individualPlate.classList.add('hidden');
+        individualPlate.setAttribute('aria-hidden', 'true');
       }
     }
 
