@@ -82,82 +82,7 @@
       width: 26px;
       height: 26px;
     }
-
-    /* ==================== ВЫПАДАЮЩЕЕ МЕНЮ ==================== */
-
-    .dropdown-menu-small {
-      position: fixed;
-      top: 70px;
-      left: 15px;
-      width: 220px;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(12px);
-      border-radius: 12px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-      padding: 15px 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      opacity: 0;
-      pointer-events: none;
-      transform: translateY(-10px);
-      transition: opacity 0.35s ease, transform 0.35s ease;
-      z-index: 1999;
-    }
-
-    .dropdown-menu-small.show {
-      opacity: 1;
-      pointer-events: auto;
-      transform: translateY(0);
-    }
-
-    .dropdown-menu-small a {
-      color: #1a73e8;
-      font-weight: 600;
-      text-decoration: none;
-      font-size: 1rem;
-      padding: 8px 12px;
-      border-radius: 8px;
-      transition: background 0.3s, color 0.3s;
-      user-select: none;
-    }
-    .dropdown-menu-small a:hover,
-    .dropdown-menu-small a:focus {
-      background: rgba(26, 115, 232, 0.12);
-      color: #174ea6;
-      outline: none;
-    }
-
-    /* Затемняющий фон (оверлей) */
-    .overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.2);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-      z-index: 1500;
-      backdrop-filter: blur(3px);
-    }
-    .overlay.show {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .watermark {
-      position: fixed;
-      bottom: 12px;
-      font-size: 12px;
-      color: #918c8c;
-      user-select: none;
-      pointer-events: none;
-      font-weight: 400;
-      font-family: 'Roboto', sans-serif;
-      width: 100%;
-      text-align: center;
-      z-index: 1;
-    }
-  </style>
+    </style>
 </head>
 <body>
   <div class="container">
@@ -166,60 +91,7 @@
 
   <div class="watermark">www.prank-as.site</div> 
 
-  <!-- Кнопка гамбургер в левом верхнем углу -->
-  <button class="top-left-menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="dropdown-menu">
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <path d="M3 6h18M3 12h18M3 18h18" stroke="#1a73e8" stroke-width="2" stroke-linecap="round"/>
-    </svg>
-  </button>
 
-  <!-- Оверлей для затемнения -->
-  <div class="overlay" tabindex="-1"></div>
-
-  <!-- Выпадающее меню маленького размера -->
-  <nav id="dropdown-menu" class="dropdown-menu-small" role="menu" aria-hidden="true" tabindex="-1">
-    <a href="index.html" role="menuitem" tabindex="0">🏠 Bosh sahifa</a>
-    <a href="disclaimer.html" role="menuitem" tabindex="0">Disclaimer</a>
-    <a href="developer.html" role="menuitem" tabindex="0">Developer</a>
-  </nav>
-
-  <script>
-    const menuBtn = document.querySelector('.top-left-menu-toggle');
-    const menu = document.getElementById('dropdown-menu');
-    const overlay = document.querySelector('.overlay');
-
-    function openMenu() {
-      menu.classList.add('show');
-      overlay.classList.add('show');
-      menu.setAttribute('aria-hidden', 'false');
-      menuBtn.setAttribute('aria-expanded', 'true');
-      menu.focus();
-    }
-
-    function closeMenu() {
-      menu.classList.remove('show');
-      overlay.classList.remove('show');
-      menu.setAttribute('aria-hidden', 'true');
-      menuBtn.setAttribute('aria-expanded', 'false');
-      menuBtn.focus();
-    }
-
-    menuBtn.addEventListener('click', () => {
-      if (menu.classList.contains('show')) {
-        closeMenu();
-      } else {
-        openMenu();
-      }
-    });
-
-    overlay.addEventListener('click', closeMenu);
-
-    // Закрытие по Escape
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape' && menu.classList.contains('show')) {
-        closeMenu();
-      }
-    });
   </script>
 </body>
 </html>
