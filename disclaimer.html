@@ -169,5 +169,66 @@
     <strong>Disclaimer:</strong>
     This website is for entertainment purposes only. All content provided is fictional and should not be taken as real or factual. The site does not promote or support any illegal activities. By using this website, you acknowledge that it is intended solely for harmless fun and simulation.
   </div>
+  <!-- Кнопка гамбургер в левом верхнем углу -->
+  <button class="top-left-menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="dropdown-menu">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M3 6h18M3 12h18M3 18h18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </button>
+
+  <!-- Оверлей для затемнения -->
+  <div class="overlay" tabindex="-1"></div>
+
+  <!-- Выпадающее меню маленького размера -->
+  <nav id="dropdown-menu" class="dropdown-menu-small" role="menu" aria-hidden="true" tabindex="-1">
+    <a href="www.prank-as.site" role="menuitem" tabindex="0">🏠 Bosh sahifa</a>
+    <a href="/disclaimer" role="menuitem" tabindex="0">Disclaimer</a>
+    <a href="/developer" role="menuitem" tabindex="0">Developer</a>
+  </nav>
+
+  <script>
+    const menuBtn = document.querySelector('.top-left-menu-toggle');
+    const menu = document.getElementById('dropdown-menu');
+    const overlay = document.querySelector('.overlay');
+
+    function openMenu() {
+      menu.classList.add('show');
+      overlay.classList.add('show');
+      menu.setAttribute('aria-hidden', 'false');
+      menuBtn.setAttribute('aria-expanded', 'true');
+      menu.focus();
+    }
+
+    function closeMenu() {
+      menu.classList.remove('show');
+      overlay.classList.remove('show');
+      menu.setAttribute('aria-hidden', 'true');
+      menuBtn.setAttribute('aria-expanded', 'false');
+      menuBtn.focus();
+    }
+
+    menuBtn.addEventListener('click', () => {
+      if (menu.classList.contains('show')) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
+    });
+
+    overlay.addEventListener('click', closeMenu);
+
+    // Закрытие по Escape
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && menu.classList.contains('show')) {
+        closeMenu();
+      }
+    });
+
+    // Анимация появления кнопок основной части
+    const buttons = document.querySelectorAll('.button-container a');
+    buttons.forEach((btn, i) => {
+      btn.style.animationDelay = `${i * 0.2}s`;
+    });
+
 </body>
 </html>
