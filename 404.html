@@ -19,6 +19,7 @@
       text-align: center;
       position: relative;
       padding-top: 70px; /* чтобы меню не перекрывало контент */
+      flex-direction: column;
     }
 
     .container {
@@ -82,7 +83,22 @@
       width: 26px;
       height: 26px;
     }
-    </style>
+
+    /* Водяной знак снизу */
+    .watermark {
+      position: fixed;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(32, 33, 36, 0.3);
+      font-size: 14px;
+      user-select: none;
+      pointer-events: none;
+      font-weight: 500;
+      font-family: 'Roboto', sans-serif;
+      z-index: 1000;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -91,7 +107,5 @@
 
   <div class="watermark">www.prank-as.site</div> 
 
-
-  </script>
 </body>
 </html>
