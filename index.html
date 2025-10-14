@@ -7,6 +7,7 @@
   <meta name="description" content="Do'stlaringiz bilan soxta hacker buyumlari orqali xazillashing, va o'zingizga boshqa foydali narsalar toping!">
   <link rel="icon" type="image/x-icon" href="favicon.png"/>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+   <link rel="manifest" href="/manifest.json" />
   <style>
     /* Бесконечная анимация градиентного фона */
     @keyframes gradientBG {
@@ -262,6 +263,14 @@
   </nav>
 
   <script>
+    if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(() => console.log('Service Worker зарегистрирован'))
+      .catch(err => console.error('Ошибка регистрации:', err));
+  });
+}
+
     const menuBtn = document.querySelector('.top-left-menu-toggle');
     const menu = document.getElementById('dropdown-menu');
     const overlay = document.querySelector('.overlay');
