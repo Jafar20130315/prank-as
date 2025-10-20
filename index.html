@@ -124,15 +124,16 @@
 
   <!-- Yuqoridan chiqadigan xabar -->
   <div class="top-message" id="topMsg"></div>
-
-  <script>
-  src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  
+ <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
 <form action="/submit" method="POST">
   <div class="cf-turnstile" data-sitekey="0x4AAAAAAB7m2CdiY7Mt3d_L"></div>
   <button type="submit">Yuborish</button>
 </form>
 
+  <script>
+    
     // Xabar ko'rsatish funksiyasi
     function showMessage(text, time = 2500) {
       const msg = document.getElementById('topMsg');
