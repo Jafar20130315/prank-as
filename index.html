@@ -11,15 +11,36 @@
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "WebSite",
-  "name": "Prank-as",
-  "url": "https://www.prank-as.site/",
-  "dateCreated": "2025-07-01",
-  "description": "Soxta buyumlar orqali prank uchun sayt ",
-  "inLanguage": "uz",
-  "keywords": "prank-as, kulgu, o'yin, hazil"
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "name": "Prank-as",
+      "url": "https://www.prank-as.site/",
+      "dateCreated": "2025-07-01",
+      "description": "Soxta buyumlar orqali prank uchun sayt.",
+      "inLanguage": "uz",
+      "keywords": "prank-as, kulgu, o'yin, hazil",
+      "image": "https://www.prank-as.site/images/logo.png",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://www.prank-as.site/?s={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    },
+    {
+      "@type": "Organization",
+      "name": "Prank-as",
+      "url": "https://www.prank-as.site/",
+      "logo": "https://www.prank-as.site/favicon.png",
+      "sameAs": [
+        "https://t.me/prank_as",
+        "https://instagram.com/prank_as"
+      ]
+    }
+  ]
 }
 </script>
+
 <style>
     @keyframes gradientBG { 0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%} }
     *{margin:0;padding:0;box-sizing:border-box}
