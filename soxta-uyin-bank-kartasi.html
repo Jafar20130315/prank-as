@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>O'yin Bank Kartasi</title>
-    <ink rel="icon" type="image/x-icon" href="favicon.png">
+    <link rel="icon" type="image/x-icon" href="favicon.png">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -19,17 +19,20 @@
             -webkit-text-size-adjust: 100%;
         }
         .game-card {
-            background: linear-gradient(135deg, #6e48aa, #9d50bb);
-            color: white;
-            width: 100%;
-            max-width: 400px;
-            padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
+    background: linear-gradient(135deg, #6e48aa, #9d50bb);
+    color: white;
+    width: 90%;
+    max-width: 420px;
+    min-width: 300px; /* 🔹 kartani juda tor bo‘lib qolishdan saqlaydi */
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
         .watermark {
             position: absolute;
             bottom: 8px;
