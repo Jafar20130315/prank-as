@@ -136,11 +136,16 @@
     }
 
     // Service Worker
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js');
-      });
-    }
+    <script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(() => console.log('Service Worker running'))
+      .catch(err => console.log('SW error:', err));
+  });
+}
+</script>
+
 
     // Menyu
     const menuBtn = document.querySelector('.top-left-menu-toggle');
