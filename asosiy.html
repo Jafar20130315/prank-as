@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Prank-as</title>
+  <meta name="description" content="Do'stlaringiz bilan soxta hacker buyumlari orqali xazillashing, va o'zingizga boshqa foydali narsalar toping!">
+  <link rel="icon" type="image/x-icon" href="favicon.png"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="manifest" href="/manifest.json" />
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "name": "Prank-as",
+      "url": "https://www.prank-as.site/",
+      "dateCreated": "2025-07-01",
+      "description": "Soxta buyumlar orqali prank uchun sayt.",
+      "inLanguage": "uz",
+      "keywords": "prank-as, kulgu, o'yin, hazil",
+      "image": "https://www.prank-as.site/images/logo.png",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://www.prank-as.site/?s={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    },
+    {
+      "@type": "Organization",
+      "name": "Prank-as",
+      "url": "https://www.prank-as.site/",
+      "logo": "https://www.prank-as.site/favicon.png",
+      "sameAs": [
+        "https://t.me/prank_as",
+        "https://instagram.com/prank_as"
+      ]
+    }
+  ]
+}
+</script>
+
+<style>
+    @keyframes gradientBG { 0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%} }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body {
+      font-family:'Poppins',sans-serif;line-height:1.6;color:#fff;
+      background:linear-gradient(270deg,#1f1f1f,#111,#222,#333);
+      background-size:800% 800%;animation:gradientBG 20s ease infinite;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;
+    }
+    h1{text-align:center;margin-bottom:40px;text-shadow:0 0 10px rgba(255,255,255,0.2)}
+    .button-container{display:grid;gap:15px;width:100%;max-width:800px;margin-bottom:100px}
+    @media(min-width:768px){.button-container{grid-template-columns:repeat(2,1fr)}}
+    @media(min-width:1200px){.button-container{grid-template-columns:repeat(3,1fr)}}
+    .btn{
+      display:block;padding:16px 20px;background:rgba(255,255,255,0.1);
+      border:2px solid rgba(255,255,255,0.5);border-radius:8px;color:#fff;
+      text-decoration:none;font-weight:600;box-shadow:0 4px 6px rgba(0,0,0,0.3);
+      transition:all 0.3s;opacity:0;transform:translateY(20px);animation:fadeInUp 0.6s forwards;
+    }
+    .btn:hover{background:rgba(255,255,255,0.95);color:#111;transform:scale(1.05)}
+    @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+    .top-left-menu-toggle{
+      position:fixed;top:15px;left:15px;background:rgba(255,255,255,0.15);
+      border:none;border-radius:12px;padding:10px 12px;cursor:pointer;z-index:2000;
+      box-shadow:0 4px 12px rgba(0,0,0,0.4);backdrop-filter:blur(6px);transition:0.3s;width:48px;height:48px;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .top-left-menu-toggle:hover{background:rgba(255,255,255,0.35);transform:scale(1.1)}
+    .top-left-menu-toggle svg{fill:#fff;width:26px;height:26px}
+    .dropdown-menu-small{
+      position:fixed;top:70px;left:15px;width:220px;background:rgba(20,20,20,0.95);
+      backdrop-filter:blur(12px);border-radius:12px;box-shadow:0 8px 25px rgba(0,0,0,0.7);
+      padding:15px 10px;display:flex;flex-direction:column;gap:12px;
+      opacity:0;pointer-events:none;transform:translateY(-10px);transition:all 0.35s ease;z-index:1999;
+    }
+    .dropdown-menu-small.show{opacity:1;pointer-events:auto;transform:translateY(0)}
+    .dropdown-menu-small a{color:#fff;font-weight:600;text-decoration:none;padding:8px 12px;border-radius:8px;transition:background 0.3s}
+    .dropdown-menu-small a:hover{background:rgba(255,255,255,0.12)}
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);opacity:0;pointer-events:none;transition:opacity 0.3s ease;z-index:1500;backdrop-filter:blur(3px)}
+    .overlay.show{opacity:1;pointer-events:auto}
+
+    /* Popup tanlov */
+    .overlay-choise{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;}
+    .popup{background:#fff;color:#111;border-radius:16px;padding:30px 25px;text-align:center;width:90%;max-width:320px;box-shadow:0 4px 12px rgba(0,0,0,0.3);animation:fadeIn 0.4s ease;}
+    .popup h2{font-size:20px;margin-bottom:20px}
+    .popup .buttons{display:flex;justify-content:space-around}
+    .popup button{background:#111;color:#fff;border:none;border-radius:10px;padding:10px 15px;cursor:pointer;font-weight:600;transition:transform 0.2s,background 0.3s;}
+    .popup button:hover{background:#333;transform:scale(1.05)}
+
+    /* Yuqoridan chiqadigan xabar */
+    .top-message {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #222;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      z-index: 99999;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      font-size: 14px;
+    }
+    .top-message.show { opacity: 1; }
+  </style>
+</head>
+<body>
+  <h1>Prank_as orqali do‘stlaringiz bilan hazillashing!</h1>
+
+  <div class="button-container">
+    <a class="btn" href="/soxta-ulanish-sistemasi">Soxta ulanish sistemasi</a>
+    <a class="btn" href="/soxta-uyin-bank-kartasi">Soxta o‘yin bank kartasi</a>
+    <a class="btn" href="/soxta-wifi-parol-aniqlovchi">Soxta Wi-Fi parol aniqlovchi</a>
+    <a class="btn" href="/soxta-joylashuv-aniqlovchi">Soxta joylashuv aniqlovchi</a>
+    <a class="btn" href="/soxta-random-yashash-joyi">Soxta random yashash joyi</a>
+    <a class="btn" href="/soxta-shaxs-aniqlovchi">Soxta shaxs aniqlovchi</a>
+    <a class="btn" href="/avtoraqam-rasm-generatori">Avtoraqam rasm generatori</a>
+    <a class="btn" href="/soxta-parol-aniqlovchi">Soxta parol aniqlovchi</a>
+    <a class="btn" href="/soxta-balans-aniqlovchi">Soxta balans aniqlovchi</a>
+    <a class="btn" href="/oyin-barabani">O‘yin barabani</a>
+    <a class="btn" href="/bizneschi-oka">“Bizneschi oka” o‘yini</a>
+    <a class="btn" href="/tekst-ovoz">[NEW] Tekst → Ovo‍z</a>
+    <a class="btn" href="/ovoz-olchovchi">Ovoz o‘lchovchi</a>
+  </div>
+
+  <!-- Menyu tugmasi -->
+  <button class="top-left-menu-toggle">
+    <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+  </button>
+
+  <!-- Overlay -->
+  <div class="overlay"></div>
+
+  <!-- Menyu -->
+  <nav id="dropdown-menu" class="dropdown-menu-small">
+    <a href="/index">🏠 Bosh sahifa</a>
+    <a href="/disclaimer">Disclaimer</a>
+    <a href="#" id="installAppBtn">📱 Ilovani o‘rnatish</a>
+    <a href="#" id="resetChoice">♻️ Tanlovni tiklash</a>
+    <a href="https://old.prank-as.site">Oldingi saytga qaytish</a>
+  </nav>
+
+  <!-- Qayerda davom etilsin -->
+  <div class="overlay-choise" id="choiseOverlay">
+    <div class="popup">
+      <h2>Qayerda davom etilsin?</h2>
+      <div class="buttons">
+        <button id="pwaBtn">📱 Ilovada</button>
+        <button id="siteBtn">🌐 Saytda</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="top-message" id="topMsg"></div>
+
+  <script>
+type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Prank-as",
+  "url": "https://www.prank-as.site/",
+  "dateCreated": "2025-07-01",
+  "description": "Soxta buyumlar orqali prank uchun sayt ",
+  "inLanguage": "uz",
+  "keywords": "prank-as, kulgu, o'yin, hazil"
+}
+
+    
+
+// Xabar ko'rsatish funksiyasi
+    function showMessage(text, time = 2500) {
+      const msg = document.getElementById('topMsg');
+      msg.textContent = text;
+      msg.classList.add('show');
+      setTimeout(() => msg.classList.remove('show'), time);
+    }
+
+    // Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(() => console.log('Service Worker running'))
+      .catch(err => console.log('SW error:', err));
+  });
+}
+    const menuBtn = document.querySelector('.top-left-menu-toggle');
+    const menu = document.getElementById('dropdown-menu');
+    const overlay = document.querySelector('.overlay');
+    menuBtn.addEventListener('click', () => {
+      menu.classList.toggle('show');
+      overlay.classList.toggle('show');
+    });
+    overlay.addEventListener('click', () => {
+      menu.classList.remove('show');
+      overlay.classList.remove('show');
+    });
+
+    // Tanlov oynasi
+    const overlayChoice = document.getElementById('choiseOverlay');
+    const pwaBtn = document.getElementById('pwaBtn');
+    const siteBtn = document.getElementById('siteBtn');
+    const savedChoice = localStorage.getItem('continueChoice');
+    if (savedChoice) overlayChoice.style.display = 'none';
+
+    pwaBtn.addEventListener('click', () => {
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        showMessage("Siz allaqachon ilovadasiz 😎");
+      } else {
+        showMessage("Ilovani o‘rnatish uchun “📱 Ilovani o‘rnatish” menyusidan bosing");
+      }
+      localStorage.setItem('continueChoice', 'app');
+      overlayChoice.style.display = 'none';
+    });
+
+    siteBtn.addEventListener('click', () => {
+      localStorage.setItem('continueChoice', 'site');
+      overlayChoice.style.display = 'none';
+    });
+
+    // Tanlovni tiklash
+    document.getElementById('resetChoice').addEventListener('click', () => {
+      localStorage.removeItem('continueChoice');
+      showMessage("Tanlov tiklandi! Endi sahifani yangilang 🔄");
+    });
+
+    // PWA o‘rnatish
+    let installPrompt;
+    const installBtn = document.getElementById('installAppBtn');
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      installPrompt = e;
+      installBtn.style.display = 'block';
+    });
+    installBtn.addEventListener('click', async () => {
+      if (installPrompt) {
+        installPrompt.prompt();
+        const { outcome } = await installPrompt.userChoice;
+        if (outcome === 'accepted') {
+          showMessage("✅ Ilova o‘rnatilmoqda...");
+        } else {
+          showMessage("❌ O‘rnatish bekor qilindi");
+        }
+        installPrompt = null;
+      } else {
+        showMessage("Bu brauzer o‘rnatishni qo‘llamaydi 😕");
+      }
+    });
+
+    // Tugmalar animatsiyasi
+    document.querySelectorAll('.button-container a').forEach((btn, i) => {
+      btn.style.animationDelay = `${i * 0.2}s`;
+    });
+  </script>
+</body>
+  </html>
