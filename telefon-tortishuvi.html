@@ -3,26 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Telefon tortishuvi</title>
+<title>Telefon tortishishi 🌐</title>
 <style>
-body {
-  margin:0; font-family: system-ui,sans-serif; background:#0b1222; color:white; text-align:center; overflow:hidden;
-}
+body{margin:0;font-family:system-ui,sans-serif;background:#0b1222;color:white;text-align:center;overflow:hidden;}
 h1{margin:12px 0 2px;font-size:20px;} p{margin:0;opacity:0.85;}
-#area {position:relative;width:100%;height:80vh;margin-top:16px;overflow:hidden;}
-.phone {position:absolute;width:56px;height:56px;background:white;border-radius:50%;color:black;font-weight:700;line-height:56px;text-align:center;font-size:20px;z-index:4;box-shadow:0 10px 25px rgba(0,0,0,0.6);}
-#line {position:absolute;width:2px;height:2px;background:linear-gradient(90deg,#00f,#f0f);z-index:2;transform-origin:top left;border-radius:2px;filter:drop-shadow(0 6px 18px rgba(0,0,0,0.5));}
-#infoBtn {position:fixed;right:18px;top:18px;width:44px;height:44px;border-radius:50%;border:none;background:rgba(255,255,255,0.12);color:white;font-weight:700;font-size:18px;z-index:20;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);transition:transform .12s ease;}
+#area{position:relative;width:100%;height:80vh;margin-top:16px;overflow:hidden;}
+.phone{position:absolute;width:56px;height:56px;background:white;border-radius:50%;color:black;font-weight:700;line-height:56px;text-align:center;font-size:20px;z-index:4;box-shadow:0 10px 25px rgba(0,0,0,0.6);}
+#line{position:absolute;width:2px;height:2px;background:linear-gradient(90deg,#00f,#f0f);z-index:2;transform-origin:top left;border-radius:2px;filter:drop-shadow(0 6px 18px rgba(0,0,0,0.5));}
+#infoBtn{position:fixed;right:18px;top:18px;width:44px;height:44px;border-radius:50%;border:none;background:rgba(255,255,255,0.12);color:white;font-weight:700;font-size:18px;z-index:20;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);transition:transform .12s ease;}
 #infoBtn:active{transform:scale(.98);}
-#infoPanel {position:fixed;right:72px;top:18px;min-width:220px;max-width:360px;background:rgba(255,255,255,0.06);color:white;padding:12px 14px;border-radius:10px;z-index:19;transform-origin:left center;transform:scaleX(0);opacity:0;transition:transform 260ms cubic-bezier(.2,.9,.2,1),opacity 200ms ease;box-shadow:0 12px 30px rgba(0,0,0,0.5);backdrop-filter:blur(6px);pointer-events:none;}
-#infoPanel.open {transform:scaleX(1);opacity:1;pointer-events:auto;}
+#infoPanel{position:fixed;right:72px;top:18px;min-width:220px;max-width:360px;background:rgba(255,255,255,0.06);color:white;padding:12px 14px;border-radius:10px;z-index:19;transform-origin:left center;transform:scaleX(0);opacity:0;transition:transform 260ms cubic-bezier(.2,.9,.2,1),opacity 200ms ease;box-shadow:0 12px 30px rgba(0,0,0,0.5);backdrop-filter:blur(6px);pointer-events:none;}
+#infoPanel.open{transform:scaleX(1);opacity:1;pointer-events:auto;}
 #infoText{font-size:14px;line-height:1.35;text-align:left;}
 @media(max-width:520px){#infoPanel{right:64px;min-width:180px;padding:10px;}.phone{width:44px;height:44px;line-height:44px;font-size:16px;}}
 </style>
 </head>
 <body>
 <h1>📱 Telefonlar orasidagi tortishish</h1>
-<p>Joylashuvga ruxsat bering</p>
+<p>Joylashuvga ruxsat ber!</p>
 
 <div id="area">
   <div id="phone1" class="phone">1</div>
@@ -44,6 +42,14 @@ const infoPanel=document.getElementById('infoPanel');
 const infoText=document.getElementById('infoText');
 
 let pos1={lat:0,lon:0}, pos2={lat:0,lon:0}, infoTimer=null;
+
+// Foydalanuvchidan 1 yoki 2 so‘rash
+let phoneId;
+while(true){
+  let p=prompt("Bu telefon 1-chi yoki 2-chi? (faqat raqam yozing)");
+  if(p==='1'||p==='2'){ phoneId=p; break; }
+  alert("Faqat 1 yoki 2 yozing!");
+}
 
 function distance(lat1,lon1,lat2,lon2){
   const R=6371e3, φ1=lat1*Math.PI/180, φ2=lat2*Math.PI/180, Δφ=(lat2-lat1)*Math.PI/180, Δλ=(lon2-lon1)*Math.PI/180;
@@ -81,17 +87,14 @@ function showInfo(text){
   infoTimer=setTimeout(()=>{infoPanel.classList.remove('open');},2000);
 }
 
-infoBtn.addEventListener('click',()=>{ showInfo("Sahifaga ruxsat bering va telefonni 1 yoki 2 deb belgilang."); });
+infoBtn.addEventListener('click',()=>{ showInfo("Joylashuvga ruxsat bering va telefonni 1 yoki 2 deb belgilang."); });
 
 function startGPS(){
   if(!navigator.geolocation){ showInfo("Geolocation qo'llab-quvvatlanmaydi!"); return; }
-  let storedId=sessionStorage.getItem('phoneId');
-  if(!storedId){ storedId=prompt("Bu telefon 1mi yoki 2?")||"1"; sessionStorage.setItem('phoneId',storedId);}
   showInfo("Joylashuvga ruxsat bering — sahifa real vaqtda yangilanadi.");
-
   navigator.geolocation.watchPosition(pos=>{
-    const lat=pos.coords.latitude, lon=pos.coords.longitude, id=sessionStorage.getItem('phoneId')||"1";
-    if(id==="1") pos1={lat,lon}; else pos2={lat,lon};
+    const lat=pos.coords.latitude, lon=pos.coords.longitude;
+    if(phoneId==="1") pos1={lat,lon}; else pos2={lat,lon};
     updatePositions();
     showInfo("Joylashuv o‘lchandi ✔");
   }, err=>{ console.warn(err); showInfo("Joylashuvni yoq! (brauzer ruxsatini tasdiqlang)"); }, {enableHighAccuracy:true,maximumAge:3000,timeout:7000});
