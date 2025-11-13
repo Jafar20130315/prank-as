@@ -107,28 +107,50 @@
       font-size: 14px;
     }
     .top-message.show { opacity: 1; }
+
+  /* New tugma oltin rang */
+  .btn.new {
+    background: linear-gradient(45deg, #FFD700, #FFC107);
+    color: #111;
+  }
+  .btn.new:hover {
+    background: linear-gradient(45deg, #FFEC8B, #FFD54F);
+  }
+
+  /* Move animatsiyasi */
+  .btn {
+    position: relative;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .btn:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+  }
+
   </style>
 </head>
 <body>
   <h1>Prank_as orqali do‘stlaringiz bilan hazillashing!</h1>
 
   <div class="button-container">
-    <a class="btn" href="/soxta-ulanish-sistemasi">Soxta ulanish sistemasi</a>
-    <a class="btn" href="/soxta-uyin-bank-kartasi">Soxta o‘yin bank kartasi</a>
-    <a class="btn" href="/soxta-wifi-parol-aniqlovchi">Soxta Wi-Fi parol aniqlovchi</a>
-    <a class="btn" href="/soxta-joylashuv-aniqlovchi">Soxta joylashuv aniqlovchi</a>
-    <a class="btn" href="/soxta-random-yashash-joyi">Soxta random yashash joyi</a>
-    <a class="btn" href="/soxta-shaxs-aniqlovchi">Soxta shaxs aniqlovchi</a>
-    <a class="btn" href="/avtoraqam-rasm-generatori">Avtoraqam rasm generatori</a>
-    <a class="btn" href="/soxta-parol-aniqlovchi">Soxta parol aniqlovchi</a>
-    <a class="btn" href="/soxta-balans-aniqlovchi">Soxta balans aniqlovchi</a>
-    <a class="btn" href="/oyin-barabani">O‘yin barabani</a>
-    <a class="btn" href="/bizneschi-oka">“Bizneschi oka” o‘yini</a>
-    <a class="btn" href="/tekst-ovoz">[NEW] Tekst → Ovo‍z</a>
-    <a class="btn" href="/ovoz-olchovchi">Ovoz o‘lchovchi</a>
-    <a class="btn" href="/telefon-tortishuvi">Telefon Tortishishi [Beta]</a>
-  </div>
+  <a id="btn1" class="btn oddiy" href="/soxta-ulanish-sistemasi">Soxta ulanish sistemasi</a>
+  <a id="btn2" class="btn oddiy" href="/soxta-uyin-bank-kartasi">Soxta o‘yin bank kartasi</a>
+  <a id="btn3" class="btn oddiy" href="/soxta-wifi-parol-aniqlovchi">Soxta Wi-Fi parol aniqlovchi</a>
+  <a id="btn4" class="btn oddiy" href="/soxta-joylashuv-aniqlovchi">Soxta joylashuv aniqlovchi</a>
+  <a id="btn5" class="btn oddiy" href="/soxta-random-yashash-joyi">Soxta random yashash joyi</a>
+  <a id="btn6" class="btn oddiy" href="/soxta-shaxs-aniqlovchi">Soxta shaxs aniqlovchi</a>
+  <a id="btn7" class="btn oddiy" href="/avtoraqam-rasm-generatori">Avtoraqam rasm generatori</a>
+  <a id="btn8" class="btn oddiy" href="/soxta-parol-aniqlovchi">Soxta parol aniqlovchi</a>
+  <a id="btn9" class="btn oddiy" href="/soxta-balans-aniqlovchi">Soxta balans aniqlovchi</a>
+  <a id="btn10" class="btn oddiy" href="/oyin-barabani">O‘yin barabani</a>
+  <a id="btn11" class="btn oddiy" href="/bizneschi-oka">“Bizneschi oka” o‘yini</a>
+  <a id="btn12" class="btn new" href="/tekst-ovoz"><span style="display:block;font-size:12px;font-weight:700;color:#FFD700;">YANGI</span> Tekst → Ovo‍z</a>
+  <a id="btn13" class="btn oddiy" href="/ovoz-olchovchi">Ovoz o‘lchovchi</a>
+  <a id="btn14" class="btn oddiy" href="/telefon-tortishuvi">Telefon Tortishishi [Beta]</a>
+</div>
 
+<style>
+  
   <!-- Menyu tugmasi -->
   <button class="top-left-menu-toggle">
     <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
