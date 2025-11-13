@@ -5,11 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Telefon tortishishi 🌐</title>
 <style>
-  
-  
-  <button id="startGPSBtn" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:12px 18px;font-size:16px;border:none;border-radius:8px;background:#0af;color:#fff;z-index:50;cursor:pointer;">Start GPS</button>
-
-body{margin:0;font-family:system-ui,sans-serif;background:#0b1222;color:white;text-align:center;overflow:hidden;}
+  body{margin:0;font-family:system-ui,sans-serif;background:#0b1222;color:white;text-align:center;overflow:hidden;}
   h1{margin:12px 0 2px;font-size:20px;} p{margin:0;opacity:0.85;}
   #area{position:relative;width:100%;height:80vh;margin-top:16px;overflow:hidden;}
   .phone{position:absolute;width:56px;height:56px;background:white;border-radius:50%;color:black;font-weight:700;line-height:56px;text-align:center;font-size:20px;z-index:4;box-shadow:0 10px 25px rgba(0,0,0,0.6);user-select:none;}
@@ -20,6 +16,7 @@ body{margin:0;font-family:system-ui,sans-serif;background:#0b1222;color:white;te
   #infoPanel.open{transform:scaleX(1);opacity:1;pointer-events:auto;}
   #infoText{font-size:14px;line-height:1.35;text-align:left;}
   @media(max-width:520px){#infoPanel{right:64px;min-width:180px;padding:10px;}.phone{width:44px;height:44px;line-height:44px;font-size:16px;}}
+  #startGPSBtn{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:12px 18px;font-size:16px;border:none;border-radius:8px;background:#0af;color:#fff;z-index:50;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -27,56 +24,49 @@ body{margin:0;font-family:system-ui,sans-serif;background:#0b1222;color:white;te
   <p>Joylashuvga ruxsat ber!</p>
 
   <div id="area">
-    <div id="phone1" class="phone" aria-hidden="false">1</div>
-    <div id="phone2" class="phone" aria-hidden="false">2</div>
-    <div id="line" aria-hidden="true"></div>
+    <div id="phone1" class="phone">1</div>
+    <div id="phone2" class="phone">2</div>
+    <div id="line"></div>
   </div>
 
-  <button id="infoBtn" aria-label="info" aria-pressed="false">I</button>
-  <div id="infoPanel" role="status" aria-live="polite">
+  <button id="infoBtn">I</button>
+  <div id="infoPanel">
     <div id="infoText"></div>
   </div>
 
-<script>
-  
-const startBtn = document.getElementById('startGPSBtn');
-startBtn.addEventListener('click', ()=>{
-  startBtn.style.display = 'none'; // tugmani yashirish
-  startGPS(); // eski startGPS funksiyasini ishga tushirish
-});
+  <button id="startGPSBtn">Start GPS</button>
 
+<script>
 const phone1 = document.getElementById("phone1");
 const phone2 = document.getElementById("phone2");
 const line = document.getElementById("line");
 const infoBtn = document.getElementById('infoBtn');
 const infoPanel = document.getElementById('infoPanel');
 const infoText = document.getElementById('infoText');
+const startBtn = document.getElementById('startGPSBtn');
 
-let pos1 = {lat: null, lon: null}, pos2 = {lat: null, lon: null}, infoTimer = null;
+let pos1 = {lat: null, lon: null}, pos2 = {lat: null, lon: null};
 let phoneId = null;
+let infoTimer = null;
 
-// So'rov: 1 yoki 2 — cancel / bo'sh qoldirishni ham ko'rib chiqamiz
+// So‘rov: 1 yoki 2
 (function askPhoneId(){
   for(;;){
     const p = prompt("Bu telefon 1-chi yoki 2-chi? (faqat raqam yozing)");
-    if(p === null){ // foydalanuvchi bekor qildi
-      alert("Sahifa ishlashi uchun 1 yoki 2 belgilash kerak. Sahifa bekor qilindi.");
-      return;
-    }
+    if(p === null){ alert("Sahifa ishlashi uchun 1 yoki 2 belgilash kerak."); return; }
     const trimmed = String(p).trim();
     if(trimmed === '1' || trimmed === '2'){ phoneId = trimmed; break; }
     alert("Faqat 1 yoki 2 yozing!");
   }
 })();
 
-function showInfo(text, timeout = 2000){
+function showInfo(text, timeout=2000){
   clearTimeout(infoTimer);
   infoText.textContent = text;
   infoPanel.classList.add('open');
-  infoTimer = setTimeout(()=>{ infoPanel.classList.remove('open'); }, timeout);
+  infoTimer = setTimeout(()=> infoPanel.classList.remove('open'), timeout);
 }
 
-// Har qanday ikkala koordinata mavjudligini tekshirish
 function haveBothPositions(){
   return Number.isFinite(pos1.lat) && Number.isFinite(pos1.lon) && Number.isFinite(pos2.lat) && Number.isFinite(pos2.lon);
 }
@@ -94,99 +84,63 @@ function distance(lat1,lon1,lat2,lon2){
 function updatePositions(){
   const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
   const vhRaw = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
-  const containerHeight = Math.max(200, vhRaw * 0.6); // javobgar hudud balandligi
-  const baseY = (containerHeight) * 0.45 + 20;
+  const containerHeight = Math.max(200, vhRaw * 0.6);
+  const baseY = (containerHeight)*0.45 + 20;
 
   if(!haveBothPositions()){
-    // Agar ikkita qurilma ham joylashuv berilmagan bo'lsa, ikonlarni markazlash
-    phone1.style.left = `${Math.round(vw * 0.18)}px`; phone1.style.top = `${Math.round(baseY)}px`;
-    phone2.style.left = `${Math.round(vw * 0.72)}px`; phone2.style.top = `${Math.round(baseY)}px`;
+    phone1.style.left = `${Math.round(vw*0.18)}px`; phone1.style.top = `${Math.round(baseY)}px`;
+    phone2.style.left = `${Math.round(vw*0.72)}px`; phone2.style.top = `${Math.round(baseY)}px`;
     line.style.width = `0px`;
     return;
   }
 
-  const dist = distance(pos1.lat, pos1.lon, pos2.lat, pos2.lon);
-  const maxDist = 500; // metr — chastota o'lchami (sozla)
-  const strength = Math.max(0, 1 - dist / maxDist); // 0..1
+  const dist = distance(pos1.lat,pos1.lon,pos2.lat,pos2.lon);
+  const maxDist=500;
+  const strength = Math.max(0,1-dist/maxDist);
 
-  const baseLeft = 0.18 * vw, baseRight = 0.72 * vw, maxShift = 0.18 * vw;
-  const shift = strength * maxShift;
+  const baseLeft=0.18*vw, baseRight=0.72*vw, maxShift=0.18*vw, shift=strength*maxShift;
+  const x1 = baseLeft + shift, x2 = baseRight - shift, y1=baseY, y2=baseY;
 
-  const x1 = baseLeft + shift;
-  const y1 = baseY;
-  const x2 = baseRight - shift;
-  const y2 = baseY;
-
-  // Pozitsiyalar
   phone1.style.left = `${Math.round(x1)}px`; phone1.style.top = `${Math.round(y1)}px`;
   phone2.style.left = `${Math.round(x2)}px`; phone2.style.top = `${Math.round(y2)}px`;
 
-  // Chiziqni chizish
-  const dx = x2 - x1, dy = y2 - y1;
-  const len = Math.sqrt(dx*dx + dy*dy);
-  const leftForLine = x1 + (phone1.offsetWidth/2);
-  const topForLine = y1 + (phone1.offsetHeight/2);
-
+  const dx = x2 - x1, dy = y2 - y1, len = Math.sqrt(dx*dx+dy*dy);
+  const leftForLine = x1 + phone1.offsetWidth/2, topForLine = y1 + phone1.offsetHeight/2;
   line.style.left = `${Math.round(leftForLine)}px`;
   line.style.top = `${Math.round(topForLine)}px`;
-  line.style.width = `${Math.round(len)}px`;
-  line.style.height = `6px`;
-  const angle = Math.atan2(dy, dx);
-  line.style.transform = `rotate(${angle}rad)`;
-
-  // Rang gradienti: masofaga qarab o'zgaradi
-  const hueA = Math.round(10 + (1 - strength) * 200);
-  const hueB = Math.round(200 - (1 - strength) * 150);
-  line.style.background = `linear-gradient(90deg, hsl(${hueA} 90% 55%), hsl(${hueB} 90% 55%))`;
+  line.style.width = `${Math.round(len)}px`; line.style.height="6px";
+  line.style.transform = `rotate(${Math.atan2(dy,dx)}rad)`;
+  const hueA = Math.round(10 + (1-strength)*200), hueB=Math.round(200-(1-strength)*150);
+  line.style.background = `linear-gradient(90deg,hsl(${hueA} 90% 55%),hsl(${hueB} 90% 55%))`;
 }
 
-infoBtn.addEventListener('click', ()=>{
-  const pressed = infoBtn.getAttribute('aria-pressed') === 'true';
-  infoBtn.setAttribute('aria-pressed', String(!pressed));
-  showInfo("Joylashuvga ruxsat bering va telefonni 1 yoki 2 deb belgilang.");
-});
+infoBtn.addEventListener('click', ()=>{ showInfo("Joylashuvga ruxsat bering va telefonni 1 yoki 2 deb belgilang."); });
 
-// Geolocation boshlash
 function startGPS(){
-  if(!phoneId){
-    showInfo("Telefon raqami tanlanmadi — sahifa toʻxtadi.");
-    return;
-  }
-  if(!navigator.geolocation){
-    showInfo("Geolocation qo'llab-quvvatlanmaydi!");
-    return;
-  }
-  showInfo("Joylashuvga ruxsat bering — sahifa real vaqtda yangilanadi.", 2500);
+  if(!phoneId){ showInfo("Telefon raqami tanlanmadi."); return; }
+  if(!navigator.geolocation){ showInfo("Geolocation qo‘llab-quvvatlanmaydi!"); return; }
+  showInfo("Joylashuvga ruxsat bering — real vaqtda yangilanadi.",2500);
 
-  navigator.geolocation.watchPosition(pos => {
-    const lat = Number(pos.coords.latitude);
-    const lon = Number(pos.coords.longitude);
-
-    if(phoneId === "1"){
-      pos1.lat = lat; pos1.lon = lon;
-    } else {
-      pos2.lat = lat; pos2.lon = lon;
-    }
-
+  navigator.geolocation.watchPosition(pos=>{
+    const lat = Number(pos.coords.latitude), lon=Number(pos.coords.longitude);
+    if(phoneId==="1"){ pos1={lat,lon}; } else { pos2={lat,lon}; }
     updatePositions();
-    showInfo("Joylashuv o‘lchandi ✔", 1200);
-  }, err => {
-    console.warn("Geolocation error:", err);
-    let msg = "Joylashuv yuklanmadi. Brauzer/telefon ruxsatini tekshir.";
-    if(err && err.code === 1) msg = "Joylashuvga ruxsat rad etildi.";
-    if(err && err.code === 3) msg = "Joylashuv vaqti tugadi (timeout).";
-    showInfo(msg, 3000);
-  }, { enableHighAccuracy: true, maximumAge: 3000, timeout: 7000 });
+    showInfo("Joylashuv o‘lchandi ✔",1200);
+  }, err=>{
+    console.warn("Geo error:",err);
+    let msg = "Joylashuv olinmadi. Ruxsatni tekshir.";
+    if(err && err.code===1) msg="Joylashuv rad etildi.";
+    if(err && err.code===3) msg="Timeout.";
+    showInfo(msg,3000);
+  }, {enableHighAccuracy:true,maximumAge:3000,timeout:7000});
 }
 
-// Oyna yuklanganda boshlash
-window.addEventListener('load', ()=>{
-  updatePositions();
+window.addEventListener('load', updatePositions);
+window.addEventListener('resize', updatePositions);
+startBtn.addEventListener('click', ()=>{
+  startBtn.style.display='none';
   startGPS();
 });
-
-// O'lcham o'zgarganda to'g'rilash
-window.addEventListener('resize', updatePositions);
 </script>
 </body>
 </html>
