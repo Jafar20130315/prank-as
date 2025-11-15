@@ -50,7 +50,7 @@ h1{text-align:center;margin-bottom:40px;text-shadow:0 0 10px rgba(255,255,255,0.
 .btn.new {
   background: linear-gradient(45deg, #FFD700, #FFC107);
   color: #111;
-  z-index: 10;
+  z-index: 20;
   animation: pulse 1.5s infinite alternate, moveBtn 0.5s ease forwards;
 }
 
@@ -61,18 +61,28 @@ h1{text-align:center;margin-bottom:40px;text-shadow:0 0 10px rgba(255,255,255,0.
   100% { transform: translateY(0) scale(1); box-shadow:0 4px 6px rgba(0,0,0,0.3); }
 }
 
-/* YANGI tag */
+/* Smooth animatsiya */
+@keyframes smoothMove {
+  0%   { transform: translateY(0); }
+  50%  { transform: translateY(-4px); }
+  100% { transform: translateY(0); }
+}
+
+/* qo‘llash */
 .btn .tag {
   position: absolute;
-  top: -8px;
-  right: -8px;
+  top: -10px;
+  right: -10px;
   background: #FF4500;
   color: #fff;
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 6px;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 2px 10px;
   border-radius: 6px;
+  animation: smoothMove 1.5s ease-in-out infinite; /* linear o‘rniga ease-in-out */
 }
+
+
 
 .top-left-menu-toggle{
   position:fixed;top:15px;left:15px;background:rgba(255,255,255,0.15);
