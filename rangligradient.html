@@ -4,58 +4,18 @@
   <meta charset="UTF-8">
   <title>BETA rangli gradient</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap">
-<h1>Qurilmangiz qotishi mumkin!</h1>
-
   <style>
     body, html, #app {
       margin: 0;
       width: 100%;
       height: 100%;
+      font-family: "Montserrat", serif;
     }
 
     body {
       touch-action: none;
-    }
-
-    #app {
-      height: 100%;
-      font-family: "Montserrat", serif;
-    }
-
-    #app a {
-      text-decoration: none;
-      color: #fff;
-    }
-
-    .hero {
-      position: relative;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-
-    h1, h2, p {
-      margin: 0;
-      padding: 0;
-      color: white;
-      text-shadow: 0 0 20px rgba(0, 0, 0, 1);
-      line-height: 100%;
-      user-select: none;
-    }
-
-    h1 {
-      font-size: 80px;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-
-    h2 {
-      font-size: 60px;
-      font-weight: 500;
-      text-transform: uppercase;
+      background: #111;
+      overflow: hidden;
     }
 
     #canvas {
@@ -65,13 +25,79 @@
       bottom: 0;
       left: 0;
       overflow: hidden;
+      z-index: 0;
+    }
+
+    /* Modal oynasi */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    .modal-content {
+      background: linear-gradient(135deg, #ff4d6d, #6d5bff);
+      padding: 40px 60px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      color: #fff;
+      animation: fadeIn 0.5s ease-out;
+      max-width: 600px;
+    }
+
+    .modal-content h1 {
+      font-size: 50px;
+      margin-bottom: 20px;
+      text-shadow: 0 0 20px rgba(0,0,0,0.7);
+    }
+
+    .modal-content p {
+      font-size: 20px;
+      margin-bottom: 30px;
+    }
+
+    .modal-content button {
+      background: #fff;
+      color: #333;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 10px;
+      font-size: 18px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: all 0.3s ease;
+    }
+
+    .modal-content button:hover {
+      background: #333;
+      color: #fff;
+      transform: scale(1.05);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
     }
   </style>
 </head>
-
 <body>
-  <div id="app">
-    <canvas id="canvas"></canvas>
+  <canvas id="canvas"></canvas>
+
+  <!-- Modal ogohlantirish -->
+  <div class="modal" id="warningModal">
+    <div class="modal-content">
+      <h1>Diqqat!</h1>
+      <p>Qurilmangiz qotishi yoki sekinlashishi mumkin. Davom etmoqchimisiz?</p>
+      <button id="closeModal">Davom etish</button>
+    </div>
   </div>
 
   <script type="module">
@@ -90,7 +116,6 @@
     document.body.addEventListener('click', () => {
       const colors = randomColors(3)
       const lightsColors = randomColors(4)
-      console.log(colors, lightsColors)
       app.tubes.setColors(colors)
       app.tubes.setLightsColors(lightsColors)
     })
@@ -100,6 +125,14 @@
         .fill(0)
         .map(() => "#" + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0'))
     }
+
+    // Modalni yopish
+    const modal = document.getElementById('warningModal');
+    const closeModal = document.getElementById('closeModal');
+
+    closeModal.addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
   </script>
 </body>
 </html>
