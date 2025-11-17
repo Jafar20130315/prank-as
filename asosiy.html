@@ -103,6 +103,21 @@ h1{text-align:center;margin-bottom:40px;text-shadow:0 0 10px rgba(255,255,255,0.
 
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);opacity:0;pointer-events:none;transition:opacity 0.3s ease;z-index:1500;backdrop-filter:blur(3px)}
 .overlay.show{opacity:1;pointer-events:auto}
+ 
+  /* PRO tag */
+.tag-pro{
+  position:absolute;
+  top:-10px;
+  right:-10px;
+  background:#00ff0a;
+  color:#111;
+  font-size:13px;
+  font-weight:600;
+  padding:2px 10px;
+  border-radius:6px;
+  animation:smoothMove 1.5s ease-in-out infinite;
+}
+
 
 /* Top message */
 .top-message {
@@ -210,23 +225,37 @@ document.querySelectorAll('.button-container a').forEach((btn,i)=>{
 });
 
 
-// Promo kod tekshirish: faqat premium tugmalar uchun PRO
-if(localStorage.getItem('promo')==='true'){
-  const proBtns=['/yangi-tugma','/yangi-tugma','/yangi-tugma'];
-  let proCounter = 1; // PRO raqamini hisoblash
-  proBtns.forEach(href=>{
-    const btn=container.querySelector(`.btn[href="${href}"]`);
-    if(btn){
-      btn.classList.add('pro');
-      // Avtomatik PRO raqamini yozish
-      const tag=document.createElement('span');
-      tag.className='tag';
-      tag.textContent = `PRO ${proCounter}`;
+window.addEventListener('DOMContentLoaded', () => {
+  // Agar foydalanuvchi promo kod kiritgan bo'lsa
+  if(localStorage.getItem('promo') === 'true'){
+    // PRO tugmalarni yaratish
+    const container = document.querySelector('.button-container');
+    
+    const proButtons = [
+      {text:'Pro 1', href:'/pro1'},
+      {text:'Pro 2', href:'/pro2'}
+    ];
+    
+    proButtons.forEach((btnInfo, i) => {
+      const btn = document.createElement('a');
+      btn.className = 'btn pro';
+      btn.href = btnInfo.href;
+      btn.textContent = btnInfo.text;
+      
+      // PRO tag qo'shish
+      const tag = document.createElement('span');
+      tag.className = 'tag-pro';
+      tag.textContent = 'PRO';
       btn.appendChild(tag);
-      proCounter++;
-    }
-  });
-}
+      
+      container.appendChild(btn); // tugmani containerga qo'shish
+      
+      // Animatsiya delay
+      btn.style.animationDelay = `${(container.children.length-1)*0.15}s`;
+    });
+  }
+});
+
 </script>
 
 </body>
