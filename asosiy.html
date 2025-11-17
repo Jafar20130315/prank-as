@@ -4,11 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Prank-as</title>
-<meta name="description" content="Do'stlaringiz bilan soxta hacker buyumlari orqali xazillashing, va o'zingizga boshqa foydali narsalar toping! Prank_as Prank as">
 <link rel="icon" type="image/x-icon" href="favicon.png"/>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
-<link rel="manifest" href="/manifest.json" />
-
 <style>
 @keyframes gradientBG { 
   0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%} 
@@ -40,35 +37,33 @@ h1{text-align:center;margin-bottom:40px;text-shadow:0 0 10px rgba(255,255,255,0.
   color:#111;
 }
 
-/* move animatsiyasi */
 @keyframes moveBtn {
   from { transform: translateY(20px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
 
-/* New tugma sariq va pulsatsiya animatsiyasi */
+/* YANGI tugma */
 .btn.new {
   background: linear-gradient(45deg, #FFD700, #FFC107);
   color: #111;
   z-index: 20;
   animation: pulse 1.5s infinite alternate, moveBtn 0.5s ease forwards;
 }
-
-/* pulsatsiya */
 @keyframes pulse {
   0% { transform: translateY(0) scale(1); box-shadow:0 4px 6px rgba(0,0,0,0.3); }
   50% { transform: translateY(-5px) scale(1.05); box-shadow:0 6px 12px rgba(0,0,0,0.4); }
   100% { transform: translateY(0) scale(1); box-shadow:0 4px 6px rgba(0,0,0,0.3); }
 }
 
-/* Smooth animatsiya */
-@keyframes smoothMove {
-  0%   { transform: translateY(0); }
-  50%  { transform: translateY(-4px); }
-  100% { transform: translateY(0); }
+/* PRO tugma */
+.btn.pro {
+  background: linear-gradient(45deg, #00ff0a, #ff0057);
+  color: #fff;
+  z-index: 20;
+  animation: pulse 1.5s infinite alternate, moveBtn 0.5s ease forwards;
 }
 
-/* qo‘llash */
+/* tag */
 .btn .tag {
   position: absolute;
   top: -10px;
@@ -79,10 +74,13 @@ h1{text-align:center;margin-bottom:40px;text-shadow:0 0 10px rgba(255,255,255,0.
   font-weight: 500;
   padding: 2px 10px;
   border-radius: 6px;
-  animation: smoothMove 1.5s ease-in-out infinite; /* linear o‘rniga ease-in-out */
+  animation: smoothMove 1.5s ease-in-out infinite;
 }
-
-
+@keyframes smoothMove {
+  0%   { transform: translateY(0); }
+  50%  { transform: translateY(-4px); }
+  100% { transform: translateY(0); }
+}
 
 .top-left-menu-toggle{
   position:fixed;top:15px;left:15px;background:rgba(255,255,255,0.15);
@@ -106,14 +104,6 @@ h1{text-align:center;margin-bottom:40px;text-shadow:0 0 10px rgba(255,255,255,0.
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);opacity:0;pointer-events:none;transition:opacity 0.3s ease;z-index:1500;backdrop-filter:blur(3px)}
 .overlay.show{opacity:1;pointer-events:auto}
 
-/* Popup */
-.overlay-choise{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;}
-.popup{background:#fff;color:#111;border-radius:16px;padding:30px 25px;text-align:center;width:90%;max-width:320px;box-shadow:0 4px 12px rgba(0,0,0,0.3);animation:fadeIn 0.4s ease;}
-.popup h2{font-size:20px;margin-bottom:20px}
-.popup .buttons{display:flex;justify-content:space-around}
-.popup button{background:#111;color:#fff;border:none;border-radius:10px;padding:10px 15px;cursor:pointer;font-weight:600;transition:transform 0.2s,background 0.3s;}
-.popup button:hover{background:#333;transform:scale(1.05)}
-
 /* Top message */
 .top-message {
   position: fixed;top: 10px;left: 50%;transform: translateX(-50%);
@@ -121,7 +111,6 @@ h1{text-align:center;margin-bottom:40px;text-shadow:0 0 10px rgba(255,255,255,0.
   box-shadow: 0 4px 8px rgba(0,0,0,0.3);z-index: 99999;opacity: 0;transition: opacity 0.4s ease;font-size: 14px;
 }
 .top-message.show { opacity: 1; }
-
 </style>
 </head>
 <body>
@@ -139,7 +128,7 @@ h1{text-align:center;margin-bottom:40px;text-shadow:0 0 10px rgba(255,255,255,0.
   <a class="btn" href="/soxta-balans-aniqlovchi">Soxta balans aniqlovchi</a>
   <a class="btn" href="/oyin-barabani">O‘yin barabani</a>
   <a class="btn" href="/ovoz-olchovchi">Ovoz o‘lchovchi</a>
-<a class="btn" href="/tekst-ovoz">Tekst → Ovo‍z</a>
+  <a class="btn" href="/tekst-ovoz">Tekst → Ovo‍z</a>
   <a class="btn new" href="/rangligradient">Rangli sensor</a>
 </div>
 
@@ -148,33 +137,21 @@ h1{text-align:center;margin-bottom:40px;text-shadow:0 0 10px rgba(255,255,255,0.
   <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
 </button>
 
-<!-- Overlay -->
 <div class="overlay"></div>
 
-<!-- Menyu -->
 <nav id="dropdown-menu" class="dropdown-menu-small">
   <a href="/index">🏠 Bosh sahifa</a>
   <a href="/disclaimer">Disclaimer</a>
+  <a href="/promokod-kiritish">💳 Promokod kiritish</a>
   <a href="#" id="installAppBtn">📱 Ilovani o‘rnatish</a>
   <a href="#" id="resetChoice">♻️ Tanlovni tiklash</a>
   <a href="https://old.prank-as.site">Oldingi saytga qaytish</a>
 </nav>
 
-<!-- Tanlov oynasi -->
-<div class="overlay-choise" id="choiseOverlay">
-  <div class="popup">
-    <h2>Qayerda davom etilsin?</h2>
-    <div class="buttons">
-      <button id="pwaBtn">📱 Ilovada</button>
-      <button id="siteBtn">🌐 Saytda</button>
-    </div>
-  </div>
-</div>
-
 <div class="top-message" id="topMsg"></div>
 
 <script>
-// Xabar ko'rsatish funksiyasi
+// Fade-in xabar
 function showMessage(text,time=2500){
   const msg=document.getElementById('topMsg');
   msg.textContent=text;
@@ -184,90 +161,73 @@ function showMessage(text,time=2500){
 
 // Service Worker
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('./sw.js').then(()=>console.log('Service Worker running')).catch(err=>console.log('SW error:',err));
-  });
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').then(()=>console.log('SW running')).catch(err=>console.log(err));});
 }
 
 // Menu toggle
 const menuBtn=document.querySelector('.top-left-menu-toggle');
 const menu=document.getElementById('dropdown-menu');
 const overlay=document.querySelector('.overlay');
-menuBtn.addEventListener('click',()=>{
-  menu.classList.toggle('show');
-  overlay.classList.toggle('show');
-});
-overlay.addEventListener('click',()=>{
-  menu.classList.remove('show');
-  overlay.classList.remove('show');
-});
-
-// Tanlov oynasi
-const overlayChoice=document.getElementById('choiseOverlay');
-const pwaBtn=document.getElementById('pwaBtn');
-const siteBtn=document.getElementById('siteBtn');
-const savedChoice=localStorage.getItem('continueChoice');
-if(savedChoice) overlayChoice.style.display='none';
-pwaBtn.addEventListener('click',()=>{
-  if(window.matchMedia('(display-mode: standalone)').matches){
-    showMessage("Siz allaqachon ilovadasiz 😎");
-  }else{
-    showMessage("Ilovani o‘rnatish uchun “📱 Ilovani o‘rnatish” menyusidan bosing");
-  }
-  localStorage.setItem('continueChoice','app');
-  overlayChoice.style.display='none';
-});
-siteBtn.addEventListener('click',()=>{
-  localStorage.setItem('continueChoice','site');
-  overlayChoice.style.display='none';
-});
+menuBtn.addEventListener('click',()=>{menu.classList.toggle('show');overlay.classList.toggle('show');});
+overlay.addEventListener('click',()=>{menu.classList.remove('show');overlay.classList.remove('show');});
 
 // Tanlovni tiklash
 document.getElementById('resetChoice').addEventListener('click',()=>{
   localStorage.removeItem('continueChoice');
+  localStorage.removeItem('promo');
   showMessage("Tanlov tiklandi! Endi sahifani yangilang 🔄");
 });
 
 // PWA o‘rnatish
 let installPrompt;
-const installBtn=document.getElementById('installAppBtn');
-window.addEventListener('beforeinstallprompt', e=>{
-  e.preventDefault();
-  installPrompt=e;
-  installBtn.style.display='block';
-});
-installBtn.addEventListener('click', async ()=>{
+window.addEventListener('beforeinstallprompt', e=>{e.preventDefault();installPrompt=e;});
+document.getElementById('installAppBtn').addEventListener('click', async()=>{
   if(installPrompt){
     installPrompt.prompt();
     const {outcome}=await installPrompt.userChoice;
-    if(outcome==='accepted'){
-      showMessage("✅ Ilova o‘rnatilmoqda...");
-    }else{
-      showMessage("❌ O‘rnatish bekor qilindi");
-    }
+    if(outcome==='accepted') showMessage("✅ Ilova o‘rnatilmoqda...");
+    else showMessage("❌ O‘rnatish bekor qilindi");
     installPrompt=null;
-  }else{
-    showMessage("Bu brauzer o‘rnatishni qo‘llamaydi 😕");
-  }
+  } else showMessage("Bu brauzer o‘rnatishni qo‘llamaydi 😕");
 });
 
-// New tugma avtomatik birinchi qatorga
+// YANGI tugma avtomatik birinchi qatorga
 const container=document.querySelector('.button-container');
 const newBtns=Array.from(container.querySelectorAll('.btn.new'));
-newBtns.forEach(btn=>container.prepend(btn));
-
-// YANGI tag qo'shish
 newBtns.forEach(btn=>{
+  // Tag qo'shish
   const tag=document.createElement('span');
   tag.className='tag';
   tag.textContent='YANGI';
   btn.appendChild(tag);
+  // Birinchi o‘ringa
+  container.prepend(btn);
 });
 
-// Har bir tugma uchun animatsiya delay
+// Animatsiya delay
 document.querySelectorAll('.button-container a').forEach((btn,i)=>{
   btn.style.animationDelay=`${i*0.15}s`;
 });
+
+
+// Promo kod tekshirish: faqat premium tugmalar uchun PRO
+if(localStorage.getItem('promo')==='true'){
+  const proBtns=['/yangi-tugma','/yangi-tugma','/yangi-tugma'];
+  let proCounter = 1; // PRO raqamini hisoblash
+  proBtns.forEach(href=>{
+    const btn=container.querySelector(`.btn[href="${href}"]`);
+    if(btn){
+      btn.classList.add('pro');
+      // Avtomatik PRO raqamini yozish
+      const tag=document.createElement('span');
+      tag.className='tag';
+      tag.textContent = `PRO ${proCounter}`;
+      btn.appendChild(tag);
+      proCounter++;
+    }
+  });
+}
 </script>
+
 </body>
 </html>
