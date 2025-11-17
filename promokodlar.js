@@ -4,4 +4,4 @@ if (window.location.pathname.endsWith('promokodlar.js')) {
 }
 
 // Promo kodlar ro'yxati
-export const validPromos = ["ZZ478","WOW4444","PRANK-AS1212"];
+export const validPromos = ["ZZ478","WOW4444","PRANK-AS1212","AZ2145"];
