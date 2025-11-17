@@ -15,7 +15,7 @@ body {
   font-family:'Poppins',sans-serif;line-height:1.6;color:#fff;
   background:linear-gradient(270deg,#1f1f1f,#111,#222,#333);
   background-size:800% 800%;animation:gradientBG 20s ease infinite;
-  min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:20px;
 }
 h1{text-align:center;margin-bottom:40px;text-shadow:0 0 10px rgba(255,255,255,0.2)}
 
@@ -118,7 +118,6 @@ h1{text-align:center;margin-bottom:40px;text-shadow:0 0 10px rgba(255,255,255,0.
   animation:smoothMove 1.5s ease-in-out infinite;
 }
 
-
 /* Top message */
 .top-message {
   position: fixed;top: 10px;left: 50%;transform: translateX(-50%);
@@ -129,15 +128,7 @@ h1{text-align:center;margin-bottom:40px;text-shadow:0 0 10px rgba(255,255,255,0.
 </style>
 </head>
 <body>
-  
-  <!-- Sahifaning eng pastida Trustpilot tugma -->
-<footer style="width:100%;text-align:center;padding:30px 0;">
-  <a class="btn" href="https://www.trustpilot.com/evaluate/prank-as.site" target="_blank" style="animation:none;">
-    Baholash
-  </a>
-</footer>
-
-  <h1>Prank-as orqali do‘stlaringiz bilan hazillashing!</h1>
+<h1>Prank-as orqali do‘stlaringiz bilan hazillashing!</h1>
 
 <div class="button-container">
   <a class="btn" href="/soxta-ulanish-sistemasi">Soxta ulanish sistemasi</a>
@@ -153,8 +144,14 @@ h1{text-align:center;margin-bottom:40px;text-shadow:0 0 10px rgba(255,255,255,0.
   <a class="btn" href="/ovoz-olchovchi">Ovoz o‘lchovchi</a>
   <a class="btn" href="/tekst-ovoz">Tekst → Ovo‍z</a>
   <a class="btn new" href="/rangligradient">Rangli sensor</a>
-
 </div>
+
+<!-- Eng pastdagi Trustpilot tugma -->
+<footer style="width:100%;text-align:center;padding:30px 0;">
+  <a class="btn new" href="https://www.trustpilot.com/evaluate/prank-as.com" target="_blank" style="animation:none;">
+    Baholash
+  </a>
+</footer>
 
 <!-- Menyu tugmasi -->
 <button class="top-left-menu-toggle">
@@ -174,7 +171,7 @@ h1{text-align:center;margin-bottom:40px;text-shadow:0 0 10px rgba(255,255,255,0.
 
 <div class="top-message" id="topMsg"></div>
 
-  <script>
+<script>
 // Fade-in xabar
 function showMessage(text,time=2500){
   const msg=document.getElementById('topMsg');
@@ -196,79 +193,40 @@ menuBtn.addEventListener('click',()=>{menu.classList.toggle('show');overlay.clas
 overlay.addEventListener('click',()=>{menu.classList.remove('show');overlay.classList.remove('show');});
 
 // Tanlovni tiklash
-document.getElementById('resetChoice').addEventListener('click',()=>{
-  localStorage.removeItem('continueChoice');
-  localStorage.removeItem('promo');
-  showMessage("Tanlov tiklandi! Endi sahifani yangilang 🔄");
-});
+document.getElementById('resetChoice').addEventListener('click',()=>{localStorage.removeItem('continueChoice');localStorage.removeItem('promo');showMessage("Tanlov tiklandi! Endi sahifani yangilang 🔄");});
 
 // PWA o‘rnatish
 let installPrompt;
 window.addEventListener('beforeinstallprompt', e=>{e.preventDefault();installPrompt=e;});
-document.getElementById('installAppBtn').addEventListener('click', async()=>{
-  if(installPrompt){
-    installPrompt.prompt();
-    const {outcome}=await installPrompt.userChoice;
-    if(outcome==='accepted') showMessage("✅ Ilova o‘rnatilmoqda...");
-    else showMessage("❌ O‘rnatish bekor qilindi");
-    installPrompt=null;
-  } else showMessage("Bu brauzer o‘rnatishni qo‘llamaydi 😕");
-});
+document.getElementById('installAppBtn').addEventListener('click', async()=>{if(installPrompt){installPrompt.prompt();const {outcome}=await installPrompt.userChoice;if(outcome==='accepted') showMessage("✅ Ilova o‘rnatilmoqda..."); else showMessage("❌ O‘rnatish bekor qilindi");installPrompt=null;} else showMessage("Bu brauzer o‘rnatishni qo‘llamaydi 😕");});
 
 // YANGI tugma avtomatik birinchi qatorga
 const container=document.querySelector('.button-container');
 const newBtns=Array.from(container.querySelectorAll('.btn.new'));
-newBtns.forEach(btn=>{
-  // Tag qo'shish
-  const tag=document.createElement('span');
-  tag.className='tag';
-  tag.textContent='YANGI';
-  btn.appendChild(tag);
-  // Birinchi o‘ringa
-  container.prepend(btn);
-});
+newBtns.forEach(btn=>{const tag=document.createElement('span');tag.className='tag';tag.textContent='YANGI';btn.appendChild(tag);container.prepend(btn);});
 
 // Animatsiya delay
-document.querySelectorAll('.button-container a').forEach((btn,i)=>{
-  btn.style.animationDelay=`${i*0.15}s`;
-});
-
+document.querySelectorAll('.button-container a').forEach((btn,i)=>{btn.style.animationDelay=`${i*0.15}s`;});
 
 window.addEventListener('DOMContentLoaded', () => {
-  // Agar foydalanuvchi promo kod kiritgan bo'lsa
   if(localStorage.getItem('promo') === 'true'){
-    // PRO tugmalarni yaratish
     const container = document.querySelector('.button-container');
-    
-    const proButtons = [
-      {text:'Pro 1', href:'/pro1'},
-      {text:'Pro 2', href:'/pro2'}
-    ];
-    
+    const proButtons = [{text:'Pro 1', href:'/pro1'},{text:'Pro 2', href:'/pro2'}];
     proButtons.forEach((btnInfo, i) => {
       const btn = document.createElement('a');
       btn.className = 'btn pro';
       btn.href = btnInfo.href;
       btn.textContent = btnInfo.text;
-      
-      // PRO tag qo'shish
       const tag = document.createElement('span');
       tag.className = 'tag-pro';
       tag.textContent = 'PRO';
       btn.appendChild(tag);
-      
-      container.appendChild(btn); // tugmani containerga qo'shish
-      
-      // Animatsiya delay
+      container.appendChild(btn);
       btn.style.animationDelay = `${(container.children.length-1)*0.15}s`;
     });
   }
 });
-
 </script>
-  
-  
-
 
 </body>
-</html>
+    </html>
