@@ -87,6 +87,71 @@ h1{text-align:center;margin:20px 0 40px;text-shadow:0 0 10px rgba(255,255,255,0.
 <div class="top-message" id="topMsg"></div>
 
 <script>
+  // Tugmalarni containerga qo'yish va tag berish
+function refreshButtons() {
+  const container = document.querySelector('.button-container');
+  const newBtns = Array.from(container.querySelectorAll('.btn.new'));
+
+  // "YANGI" tag
+  newBtns.forEach(btn => {
+    if(!btn.querySelector('.tag')) {
+      const tag = document.createElement('span');
+      tag.className = 'tag';
+      tag.textContent = 'YANGI';
+      btn.appendChild(tag);
+    }
+  });
+
+  // YANGI tugmalar birinchi o‘ringa
+  newBtns.forEach(btn => container.prepend(btn));
+}
+
+// PRO tugmalarni qo‘shish
+function addProButtons() {
+  const container = document.querySelector('.button-container');
+
+  const proList = [
+    {text:'Pro 1', href:'#'},
+    {text:'Pro 2', href:'#'}
+  ];
+
+  proList.forEach(item => {
+    const a = document.createElement('a');
+    a.className = 'btn pro';
+    a.href = item.href;
+    a.textContent = item.text;
+
+    const tag = document.createElement('span');
+    tag.className = 'tag';
+    tag.textContent = 'PRO';
+    tag.style.background = 'linear-gradient(45deg, #ff00ff, #00ffff, #ff9900)';
+    a.appendChild(tag);
+
+    container.appendChild(a);
+  });
+}
+
+// Sahifa yuklanganda
+window.onload = () => {
+  refreshButtons();
+  // Agar foydalanuvchi premium tanlasa, PRO tugmalar qo‘shiladi
+  if(localStorage.getItem('premium') === 'true'){
+    addProButtons();
+  }
+};
+
+// Tanlov tiklash
+document.getElementById('resetChoice').addEventListener('click',()=>{
+  localStorage.removeItem('continueChoice');
+  localStorage.removeItem('premium'); // PRO tugmalarini o‘chirish
+  showMessage("Tanlov tiklandi! Endi sahifani yangilang 🔄");
+
+  // PRO tugmalarni DOM’dan olib tashlash
+  const proBtns = document.querySelectorAll('.btn.pro');
+  proBtns.forEach(btn => btn.remove());
+
+  refreshButtons(); // YANGI tugmalar saqlansin
+});
 // Xabar ko'rsatish funksiyasi
 function showMessage(text,time=2500){
   const msg=document.getElementById('topMsg');
