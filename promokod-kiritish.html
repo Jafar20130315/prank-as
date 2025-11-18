@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="uz">
 <head>
 <meta charset="UTF-8">
@@ -44,31 +44,33 @@ body { display:flex; justify-content:center; align-items:center; min-height:100v
   </div>
 </div>
 
-<script type="module">
-// Promo kodlarni import qilamiz
-import { validPromos } from './promokodlar.js';
-
-// Promo kodni tekshirish
-document.getElementById("applyPromo").onclick = () => {
-  const code = document.getElementById("promoCode").value.trim();
-  const message = document.getElementById("promoMessage");
-
+<script>
+  // Promo kodlar ro'yxati
   const validPromos = ["ZZ478","WOW4444","PRANK-AS1212"];
 
-document.getElementById("applyPromo").onclick = () => {
-  const code = document.getElementById("promoCode").value.trim();
-  const message = document.getElementById("promoMessage");
+  document.getElementById("applyPromo").onclick = () => {
+    const code = document.getElementById("promoCode").value.trim();
+    const message = document.getElementById("promoMessage");
 
-  if(validPromos.includes(code)){
-    localStorage.setItem('promo','true'); // premium status saqlash
-    message.innerText = "✅ Promo kod tasdiqlandi! Siz premium pranklarni ishlata olasiz!";
-    message.style.color = "#00ff0a";
-  } else {
-    localStorage.setItem('promo','false');
-    message.innerText = "❌ Promokod xato yozilgan yoki muddati o'tgan";
-    message.style.color = "#ff0000";
-  }
-};
+    if(validPromos.includes(code)){
+      localStorage.setItem('promo','true'); // premium status saqlash
+      message.innerText = "✅ Promo kod tasdiqlandi! Siz premium pranklarni ishlata olasiz!";
+      message.style.color = "#00ff0a";
+    } else {
+      localStorage.setItem('promo','false');
+      message.innerText = "❌ Promokod xato yozilgan yoki muddati o'tgan";
+      message.style.color = "#ff0000";
+    }
+  };
+
+  // Sahifa yuklanganda tekshirish
+  window.addEventListener('DOMContentLoaded', () => {
+    const message = document.getElementById("promoMessage");
+    if(localStorage.getItem('promo') === 'true'){
+      message.innerText = "Siz premium pranklarni ishlata olasiz!";
+      message.style.color = "#00ff0a";
+    }
+  });
 </script>
 
 </body>
