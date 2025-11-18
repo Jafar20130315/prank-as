@@ -207,24 +207,41 @@ document.querySelectorAll('.button-container a').forEach((btn,i)=>{
   btn.style.animationDelay=`${i*0.15}s`;
 });
 
-if(localStorage.getItem('promo') === 'true'){
-  const proBtns = [
-    {name: 'Soxta WI-fi parol aniqlovchi', href: '/soxta-wifi-parol-joylashuv-aniqlovchi'},
-  ];
+window.addEventListener('DOMContentLoaded', () => {
+  const container = document.querySelector('.button-container');
 
-  proBtns.forEach(item => {
-    const btn = Array.from(container.querySelectorAll('.btn')).find(b => 
-      b.getAttribute('href') === item.href && b.textContent.includes(item.name)
-    );
-    if(btn){
-      btn.classList.add('pro');
-      const tag = document.createElement('span');
-      tag.className = 'tag';
-      tag.textContent = 'PRO';
-      btn.appendChild(tag);
-    }
-  });
+  // PRO tugmalar faqat agar promo true bo'lsa ko'rinadi
+  if(localStorage.getItem('promo') === 'true'){
+    const proBtns = [
+      {name: 'Soxta Wi-Fi parol aniqlovchi', href: '/soxta-wifi-parol-joylashuv-aniqlovchi'},
+      ];
+      
+
+    proBtns.forEach(item => {
+      const btn = Array.from(container.querySelectorAll('.btn')).find(b => 
+        b.getAttribute('href') === item.href && b.textContent.includes(item.name)
+      );
+      if(btn){
+        btn.classList.add('pro');
+        const tag = document.createElement('span');
+        tag.className = 'tag';
+        tag.textContent = 'PRO';
+        btn.appendChild(tag);
+      }
+    });
   }
+
+  // YANGI tugmalar
+  const newBtns = Array.from(container.querySelectorAll('.btn.new'));
+  newBtns.forEach(btn=>{
+    const tag = document.createElement('span');
+    tag.className='tag';
+    tag.textContent='YANGI';
+    btn.appendChild(tag);
+    container.prepend(btn);
+  });
+
+});
 
 
 </script>
