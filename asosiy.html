@@ -207,25 +207,24 @@ document.querySelectorAll('.button-container a').forEach((btn,i)=>{
   btn.style.animationDelay=`${i*0.15}s`;
 });
 
-if(localStorage.getItem('promo', 'true'){
-  // Har bir element: {name: 'tugma nomi', href: '/tugma-linki'}
+if(localStorage.getItem('promo') === 'true'){
   const proBtns = [
     {name: 'Soxta WI-fi parol aniqlovchi', href: '/soxta-wifi-parol-joylashuv-aniqlovchi'},
   ];
 
   proBtns.forEach(item => {
-    const btn = container.querySelector(`.btn[href="${item.href}"]`);
-    if(btn && btn.textContent.includes(item.name)){
+    const btn = Array.from(container.querySelectorAll('.btn')).find(b => 
+      b.getAttribute('href') === item.href && b.textContent.includes(item.name)
+    );
+    if(btn){
       btn.classList.add('pro');
-
       const tag = document.createElement('span');
       tag.className = 'tag';
       tag.textContent = 'PRO';
       btn.appendChild(tag);
     }
   });
-}
-
+  }
 
 
 </script>
