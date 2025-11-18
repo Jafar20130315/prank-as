@@ -207,7 +207,7 @@ document.querySelectorAll('.button-container a').forEach((btn,i)=>{
   btn.style.animationDelay=`${i*0.15}s`;
 });
 
-if(localStorage.getItem('promo')==='true'){
+if(localStorage.getItem('promo', 'true'){
   // Har bir element: {name: 'tugma nomi', href: '/tugma-linki'}
   const proBtns = [
     {name: 'Soxta WI-fi parol aniqlovchi', href: '/soxta-wifi-parol-joylashuv-aniqlovchi'},
