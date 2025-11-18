@@ -7,117 +7,46 @@
 <link rel="icon" type="image/x-icon" href="favicon.png"/>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
 <style>
-@keyframes gradientBG { 
-  0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%} 
-}
+/* Umumiy CSS */
 *{margin:0;padding:0;box-sizing:border-box}
-body {
-  font-family:'Poppins',sans-serif;line-height:1.6;color:#fff;
-  background:linear-gradient(270deg,#1f1f1f,#111,#222,#333);
-  background-size:800% 800%;animation:gradientBG 20s ease infinite;
-  min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;
-}
+body{font-family:'Poppins',sans-serif;line-height:1.6;color:#fff;background:linear-gradient(270deg,#1f1f1f,#111,#222,#333);background-size:800% 800%;animation:gradientBG 20s ease infinite;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
 h1{text-align:center;margin-bottom:40px;text-shadow:0 0 10px rgba(255,255,255,0.2)}
-
 .button-container{display:grid;gap:15px;width:100%;max-width:800px;margin-bottom:100px}
 @media(min-width:768px){.button-container{grid-template-columns:repeat(2,1fr)}}
 @media(min-width:1200px){.button-container{grid-template-columns:repeat(3,1fr)}}
+.btn{display:block;padding:16px 20px;background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.5);border-radius:8px;color:#fff;text-decoration:none;font-weight:600;box-shadow:0 4px 6px rgba(0,0,0,0.3);transition:all 0.3s;opacity:0;transform:translateY(20px);animation:moveBtn 0.5s ease forwards;position: relative;}
+.btn:hover{transform: translateY(-4px) scale(1.05);box-shadow:0 8px 20px rgba(0,0,0,0.4);background:rgba(255,255,255,0.95);color:#111;}
+.btn.new{background: linear-gradient(45deg, #FFD700, #FFC107);color: #111;z-index:20;animation: pulse 1.5s infinite alternate, moveBtn 0.5s ease forwards;}
+.btn.pro{background:linear-gradient(45deg,#ff3ec0,#5aff00);color:#111;z-index:20;animation: pulsePro 1.5s infinite alternate;}
+.btn .tag{position:absolute;top:-10px;right:-10px;background:#FF4500;color:#fff;font-size:13px;font-weight:500;padding:2px 10px;border-radius:6px;animation:smoothMove 1.5s ease-in-out infinite;}
+@keyframes pulse{0% { transform: translateY(0) scale(1); }50% { transform: translateY(-5px) scale(1.05); }100% { transform: translateY(0) scale(1); }}
+@keyframes pulsePro{0% { transform: translateY(0) scale(1); }50% { transform: translateY(-4px) scale(1.04); }100% { transform: translateY(0) scale(1); }}
+@keyframes smoothMove{0%{transform: translateY(0);}50%{transform: translateY(-4px);}100%{transform: translateY(0);}}
+@keyframes moveBtn {from { transform: translateY(20px); opacity: 0; }to { transform: translateY(0); opacity: 1; }}
+@keyframes gradientBG {0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 
-.btn{
-  display:block;padding:16px 20px;background:rgba(255,255,255,0.1);
-  border:2px solid rgba(255,255,255,0.5);border-radius:8px;color:#fff;
-  text-decoration:none;font-weight:600;box-shadow:0 4px 6px rgba(0,0,0,0.3);
-  transition:all 0.3s;opacity:0;transform:translateY(20px);animation:moveBtn 0.5s ease forwards;
-  position: relative;
-}
-.btn:hover{
-  transform: translateY(-4px) scale(1.05);
-  box-shadow:0 8px 20px rgba(0,0,0,0.4);
-  background:rgba(255,255,255,0.95);
-  color:#111;
-}
-
-@keyframes moveBtn {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-/* YANGI tugma */
-.btn.new {
-  background: linear-gradient(45deg, #FFD700, #FFC107);
-  color: #111;
-  z-index: 20;
-  animation: pulse 1.5s infinite alternate, moveBtn 0.5s ease forwards;
-}
-@keyframes pulse {
-  0% { transform: translateY(0) scale(1); box-shadow:0 4px 6px rgba(0,0,0,0.3); }
-  50% { transform: translateY(-5px) scale(1.05); box-shadow:0 6px 12px rgba(0,0,0,0.4); }
-  100% { transform: translateY(0) scale(1); box-shadow:0 4px 6px rgba(0,0,0,0.3); }
-}
-
-/* PRO tugma */
-.btn.pro {
-  background: linear-gradient(45deg, #00ff0a, #ff0057);
-  color: #fff;
-  z-index: 20;
-  animation: pulse 1.5s infinite alternate, moveBtn 0.5s ease forwards;
-}
-
-/* tag */
-.btn .tag {
-  position: absolute;
-  top: -10px;
-  right: -10px;
-  background: #FF4500;
-  color: #fff;
-  font-size: 13px;
-  font-weight: 500;
-  padding: 2px 10px;
-  border-radius: 6px;
-  animation: smoothMove 1.5s ease-in-out infinite;
-}
-@keyframes smoothMove {
-  0%   { transform: translateY(0); }
-  50%  { transform: translateY(-4px); }
-  100% { transform: translateY(0); }
-}
-
-.top-left-menu-toggle{
-  position:fixed;top:15px;left:15px;background:rgba(255,255,255,0.15);
-  border:none;border-radius:12px;padding:10px 12px;cursor:pointer;z-index:2000;
-  box-shadow:0 4px 12px rgba(0,0,0,0.4);backdrop-filter:blur(6px);transition:0.3s;width:48px;height:48px;
-  display:flex;align-items:center;justify-content:center;
-}
+/* Gamburger va overlay */
+.top-left-menu-toggle{position:fixed;top:15px;left:15px;background:rgba(255,255,255,0.15);border:none;border-radius:12px;padding:10px 12px;cursor:pointer;z-index:2000;box-shadow:0 4px 12px rgba(0,0,0,0.4);backdrop-filter:blur(6px);transition:0.3s;width:48px;height:48px;display:flex;align-items:center;justify-content:center;}
 .top-left-menu-toggle:hover{background:rgba(255,255,255,0.35);transform:scale(1.1)}
 .top-left-menu-toggle svg{fill:#fff;width:26px;height:26px}
-
-.dropdown-menu-small{
-  position:fixed;top:70px;left:15px;width:220px;background:rgba(20,20,20,0.95);
-  backdrop-filter:blur(12px);border-radius:12px;box-shadow:0 8px 25px rgba(0,0,0,0.7);
-  padding:15px 10px;display:flex;flex-direction:column;gap:12px;
-  opacity:0;pointer-events:none;transform:translateY(-10px);transition:all 0.35s ease;z-index:1999;
-}
+.dropdown-menu-small{position:fixed;top:70px;left:15px;width:220px;background:rgba(20,20,20,0.95);backdrop-filter:blur(12px);border-radius:12px;box-shadow:0 8px 25px rgba(0,0,0,0.7);padding:15px 10px;display:flex;flex-direction:column;gap:12px;opacity:0;pointer-events:none;transform:translateY(-10px);transition:all 0.35s ease;z-index:1999;}
 .dropdown-menu-small.show{opacity:1;pointer-events:auto;transform:translateY(0)}
 .dropdown-menu-small a{color:#fff;font-weight:600;text-decoration:none;padding:8px 12px;border-radius:8px;transition:background 0.3s}
 .dropdown-menu-small a:hover{background:rgba(255,255,255,0.12)}
-
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);opacity:0;pointer-events:none;transition:opacity 0.3s ease;z-index:1500;backdrop-filter:blur(3px)}
-.overlay.show{opacity:1;pointer-events:auto}
+.overlay.show{opacity:1}
 
 /* Top message */
-.top-message {
-  position: fixed;top: 10px;left: 50%;transform: translateX(-50%);
-  background: #222;color: #fff;padding: 10px 20px;border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.3);z-index: 99999;opacity: 0;transition: opacity 0.4s ease;font-size: 14px;
-}
+.top-message{position:fixed;top:10px;left:50%;transform: translateX(-50%);background: #222;color: #fff;padding: 10px 20px;border-radius: 10px;box-shadow: 0 4px 8px rgba(0,0,0,0.3);z-index: 99999;opacity: 0;transition: opacity 0.4s ease;font-size: 14px;}
 .top-message.show { opacity: 1; }
 </style>
 </head>
 <body>
+
 <h1>Prank-as orqali do‘stlaringiz bilan hazillashing!</h1>
 
 <div class="button-container">
-  <a class="btn new" href="/rangligradient">Rangli sensor</a>
+  <!-- Asosiy tugmalar -->
   <a class="btn" href="/soxta-ulanish-sistemasi">Soxta ulanish sistemasi</a>
   <a class="btn" href="/soxta-uyin-bank-kartasi">Soxta o‘yin bank kartasi</a>
   <a class="btn" href="/soxta-wifi-parol-aniqlovchi">Soxta Wi-Fi parol aniqlovchi</a>
@@ -130,19 +59,15 @@ h1{text-align:center;margin-bottom:40px;text-shadow:0 0 10px rgba(255,255,255,0.
   <a class="btn" href="/oyin-barabani">O‘yin barabani</a>
   <a class="btn" href="/ovoz-olchovchi">Ovoz o‘lchovchi</a>
   <a class="btn" href="/tekst-ovoz">Tekst → Ovo‍z</a>
+  <a class="btn new" href="/rangligradient">Rangli sensor</a>
 </div>
 
-<!-- Menyu tugmasi -->
-<button class="top-left-menu-toggle">
-  <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
-</button>
-
+<!-- Menyu -->
+<button class="top-left-menu-toggle"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></button>
 <div class="overlay"></div>
-
 <nav id="dropdown-menu" class="dropdown-menu-small">
   <a href="/index">🏠 Bosh sahifa</a>
   <a href="/disclaimer">Disclaimer</a>
-  <a href="/promokod-kiritish">💳 Promokod kiritish</a>
   <a href="#" id="installAppBtn">📱 Ilovani o‘rnatish</a>
   <a href="#" id="resetChoice">♻️ Tanlovni tiklash</a>
   <a href="https://old.prank-as.site">Oldingi saytga qaytish</a>
@@ -151,7 +76,7 @@ h1{text-align:center;margin-bottom:40px;text-shadow:0 0 10px rgba(255,255,255,0.
 <div class="top-message" id="topMsg"></div>
 
 <script>
-// Fade-in xabar
+// Top message
 function showMessage(text,time=2500){
   const msg=document.getElementById('topMsg');
   msg.textContent=text;
@@ -159,3 +84,82 @@ function showMessage(text,time=2500){
   setTimeout(()=>msg.classList.remove('show'),time);
 }
 
+// Service Worker
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').then(()=>console.log('SW running')).catch(err=>console.log(err));});
+}
+
+// Menu toggle
+const menuBtn=document.querySelector('.top-left-menu-toggle');
+const menu=document.getElementById('dropdown-menu');
+const overlay=document.querySelector('.overlay');
+menuBtn.addEventListener('click',()=>{menu.classList.toggle('show');overlay.classList.toggle('show');});
+overlay.addEventListener('click',()=>{menu.classList.remove('show');overlay.classList.remove('show');});
+
+// PWA o‘rnatish
+let installPrompt;
+window.addEventListener('beforeinstallprompt', e=>{
+  e.preventDefault();
+  installPrompt=e;
+});
+document.getElementById('installAppBtn').addEventListener('click', async()=>{
+  if(installPrompt){
+    installPrompt.prompt();
+    const {outcome}=await installPrompt.userChoice;
+    if(outcome==='accepted') showMessage("✅ Ilova o‘rnatilmoqda...");
+    else showMessage("❌ O‘rnatish bekor qilindi");
+    installPrompt=null;
+  } else showMessage("Bu brauzer o‘rnatishni qo‘llamaydi 😕");
+});
+
+// Reset
+document.getElementById('resetChoice').addEventListener('click',()=>{
+  localStorage.removeItem('promo');
+  showMessage("Tanlov tiklandi! Endi sahifani yangilang 🔄");
+  document.querySelectorAll('.btn.pro').forEach(btn=>{
+    btn.classList.remove('pro');
+    const tag=btn.querySelector('.tag');
+    if(tag) tag.remove();
+  });
+});
+
+// DOMContentLoaded
+window.addEventListener('DOMContentLoaded', () => {
+  const container = document.querySelector('.button-container');
+
+  // PRO tugmalar faqat promo true bo‘lsa
+  if(localStorage.getItem('promo')==='true'){
+    const proBtns=[
+      {name:'Soxta Wi-Fi parol aniqlovchi', href:'/soxta-wifi-parol-aniqlovchi'},
+      {name:'Soxta o‘yin bank kartasi', href:'/soxta-uyin-bank-kartasi'}
+    ];
+    proBtns.forEach(item=>{
+      const btn=Array.from(container.querySelectorAll('.btn')).find(b=>b.getAttribute('href')===item.href && b.textContent.includes(item.name));
+      if(btn){
+        btn.classList.add('pro');
+        const tag=document.createElement('span');
+        tag.className='tag';
+        tag.textContent='PRO';
+        btn.appendChild(tag);
+      }
+    });
+  }
+
+  // YANGI tugmalar
+  const newBtns=Array.from(container.querySelectorAll('.btn.new'));
+  newBtns.forEach(btn=>{
+    const tag=document.createElement('span');
+    tag.className='tag';
+    tag.textContent='YANGI';
+    btn.appendChild(tag);
+    container.prepend(btn);
+  });
+
+  // Animatsiya delay
+  document.querySelectorAll('.button-container a').forEach((btn,i)=>{
+    btn.style.animationDelay=`${i*0.15}s`;
+  });
+});
+</script>
+</body>
+  </html>
