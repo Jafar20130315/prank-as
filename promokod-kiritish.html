@@ -53,23 +53,20 @@ document.getElementById("applyPromo").onclick = () => {
   const code = document.getElementById("promoCode").value.trim();
   const message = document.getElementById("promoMessage");
 
+  const validPromos = ["ZZ478","WOW4444","PRANK-AS1212"];
+
+document.getElementById("applyPromo").onclick = () => {
+  const code = document.getElementById("promoCode").value.trim();
+  const message = document.getElementById("promoMessage");
+
   if(validPromos.includes(code)){
-    localStorage.setItem('promo','true');
+    localStorage.setItem('promo','true'); // premium status saqlash
     message.innerText = "✅ Promo kod tasdiqlandi! Siz premium pranklarni ishlata olasiz!";
     message.style.color = "#00ff0a";
   } else {
     localStorage.setItem('promo','false');
     message.innerText = "❌ Promokod xato yozilgan yoki muddati o'tgan";
     message.style.color = "#ff0000";
-  }
-};
-
-// Sahifa yuklanganda tekshirish
-window.onload = () => {
-  const message = document.getElementById("promoMessage");
-  if(localStorage.getItem('promo') === 'true'){
-    message.innerText = "Siz premium pranklarni ishlata olasiz!";
-    message.style.color = "#00ff0a";
   }
 };
 </script>
