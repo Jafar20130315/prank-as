@@ -209,19 +209,11 @@ document.querySelectorAll('.button-container a').forEach((btn,i)=>{
   btn.style.animationDelay=`${i*0.15}s`;
 });
 
-// Promo kod tekshirish: faqat premium tugmalar uchun PRO
-const proBtns = [
-  { name: "Soxta Wi-Fi parol aniqlovchi", href: "/soxta-wifi-parol-joylashuv-aniqlovchi" }
-];
-
-proBtns.forEach(item => {
-  const btn = container.querySelector(`.btn[href="${item.href}"]`);
-  if (btn) {
-    btn.textContent = item.name; // Tugma nomini qo‘yish
-    btn.classList.add('pro');    // PRO klass berish
-  }
+const proBtns=['/soxta-wifi-parol-joylashuv-aniqlovchi'];
+  proBtns.forEach(href=>{
+    const btn=container.querySelector(`.btn[href="${href}"]`);
+    if(btn) btn.classList.add('pro');
 });
-
 </script>
 </body>
 </html>
