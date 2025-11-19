@@ -1,7 +1,7 @@
 const CACHE_NAME = 'cache-v1';
 const urlsToCache = [
   '/',
-  '/index.html',
+  '/asosiy.html',
 '/soxta-ulanish-sistemasi',
 '/soxta-uyin-bank-kartasi',
 '/soxta-wifi-parol-aniqlovchi',
