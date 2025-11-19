@@ -56,28 +56,6 @@ h1{text-align:center;margin-bottom:40px;text-shadow:0 0 10px rgba(255,255,255,0.
   100% { transform: translateY(0) scale(1); box-shadow:0 4px 6px rgba(0,0,0,0.3); }
 }
 
-/* PRO tugma */
-
-
-/* tag */
-.btn .tag {
-  position: absolute;
-  top: -10px;
-  right: -10px;
-  background: #FF4500;
-  color: #fff;
-  font-size: 13px;
-  font-weight: 500;
-  padding: 2px 10px;
-  border-radius: 6px;
-  animation: smoothMove 1.5s ease-in-out infinite;
-}
-@keyframes smoothMove {
-  0%   { transform: translateY(0); }
-  50%  { transform: translateY(-4px); }
-  100% { transform: translateY(0); }
-}
-
 .top-left-menu-toggle{
   position:fixed;top:15px;left:15px;background:rgba(255,255,255,0.15);
   border:none;border-radius:12px;padding:10px 12px;cursor:pointer;z-index:2000;
@@ -139,7 +117,6 @@ h1{text-align:center;margin-bottom:40px;text-shadow:0 0 10px rgba(255,255,255,0.
 <nav id="dropdown-menu" class="dropdown-menu-small">
   <a href="/index">🏠 Bosh sahifa</a>
   <a href="/disclaimer">Disclaimer</a>
-  <a href="/promokod-kiritish">💳 Promokod kiritish</a>
   <a href="#" id="installAppBtn">📱 Ilovani o‘rnatish</a>
   <a href="#" id="resetChoice">♻️ Tanlovni tiklash</a>
   <a href="https://old.prank-as.site">Oldingi saytga qaytish</a>
@@ -156,10 +133,7 @@ function showMessage(text,time=2500){
   setTimeout(()=>msg.classList.remove('show'),time);
 }
 
-// Service Worker
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').then(()=>console.log('SW running')).catch(err=>console.log(err));});
-}
+
 
 // Menu toggle
 const menuBtn=document.querySelector('.top-left-menu-toggle');
@@ -176,17 +150,51 @@ document.getElementById('resetChoice').addEventListener('click',()=>{
 });
 
 // PWA o‘rnatish
+// ... (Ваши функции showMessage и Service Worker)
+// Service Worker
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').then(()=>console.log('SW running')).catch(err=>console.log(err));});
+}
+
+// PWA o‘rnatish
+const installAppBtn = document.getElementById('installAppBtn');
+installAppBtn.style.display = 'none'; // Скрываем кнопку по умолчанию
+
 let installPrompt;
-window.addEventListener('beforeinstallprompt', e=>{e.preventDefault();installPrompt=e;});
-document.getElementById('installAppBtn').addEventListener('click', async()=>{
-  if(installPrompt){
-    installPrompt.prompt();
-    const {outcome}=await installPrompt.userChoice;
-    if(outcome==='accepted') showMessage("✅ Ilova o‘rnatilmoqda...");
-    else showMessage("❌ O‘rnatish bekor qilindi");
-    installPrompt=null;
-  } else showMessage("Bu brauzer o‘rnatishni qo‘llamaydi 😕");
+window.addEventListener('beforeinstallprompt', e=>{
+    e.preventDefault();
+    installPrompt = e;
+    // Показываем кнопку, как только приложение готово к установке
+    installAppBtn.style.display = 'block'; 
 });
+
+installAppBtn.addEventListener('click', async()=>{
+    if(installPrompt){
+        // Скрываем кнопку, чтобы не нажимали дважды
+        installAppBtn.style.display = 'none'; 
+        
+        installPrompt.prompt();
+        const {outcome}=await installPrompt.userChoice;
+        
+        if(outcome==='accepted'){
+            showMessage("✅ Ilova o‘rnatilmoqda...");
+        } else {
+            showMessage("❌ O‘rnatish bekor qilindi");
+            // Если пользователь отказался, можно снова показать кнопку
+            installAppBtn.style.display = 'block'; 
+        }
+        installPrompt=null;
+    } else {
+        showMessage("Bu brauzer o‘rnatishni qo‘llamaydi 😕");
+    }
+});
+
+window.addEventListener('appinstalled', () => {
+    installAppBtn.style.display = 'none';
+    installPrompt = null;
+    showMessage("🎉 Ilova muvaffaqiyatli o‘rnatildi!");
+});
+
 
 // YANGI tugma avtomatik birinchi qatorga
 const container=document.querySelector('.button-container');
