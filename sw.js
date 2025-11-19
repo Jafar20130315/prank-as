@@ -1,43 +1,36 @@
-const CACHE_NAME = 'cache-v2'; // version yangilandi
+const CACHE_NAME = 'cache-v2';
 const urlsToCache = [
-'/asosiy', // start_url bilan mos
-'/soxta-ulanish-sistemasi',
-'/soxta-uyin-bank-kartasi',
-'/soxta-wifi-parol-aniqlovchi',
-'/soxta-joylashuv-aniqlovchi',
-'/soxta-random-yashash-joyi',
-'/soxta-shaxs-aniqlovchi',
-'/avtoraqan-rasm-generatori',
-'/soxta-parol-aniqlovchi',
-'/soxta-balans-aniqlovchi',
-'/oyin-barabani',
-'/bizneschi-oka',
-'/tekst-ovoz',
-'/ovoz-olchovchi',
-'/icons/icon-192.png',
-'/icons/icon-512.png'
+  '/',
+  '/asosiy',
+  '/soxta-ulanish-sistemasi',
+  '/soxta-uyin-bank-kartasi',
+  '/soxta-wifi-parol-aniqlovchi',
+  '/soxta-joylashuv-aniqlovchi',
+  '/soxta-random-yashash-joyi',
+  '/soxta-shaxs-aniqlovchi',
+  '/avtoraqam-rasm-generatori',
+  '/soxta-parol-aniqlovchi',
+  '/soxta-balans-aniqlovchi',
+  '/oyin-barabani',
+  '/bizneschi-oka',
+  '/tekst-ovoz',
+  '/ovoz-olchovchi',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png'
 ];
 
-self.addEventListener('install', event => {
-event.waitUntil(
-caches.open(CACHE_NAME)
-.then(cache => cache.addAll(urlsToCache))
-);
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache)));
 });
 
-self.addEventListener('activate', event => {
-event.waitUntil(
-caches.keys().then(keys =>
-Promise.all(
-keys.filter(key => key !== CACHE_NAME)
-.map(key => caches.delete(key))
-)
-)
-);
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+    )
+  );
 });
 
-self.addEventListener('fetch', event => {
-event.respondWith(
-caches.match(event.request).then(response => response || fetch(event.request))
-);
-})
+self.addEventListener('fetch', e => {
+  e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
+});
