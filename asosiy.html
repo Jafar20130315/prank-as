@@ -4,9 +4,11 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Prank-as</title>
-  <meta name="description" content="Do'stlaringiz bilan soxta hacker buyumlari bilan hazillashing. Prank-as Prank as Prank_as PrankAs">
+<meta name="description" content="Do'stlaringiz bilan soxta hacker buyumlari bilan hazillashing. Prank-as Prank as Prank_as PrankAs">
 <link rel="icon" type="image/x-icon" href="favicon.png"/>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+<link rel="manifest" href="/manifest.json">
+
 <style>
 @keyframes gradientBG { 
   0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%} 
@@ -133,7 +135,10 @@ function showMessage(text,time=2500){
   setTimeout(()=>msg.classList.remove('show'),time);
 }
 
-
+// Service Worker
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').then(()=>console.log('SW running')).catch(err=>console.log(err));});
+}
 
 // Menu toggle
 const menuBtn=document.querySelector('.top-left-menu-toggle');
@@ -150,51 +155,17 @@ document.getElementById('resetChoice').addEventListener('click',()=>{
 });
 
 // PWA o‘rnatish
-// ... (Ваши функции showMessage и Service Worker)
-// Service Worker
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').then(()=>console.log('SW running')).catch(err=>console.log(err));});
-}
-
-// PWA o‘rnatish
-const installAppBtn = document.getElementById('installAppBtn');
-installAppBtn.style.display = 'none'; // Скрываем кнопку по умолчанию
-
 let installPrompt;
-window.addEventListener('beforeinstallprompt', e=>{
-    e.preventDefault();
-    installPrompt = e;
-    // Показываем кнопку, как только приложение готово к установке
-    installAppBtn.style.display = 'block'; 
+window.addEventListener('beforeinstallprompt', e=>{e.preventDefault();installPrompt=e;});
+document.getElementById('installAppBtn').addEventListener('click', async()=>{
+  if(installPrompt){
+    installPrompt.prompt();
+    const {outcome}=await installPrompt.userChoice;
+    if(outcome==='accepted') showMessage("✅ Ilova o‘rnatilmoqda...");
+    else showMessage("❌ O‘rnatish bekor qilindi");
+    installPrompt=null;
+  } else showMessage("Bu brauzer o‘rnatishni qo‘llamaydi 😕");
 });
-
-installAppBtn.addEventListener('click', async()=>{
-    if(installPrompt){
-        // Скрываем кнопку, чтобы не нажимали дважды
-        installAppBtn.style.display = 'none'; 
-        
-        installPrompt.prompt();
-        const {outcome}=await installPrompt.userChoice;
-        
-        if(outcome==='accepted'){
-            showMessage("✅ Ilova o‘rnatilmoqda...");
-        } else {
-            showMessage("❌ O‘rnatish bekor qilindi");
-            // Если пользователь отказался, можно снова показать кнопку
-            installAppBtn.style.display = 'block'; 
-        }
-        installPrompt=null;
-    } else {
-        showMessage("Bu brauzer o‘rnatishni qo‘llamaydi 😕");
-    }
-});
-
-window.addEventListener('appinstalled', () => {
-    installAppBtn.style.display = 'none';
-    installPrompt = null;
-    showMessage("🎉 Ilova muvaffaqiyatli o‘rnatildi!");
-});
-
 
 // YANGI tugma avtomatik birinchi qatorga
 const container=document.querySelector('.button-container');
