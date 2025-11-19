@@ -158,7 +158,7 @@ function showMessage(text,time=2500){
 
 // Service Worker
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').then(()=>console.log('SW running')).catch(err=>console.log(err));});
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').then(()=>console.log('SW running')).catch(err=>console.log(err));});
 }
 
 // Menu toggle
