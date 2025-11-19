@@ -79,6 +79,27 @@ h1{text-align:center;margin-bottom:40px;text-shadow:0 0 10px rgba(255,255,255,0.
 
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);opacity:0;pointer-events:none;transition:opacity 0.3s ease;z-index:1500;backdrop-filter:blur(3px)}
 .overlay.show{opacity:1;pointer-events:auto}
+  /* PRO tugma */
+
+
+/* tag */
+.btn .tag {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: #FF4500;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 2px 10px;
+  border-radius: 6px;
+  animation: smoothMove 1.5s ease-in-out infinite;
+}
+@keyframes smoothMove {
+  0%   { transform: translateY(0); }
+  50%  { transform: translateY(-4px); }
+  100% { transform: translateY(0); }
+}
 
 /* Top message */
 .top-message {
