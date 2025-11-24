@@ -8,12 +8,14 @@
 <link rel="icon" type="image/x-icon" href="favicon.png"/>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
 <link rel="manifest" href="/manifest.json">
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1867701562878781"
-     crossorigin="anonymous"></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1867701562878781"
+crossorigin="anonymous"></script>
 
-  <style>
+<style>
 @keyframes gradientBG { 
-  0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%} 
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body {
@@ -47,7 +49,6 @@ h1{text-align:center;margin-bottom:40px;text-shadow:0 0 10px rgba(255,255,255,0.
   to { transform: translateY(0); opacity: 1; }
 }
 
-/* YANGI tugma */
 .btn.new {
   background: linear-gradient(45deg, #FFD700, #FFC107);
   color: #111;
@@ -55,9 +56,9 @@ h1{text-align:center;margin-bottom:40px;text-shadow:0 0 10px rgba(255,255,255,0.
   animation: pulse 1.5s infinite alternate, moveBtn 0.5s ease forwards;
 }
 @keyframes pulse {
-  0% { transform: translateY(0) scale(1); box-shadow:0 4px 6px rgba(0,0,0,0.3); }
-  50% { transform: translateY(-5px) scale(1.05); box-shadow:0 6px 12px rgba(0,0,0,0.4); }
-  100% { transform: translateY(0) scale(1); box-shadow:0 4px 6px rgba(0,0,0,0.3); }
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-5px) scale(1.05); }
+  100% { transform: translateY(0) scale(1); }
 }
 
 .top-left-menu-toggle{
@@ -81,10 +82,8 @@ h1{text-align:center;margin-bottom:40px;text-shadow:0 0 10px rgba(255,255,255,0.
 
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);opacity:0;pointer-events:none;transition:opacity 0.3s ease;z-index:1500;backdrop-filter:blur(3px)}
 .overlay.show{opacity:1;pointer-events:auto}
-  /* PRO tugma */
 
-
-/* tag */
+/* TAG */
 .btn .tag {
   position: absolute;
   top: -10px;
@@ -97,6 +96,7 @@ h1{text-align:center;margin-bottom:40px;text-shadow:0 0 10px rgba(255,255,255,0.
   border-radius: 6px;
   animation: smoothMove 1.5s ease-in-out infinite;
 }
+
 @keyframes smoothMove {
   0%   { transform: translateY(0); }
   50%  { transform: translateY(-4px); }
@@ -109,24 +109,39 @@ h1{text-align:center;margin-bottom:40px;text-shadow:0 0 10px rgba(255,255,255,0.
   background: #222;color: #fff;padding: 10px 20px;border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.3);z-index: 99999;opacity: 0;transition: opacity 0.4s ease;font-size: 14px;
 }
-  /* Reklama blokining joylashuvi va stili */
-#my-fixed-ad {
-    width: 300px;                /* Kengligi */
-    height: auto;                /* Balandligi avtomatik */
-    margin: 30px auto;           /* Sahifa bo‘sh joyiga markazlash */
-    border: 2px solid #FFD700;  /* Chegara rangi (o‘zing xohlashga qarab) */
-    background-color: #222;      /* Fon rangi */
-    padding: 10px;               /* Ichki bo‘sh joy */
-    text-align: center;          /* Matn va reklama markazda */
-    box-shadow: 0 0 15px rgba(0,0,0,0.5); /* Soya berish */
-    border-radius: 10px;         /* Burchaklarni yumaloqlash */
-
-  
 
 .top-message.show { opacity: 1; }
+
+/* 🔥 Kompyuterlar uchun O‘NG YUQORI BURCHAK VAQT */
+.desktop-clock {
+  position: fixed;
+  top: 10px;
+  right: 15px;
+  font-size: 18px;
+  background: rgba(0,0,0,0.4);
+  padding: 8px 14px;
+  border-radius: 8px;
+  backdrop-filter: blur(6px);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  z-index: 3000;
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .desktop-clock {
+    display: block;
+  }
+}
+
 </style>
 </head>
 <body>
+
+<!-- Kompyuterlar uchun vaqt -->
+<div class="desktop-clock" id="desktopClock">Loading...</div>
+
 <h1>Prank-as orqali do‘stlaringiz bilan hazillashing!</h1>
 
 <div class="button-container">
@@ -146,7 +161,6 @@ h1{text-align:center;margin-bottom:40px;text-shadow:0 0 10px rgba(255,255,255,0.
   <a class="btn" href="/rangligradient">Rangli sensor</a>
 </div>
 
-<!-- Menyu tugmasi -->
 <button class="top-left-menu-toggle">
   <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
 </button>
@@ -164,7 +178,7 @@ h1{text-align:center;margin-bottom:40px;text-shadow:0 0 10px rgba(255,255,255,0.
 <div class="top-message" id="topMsg"></div>
 
 <script>
-// Fade-in xabar
+// Fade message
 function showMessage(text,time=2500){
   const msg=document.getElementById('topMsg');
   msg.textContent=text;
@@ -174,7 +188,7 @@ function showMessage(text,time=2500){
 
 // Service Worker
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').then(()=>console.log('SW running')).catch(err=>console.log(err));});
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js');});
 }
 
 // Menu toggle
@@ -184,14 +198,14 @@ const overlay=document.querySelector('.overlay');
 menuBtn.addEventListener('click',()=>{menu.classList.toggle('show');overlay.classList.toggle('show');});
 overlay.addEventListener('click',()=>{menu.classList.remove('show');overlay.classList.remove('show');});
 
-// Tanlovni tiklash
+// Reset choice
 document.getElementById('resetChoice').addEventListener('click',()=>{
   localStorage.removeItem('continueChoice');
   localStorage.removeItem('promo');
-  showMessage("Tanlov tiklandi! Endi sahifani yangilang 🔄");
+  showMessage("Tanlov tiklandi! Endi yangilang 🔄");
 });
 
-// PWA o‘rnatish
+// PWA install
 let installPrompt;
 window.addEventListener('beforeinstallprompt', e=>{e.preventDefault();installPrompt=e;});
 document.getElementById('installAppBtn').addEventListener('click', async()=>{
@@ -201,19 +215,17 @@ document.getElementById('installAppBtn').addEventListener('click', async()=>{
     if(outcome==='accepted') showMessage("✅ Ilova o‘rnatilmoqda...");
     else showMessage("❌ O‘rnatish bekor qilindi");
     installPrompt=null;
-  } else showMessage("Bu brauzer o‘rnatishni qo‘llamaydi 😕");
+  } else showMessage("Bu brauzer qo‘llamaydi 😕");
 });
 
-// YANGI tugma avtomatik birinchi qatorga
+// Yangi tugmani tepaga chiqarish
 const container=document.querySelector('.button-container');
 const newBtns=Array.from(container.querySelectorAll('.btn.new'));
 newBtns.forEach(btn=>{
-  // Tag qo'shish
   const tag=document.createElement('span');
   tag.className='tag';
   tag.textContent='YANGI';
   btn.appendChild(tag);
-  // Birinchi o‘ringa
   container.prepend(btn);
 });
 
@@ -221,6 +233,25 @@ newBtns.forEach(btn=>{
 document.querySelectorAll('.button-container a').forEach((btn,i)=>{
   btn.style.animationDelay=`${i*0.15}s`;
 });
+
+// 🔥 O‘NG YUQORI BURCHAK — vaqt (faqat kompyuter)
+function updateClock() {
+  const now = new Date();
+
+  let h = String(now.getHours()).padStart(2, '0');
+  let m = String(now.getMinutes()).padStart(2, '0');
+  let s = String(now.getSeconds()).padStart(2, '0');
+
+  let day = String(now.getDate()).padStart(2, '0');
+  let month = String(now.getMonth()+1).padStart(2, '0');
+  let year = now.getFullYear();
+
+  document.getElementById("desktopClock").textContent =
+    `${h}:${m}:${s} | ${day}:${month}:${year}`;
+}
+
+setInterval(updateClock, 1000);
+updateClock();
 
 </script>
 </body>
