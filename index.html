@@ -109,14 +109,11 @@ h1{text-align:center;margin-bottom:40px;text-shadow:0 0 10px rgba(255,255,255,0.
   background: #222;color: #fff;padding: 10px 20px;border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.3);z-index: 99999;opacity: 0;transition: opacity 0.4s ease;font-size: 14px;
 }
-
 .top-message.show { opacity: 1; }
 
-/* 🔥 Kompyuterlar uchun O‘NG YUQORI BURCHAK VAQT */
+/* Kompyuterlar uchun O‘NG YUQORI BURCHAK VAQT */
 .desktop-clock {
-  position: fixed;
-  top: 10px;
-  right: 15px;
+  position: fixed; top: 10px; right: 15px;
   font-size: 18px;
   background: rgba(0,0,0,0.4);
   padding: 8px 14px;
@@ -128,16 +125,36 @@ h1{text-align:center;margin-bottom:40px;text-shadow:0 0 10px rgba(255,255,255,0.
   z-index: 3000;
   display: none;
 }
-
 @media (min-width: 768px) {
-  .desktop-clock {
-    display: block;
-  }
+  .desktop-clock { display: block; }
 }
 
+/* ❄ Minimal qor */
+.snow {
+  pointer-events: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  overflow: hidden;
+  z-index: 5000;
+}
+.snowflake {
+  position: absolute;
+  top: -10px;
+  color: #fff;
+  opacity: 0.7;
+  font-size: 8px;
+  animation: fall linear infinite;
+}
+@keyframes fall {
+  to { transform: translateY(105vh); }
+}
 </style>
 </head>
 <body>
+
+<!-- ❄ Qor -->
+<div class="snow"></div>
 
 <!-- Kompyuterlar uchun vaqt -->
 <div class="desktop-clock" id="desktopClock">Loading...</div>
@@ -218,7 +235,7 @@ document.getElementById('installAppBtn').addEventListener('click', async()=>{
   } else showMessage("Bu brauzer qo‘llamaydi 😕");
 });
 
-// Yangi tugmani tepaga chiqarish
+// Yangi tugma
 const container=document.querySelector('.button-container');
 const newBtns=Array.from(container.querySelectorAll('.btn.new'));
 newBtns.forEach(btn=>{
@@ -229,30 +246,42 @@ newBtns.forEach(btn=>{
   container.prepend(btn);
 });
 
-// Animatsiya delay
+// Tugmalar animatsiya delay
 document.querySelectorAll('.button-container a').forEach((btn,i)=>{
   btn.style.animationDelay=`${i*0.15}s`;
 });
 
-// 🔥 O‘NG YUQORI BURCHAK — vaqt (faqat kompyuter)
+// Kompyuter soati
 function updateClock() {
   const now = new Date();
-
-  let h = String(now.getHours()).padStart(2, '0');
-  let m = String(now.getMinutes()).padStart(2, '0');
-  let s = String(now.getSeconds()).padStart(2, '0');
-
-  let day = String(now.getDate()).padStart(2, '0');
-  let month = String(now.getMonth()+1).padStart(2, '0');
-  let year = now.getFullYear();
-
   document.getElementById("desktopClock").textContent =
-    `${h}:${m}:${s} | ${day}:${month}:${year}`;
+    `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} | ${String(now.getDate()).padStart(2,'0')}:${String(now.getMonth()+1).padStart(2,'0')}:${now.getFullYear()}`;
 }
-
-setInterval(updateClock, 1000);
+setInterval(updateClock,1000);
 updateClock();
 
+
+// ❄ Minimal qor funksiyasi
+function createSnow() {
+  const container = document.querySelector('.snow');
+
+  for (let i = 0; i < 10; i++) {
+    let flake = document.createElement("div");
+    flake.className = "snowflake";
+    flake.textContent = "❄";
+
+    flake.style.left = Math.random() * 100 + "vw";
+    flake.style.fontSize = (6 + Math.random() * 6) + "px";
+    flake.style.animationDuration = (6 + Math.random() * 8) + "s";
+
+    container.appendChild(flake);
+
+    setTimeout(() => flake.remove(), 15000);
+  }
+}
+
+createSnow();
+setInterval(createSnow, 5000);
 </script>
 </body>
 </html>
