@@ -101,13 +101,6 @@ h1 { text-align:center;margin-bottom:40px; text-shadow:0 2px 6px rgba(0,0,0,0.7)
 .snowflake { position: absolute; top: -10px; color: #fff; opacity: 0.7; font-size: 8px; animation: fall linear infinite; }
 @keyframes fall { to { transform: translateY(105vh); } }
 
-/* ===== Hanging lights ===== */
-.hanging-lights { position: fixed; top: 0; left: 0; width: 100%; height: 70px; display: flex; justify-content: center; gap: 30px; z-index: 7000; pointer-events: none; }
-.hanging-lights .light-wrap { display: flex; flex-direction: column; align-items: center; }
-.hanging-lights .rope { width: 2px; height: 35px; background: #444; opacity: 0.9; }
-.hanging-lights .bulb { width: 16px; height: 16px; margin-top: 3px; border-radius: 50%; animation: rainbow 2.3s infinite linear; box-shadow: 0 0 5px currentColor; opacity: 0.6; }
-@keyframes rainbow { 0% { background: red; color: red; } 15% { background: orange; color: orange; } 30% { background: yellow; color: yellow; } 50% { background: green; color: green; } 70% { background: cyan; color: cyan; } 85% { background: blue; color: blue; } 100% { background: violet; color: violet; } }
-@media (max-width:767px){ .hanging-lights { display:none !important; } }
 </style>
 </head>
 <body>
@@ -115,8 +108,6 @@ h1 { text-align:center;margin-bottom:40px; text-shadow:0 2px 6px rgba(0,0,0,0.7)
 <!-- ❄ Qor -->
 <div class="snow"></div>
 
-<!-- 🌈 Hanging lights -->
-<div class="hanging-lights"></div>
 
 <!-- Overlay layer -->
 <div class="overlay"></div>
@@ -240,22 +231,7 @@ function createSnow() {
 createSnow();
 setInterval(createSnow, 5000);
 
-// 🌈 Osilgan LED Lampalarni generatsiya qilamiz (faqat desktop)
-if(window.innerWidth>=768){
-    const hang = document.querySelector('.hanging-lights');
-    for (let i = 0; i < 25; i++) { 
-        let wrap = document.createElement('div');
-        wrap.className = "light-wrap";
-        let rope = document.createElement('div');
-        rope.className = "rope";
-        let bulb = document.createElement('div');
-        bulb.className = "bulb";
-        bulb.style.animationDelay = (i * 0.12) + "s";
-        wrap.appendChild(rope);
-        wrap.appendChild(bulb);
-        hang.appendChild(wrap);
-    }
-}
+
 </script>
 </body>
 </html>
