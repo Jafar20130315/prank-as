@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI Kamera</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- MediaPipe Hands -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    
+    <style>
+        body {
+            background-color: #000;
+            overflow: hidden;
+            touch-action: none;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        #camera-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #input_video {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform-origin: center;
+            /* No transition in CSS for zoom to make it instant via JS loop */
+        }
+
+        #output_canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .interactive { pointer-events: auto; }
+
+        /* Range Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none; 
+            background: transparent; 
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #00ffcc;
+            box-shadow: 0 0 10px #00ffcc;
+            margin-top: -8px;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+        }
+
+        /* Countdown Overlay */
+        #countdown-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 150px;
+            font-weight: 900;
+            color: white;
+            text-shadow: 0 0 30px rgba(0,0,0,0.5);
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 20;
+        }
+
+        /* Loader */
+        #loading {
+            position: fixed;
+            inset: 0;
+            background: black;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            border-top-color: #00ffcc;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Flash */
+        .flash {
+            position: fixed; inset: 0; background: white; z-index: 50;
+            opacity: 0; pointer-events: none; transition: opacity 0.1s;
+        }
+        .do-flash { opacity: 1; }
+    </style>
+</head>
+<body class="text-white">
+
+    <!-- Loading -->
+    <div id="loading">
+        <div class="spinner mb-4"></div>
+        <div class="text-gray-400 font-mono text-sm">AI yuklanmoqda, bunga 20 soniyadan ko'p vaqt ketadi.</div>
+    </div>
+
+    <!-- Flash -->
+    <div id="flash-overlay" class="flash"></div>
+
+    <!-- Countdown -->
+    <div id="countdown-overlay">3</div>
+
+    <!-- Camera & Canvas -->
+    <div id="camera-container">
+        <video id="input_video" playsinline autoplay muted></video>
+        <canvas id="output_canvas"></canvas>
+        
+        <!-- UI -->
+        <div id="ui-layer" class="p-6">
+            <!-- Top Info -->
+            <div class="flex justify-between items-start">
+                <div class="bg-black/50 backdrop-blur-md p-3 rounded-xl border border-white/10">
+                    <div id="status-badge" class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse" id="status-dot"></div>
+                        <span id="status-text" class="text-xs font-bold tracking-wider text-gray-300">ПОИСК РУКИ</span>
+                    </div>
+                    <div class="mt-1 text-[10px] text-gray-400 font-mono">
+                        QO'L BELGISI: <span id="gesture-name" class="text-white">YO'Q</span>
+                    </div>
+                </div>
+                
+                <div class="bg-black/50 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 text-center">
+                    <div class="text-[10px] text-gray-400 uppercase">Zoom</div>
+                    <div id="zoom-value" class="text-2xl font-mono font-bold text-cyan-400">1.0x</div>
+                </div>
+            </div>
+
+            <!-- Bottom Controls -->
+            <div class="flex flex-col gap-6 bg-gradient-to-t from-black/90 to-transparent pb-6 -mx-6 px-6 pt-10">
+                <!-- Slider -->
+                <div class="flex items-center gap-4 interactive">
+                    <span class="text-xs font-mono text-gray-400">1x</span>
+                    <input type="range" id="zoom-slider" min="1" max="10" step="0.1" value="1" class="w-full">
+                    <span class="text-xs font-mono text-gray-400">10x</span>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex justify-around items-center">
+                    <button id="btn-switch" class="interactive p-4 rounded-full bg-gray-800/80 active:scale-95 transition">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    </button>
+
+                    <button id="btn-shutter" class="interactive w-20 h-20 rounded-full border-4 border-white flex items-center justify-center bg-white/10 active:scale-90 transition duration-100">
+                        <div class="w-16 h-16 bg-white rounded-full"></div>
+                    </button>
+
+                    <button id="btn-toggle-ui" class="interactive p-4 rounded-full bg-gray-800/80 active:scale-95 transition text-cyan-400">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    </button>
+                </div>
+                <div class="text-center text-[10px] text-gray-500 font-mono">
+                    ✌️ IKKI BARMOQ = SELFI &nbsp;|&nbsp; 🖐 KAFT (QISISH/OCHISH) = ZOOM
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Capture Canvas -->
+    <canvas id="capture_canvas" class="hidden"></canvas>
+
+    <script>
+        // --- Config ---
+        const CONFIG = {
+            maxZoom: 10,
+            smoothing: 0.08, // Very smooth
+            fistThreshold: 0.4, // Ratio for fist (approx)
+            palmThreshold: 1.4, // Ratio for open palm (approx)
+            selfieHoldTime: 20, // Frames to hold pose before counting down (stability)
+        };
+
+        // --- State ---
+        let state = {
+            zoom: 1,
+            targetZoom: 1,
+            isFrontCam: true, // Default to selfie mode usually for gesture apps
+            isLoaded: false,
+            gesture: 'NONE',
+            selfieTimer: null,
+            selfieFrameCount: 0,
+            showSkeleton: true
+        };
+
+        // --- Elements ---
+        const video = document.getElementById('input_video');
+        const canvas = document.getElementById('output_canvas');
+        const ctx = canvas.getContext('2d');
+        const slider = document.getElementById('zoom-slider');
+        const zoomText = document.getElementById('zoom-value');
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
+        const gestureName = document.getElementById('gesture-name');
+        const countdownEl = document.getElementById('countdown-overlay');
+
+        // --- MediaPipe Setup ---
+        const hands = new Hands({locateFile: (file) => {
+            return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+        }});
+
+        hands.setOptions({
+            maxNumHands: 1,
+            modelComplexity: 1,
+            minDetectionConfidence: 0.6,
+            minTrackingConfidence: 0.6
+        });
+
+        hands.onResults(onResults);
+
+        // --- Main Logic ---
+        function onResults(results) {
+            // Remove loader on first frame
+            if (!state.isLoaded) {
+                state.isLoaded = true;
+                document.getElementById('loading').style.opacity = 0;
+                setTimeout(() => document.getElementById('loading').style.display = 'none', 500);
+            }
+
+            // Prepare Canvas
+            ctx.save();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Mirror canvas if front camera
+            if (state.isFrontCam) {
+                ctx.translate(canvas.width, 0);
+                ctx.scale(-1, 1);
+            }
+
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                const landmarks = results.multiHandLandmarks[0];
+                
+                // 1. Draw Skeleton (Cyberpunk Style)
+                if (state.showSkeleton) {
+                    drawStyledSkeleton(ctx, landmarks);
+                }
+
+                // 2. Process Gestures
+                processGestures(landmarks);
+                
+                // UI Update
+                statusDot.classList.remove('bg-red-500');
+                statusDot.classList.add('bg-green-500');
+                statusText.innerText = "KUZATILMOQDA";
+                statusText.classList.add('text-green-400');
+            } else {
+                // Reset if hand lost
+                state.gesture = 'NONE';
+                state.selfieFrameCount = 0;
+                stopCountdown();
+                
+                statusDot.classList.add('bg-red-500');
+                statusDot.classList.remove('bg-green-500');
+                statusText.innerText = "KAFT QIDIRILMOQDA";
+                statusText.classList.remove('text-green-400');
+            }
+
+            ctx.restore();
+        }
+
+        function drawStyledSkeleton(ctx, landmarks) {
+            // Draw Connectors (Lines)
+            drawConnectors(ctx, landmarks, HAND_CONNECTIONS, {color: '#00ffcc', lineWidth: 2});
+            
+            // Draw Landmarks (Dots)
+            drawLandmarks(ctx, landmarks, {
+                color: '#ffffff', 
+                lineWidth: 0, 
+                radius: (data) => {
+                    // Make fingertips larger
+                    return [4,8,12,16,20].includes(data.index) ? 4 : 2; 
+                }
+            });
+            
+            // Add Glow
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = "#00ffcc";
+        }
+
+        function processGestures(lm) {
+            // --- Metrics ---
+            
+            // 1. Check for Victory Sign (Selfie)
+            // Index & Middle UP, Ring & Pinky DOWN
+            const isIndexUp = lm[8].y < lm[6].y;
+            const isMiddleUp = lm[12].y < lm[10].y;
+            const isRingDown = lm[16].y > lm[14].y;
+            const isPinkyDown = lm[20].y > lm[18].y;
+
+            const isVictory = isIndexUp && isMiddleUp && isRingDown && isPinkyDown;
+
+            if (isVictory) {
+                state.gesture = 'VICTORY';
+                gestureName.innerText = "SELFI (V)";
+                gestureName.className = "text-purple-400 font-bold";
+                
+                state.selfieFrameCount++;
+                if (state.selfieFrameCount > 10 && !state.selfieTimer) {
+                    startCountdown();
+                }
+                return; // Prioritize Selfie, skip zoom logic
+            } else {
+                state.selfieFrameCount = 0;
+                if (!state.selfieTimer) { 
+                    // Only clear gesture text if we aren't currently counting down
+                    // (Optional: allows zoom while counting down? No, better lock it)
+                }
+            }
+
+            // If we are counting down, don't change zoom
+            if (state.selfieTimer) return;
+
+            // 2. Analog Zoom Logic (Hand Opening)
+            
+            // We need a normalized metric. 
+            // Distance between Wrist(0) and MiddleMCP(9) is "Palm Height" (Reference).
+            // Distance between ThumbTip(4) and PinkyTip(20) is "Spread".
+            
+            const palmSize = distance(lm[0], lm[9]);
+            const spread = distance(lm[4], lm[20]);
+            
+            const ratio = spread / palmSize; // This is scale-invariant (works at any distance)
+
+            // Clamp Ratio to our defined thresholds
+            let cleanRatio = Math.max(CONFIG.fistThreshold, Math.min(ratio, CONFIG.palmThreshold));
+            
+            // Map Ratio to Zoom (1x to 10x)
+            // Formula: (cleanRatio - min) / (max - min) -> 0 to 1
+            const percentage = (cleanRatio - CONFIG.fistThreshold) / (CONFIG.palmThreshold - CONFIG.fistThreshold);
+            
+            const newTarget = 1 + (percentage * (CONFIG.maxZoom - 1));
+            
+            state.targetZoom = newTarget;
+            state.gesture = 'ZOOM';
+            gestureName.innerText = "ZOOM'NI BOSHQARISH";
+            gestureName.className = "text-cyan-400 font-bold";
+        }
+
+        // --- Helper Math ---
+        function distance(p1, p2) {
+            return Math.hypot(p1.x - p2.x, p1.y - p2.y);
+        }
+
+        // --- Selfie Logic ---
+        let countdownValue = 3;
+        function startCountdown() {
+            if (state.selfieTimer) return;
+            
+            countdownValue = 3;
+            countdownEl.innerText = countdownValue;
+            countdownEl.style.opacity = 1;
+            
+            state.selfieTimer = setInterval(() => {
+                countdownValue--;
+                if (countdownValue > 0) {
+                    countdownEl.innerText = countdownValue;
+                } else {
+                    stopCountdown();
+                    takePhoto();
+                }
+            }, 1000);
+        }
+
+        function stopCountdown() {
+            clearInterval(state.selfieTimer);
+            state.selfieTimer = null;
+            countdownEl.style.opacity = 0;
+        }
+
+        function takePhoto() {
+            const flash = document.getElementById('flash-overlay');
+            flash.classList.add('do-flash');
+            
+            // Capture logic
+            const captureCvs = document.getElementById('capture_canvas');
+            const captureCtx = captureCvs.getContext('2d');
+            
+            const vW = video.videoWidth;
+            const vH = video.videoHeight;
+            
+            captureCvs.width = vW;
+            captureCvs.height = vH;
+            
+            // Calculate Crop for Digital Zoom
+            const cropW = vW / state.zoom;
+            const cropH = vH / state.zoom;
+            const x = (vW - cropW) / 2;
+            const y = (vH - cropH) / 2;
+
+            captureCtx.save();
+            if (state.isFrontCam) {
+                captureCtx.scale(-1, 1);
+                captureCtx.drawImage(video, x, y, cropW, cropH, -vW, 0, vW, vH);
+            } else {
+                captureCtx.drawImage(video, x, y, cropW, cropH, 0, 0, vW, vH);
+            }
+            captureCtx.restore();
+
+            // Download
+            const link = document.createElement('a');
+            link.download = `AI_Cam_${Date.now()}.jpg`;
+            link.href = captureCvs.toDataURL('image/jpeg', 0.9);
+            link.click();
+
+            setTimeout(() => flash.classList.remove('do-flash'), 200);
+        }
+
+
+        // --- Animation Loop ---
+        function animate() {
+            // Smooth Zoom Lerp
+            if (Math.abs(state.targetZoom - state.zoom) > 0.01) {
+                state.zoom += (state.targetZoom - state.zoom) * CONFIG.smoothing;
+                applyZoom(state.zoom);
+                slider.value = state.zoom;
+            }
+            requestAnimationFrame(animate);
+        }
+
+        function applyZoom(val) {
+            zoomText.innerText = val.toFixed(1) + "x";
+            const scale = val;
+            const mirror = state.isFrontCam ? "scaleX(-1)" : "";
+            video.style.transform = `${mirror} scale(${scale})`;
+        }
+
+
+        // --- Camera System ---
+        async function startCamera() {
+            const constraints = {
+                video: {
+                    facingMode: state.isFrontCam ? 'user' : 'environment',
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                }
+            };
+
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
+            video.srcObject = stream;
+
+            const camera = new Camera(video, {
+                onFrame: async () => {
+                    await hands.send({image: video});
+                },
+                width: 1280,
+                height: 720
+            });
+            camera.start();
+        }
+
+        // --- Inputs ---
+        slider.addEventListener('input', (e) => {
+            state.targetZoom = parseFloat(e.target.value);
+            // Manual override temporarily allows jitter, but AI will fight back if hand visible
+            // Ideally pause AI zoom if touching slider, but keeping simple for now.
+        });
+
+        document.getElementById('btn-switch').addEventListener('click', () => {
+            state.isFrontCam = !state.isFrontCam;
+            startCamera();
+        });
+
+        document.getElementById('btn-shutter').addEventListener('click', takePhoto);
+        
+        document.getElementById('btn-toggle-ui').addEventListener('click', () => {
+            state.showSkeleton = !state.showSkeleton;
+        });
+
+        // Resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Init
+        animate();
+        startCamera();
+
+    </script>
+</body>
+</html>
