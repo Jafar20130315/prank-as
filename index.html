@@ -252,7 +252,10 @@ function showMessage(text,time=2500){
   setTimeout(()=>msg.classList.remove('show'),time);
 }
 
-
+// Service Worker
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js');});
+}
 
 // Menu toggle (click + touchstart)
 const menuBtn=document.querySelector('.top-left-menu-toggle');
@@ -302,17 +305,23 @@ function updateClock() {
 }
 setInterval(updateClock,1000);
 updateClock();
+// Yangi tugmalarni tepaga chiqarish
+const container = document.querySelector('.button-container');
+const newBtns = Array.from(container.querySelectorAll('.btn.new'));
 
-// Yangi tugmani tepaga chiqarish
-const container=document.querySelector('.button-container');
-const newBtns=Array.from(container.querySelectorAll('.btn.new'));
-newBtns.forEach(btn=>{
-  const tag=document.createElement('span');
-  tag.className='tag';
-  tag.textContent='YANGI';
+newBtns.forEach(btn => {
+  const tag = document.createElement('span');
+  tag.className = 'tag';
+  tag.textContent = 'YANGI';
   btn.appendChild(tag);
   container.prepend(btn);
 });
+
+// 🔁 Animatsiya delay'ni QAYTA hisoblash
+Array.from(container.children).forEach((btn, i) => {
+  btn.style.animationDelay = `${i * 0.15}s`;
+});
+
 
 // ❄ Minimal qor funksiyasi
 function createSnow() {
