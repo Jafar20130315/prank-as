@@ -252,10 +252,7 @@ function showMessage(text,time=2500){
   setTimeout(()=>msg.classList.remove('show'),time);
 }
 
-// Service Worker
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js');});
-}
+
 
 // Menu toggle (click + touchstart)
 const menuBtn=document.querySelector('.top-left-menu-toggle');
