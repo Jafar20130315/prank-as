@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Prank-as</title>
-<meta name="description" content="O'zbekistondagi prank qilish uchun mo'ljallangan birinchi sayt.Do'stlaringiz bilan soxta hacker buyumlari bilan hazillashing! Prank-as">
+<meta name="description" content="Prank-as — ko‘ngilochar va ta’limiy onlayn platforma. Internetdagi prank va tajriba elementlari qanday ishlashini tushuntirish uchun yaratilgan loyiha.">
 <link rel="icon" type="image/x-icon" href="favicon.png"/>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
 <link rel="manifest" href="/manifest.json">
@@ -101,10 +101,21 @@ h1 { text-align:center;margin-bottom:40px; text-shadow:0 2px 6px rgba(0,0,0,0.7)
 }
 @media (min-width: 768px) { .desktop-clock { display: block; } }
 
+
 /* ===== Minimal qor ===== */
 .snow { pointer-events: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: 5000; }
 .snowflake { position: absolute; top: -10px; color: #fff; opacity: 0.7; font-size: 8px; animation: fall linear infinite; }
 @keyframes fall { to { transform: translateY(105vh); } }
+
+  .subtitle {
+  font-size: 16px;      /* kichikroq matn */
+  color: #666;          /* yumshoq rang */
+  max-width: 700px;
+  margin: 12px auto 30px;
+  line-height: 1.6;
+  text-align: center;
+}
+
 
 </style>
 </head>
@@ -118,9 +129,16 @@ h1 { text-align:center;margin-bottom:40px; text-shadow:0 2px 6px rgba(0,0,0,0.7)
 <div class="overlay"></div>
 
 <!-- Kompyuterlar uchun vaqt -->
-<div class="desktop-clock" id="desktopClock">Loading...</div>
+<div class="desktop-clock" id="desktopClock">Hozir</div>
 
 <h1>Prank-as orqali do‘stlaringiz bilan hazillashing!</h1>
+  
+  <p class="subtitle">
+Prank-as — tajriba va ko‘ngilochar maqsadlarda
+yaratilgan onlayn platforma.
+</p>
+
+
 
 <div class="button-container">
   <a class="btn" href="/soxta-ulanish-sistemasi">Soxta ulanish sistemasi</a>
@@ -140,6 +158,11 @@ h1 { text-align:center;margin-bottom:40px; text-shadow:0 2px 6px rgba(0,0,0,0.7)
   <a class="btn new" href="/3d-qol-boshqaruvi">3D Shakl boshqaruvi</a>
   <a class="btn new" href="/ai-kamera">Aqlli kamera</a>
 </div>
+
+
+<p class="subtitle">
+Vaqti-vaqti bilan yangilanib turadigan faktlar:</p>
+
   
 <section style="max-width:900px;margin:50px auto;background:rgba(0,0,0,0.4);padding:25px;border-radius:12px;backdrop-filter:blur(8px);box-shadow:0 8px 25px rgba(0,0,0,0.4);">
   <h2 style="margin-bottom:20px;font-size:28px;font-weight:700;text-align:center;">
