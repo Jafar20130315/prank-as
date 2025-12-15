@@ -1,27 +1,157 @@
-<script>
-        // 1. Инициализация
-        // ВАЖНО: Мы используем имя переменной 'supabaseClient', а не просто 'supabase'
-        const supabaseClient = supabase.createClient(
-            'https://gefaqrfjzwemwuxuoadp.supabase.co', // Проверь, правильный ли это URL
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg' // СЮДА ОБЯЗАТЕЛЬНО ВСТАВЬ СВОЙ НАСТОЯЩИЙ KEY
-        )
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <title>Prank-as — Google bilan kirish</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        const msgContainer = document.getElementById('msg-container')
-        const msgText = document.getElementById('msg')
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
-        function showMessage(text, isError=false) {
-            msgText.textContent = text
-            msgText.style.color = isError ? '#ef4444' : '#22c55e' // Цвета Tailwind (red-500 / green-500)
+    <!-- Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            overflow: hidden;
         }
 
-        document.getElementById('google-login').onclick = async () => {
-            showMessage("Google login oynasi ochilmoqda...", false)
-            
-            // 2. Обращаемся к нашей переименованной переменной
-            const { error } = await supabaseClient.auth.signInWithOAuth({
-                provider: 'google'
-            })
-            
-            if(error) showMessage(error.message, true)
+        .glass-card {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+            padding: 2rem;
+            border-radius: 1.5rem;
         }
+
+        .fade-in-up {
+            animation: fadeInUp 0.8s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center h-screen relative">
+
+    <div class="glass-card fade-in-up w-full max-w-sm text-center">
+        <h2 class="text-3xl font-bold text-white mb-2">Prank-as</h2>
+        <p class="text-slate-400 mb-6">Davom etish uchun Google bilan tizimga kiring</p>
+
+        <button id="google-login" class="w-full py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white font-semibold transition duration-200">
+            <span id="button-text">Google bilan kirish</span>
+        </button>
+
+        <div id="msg-container" class="mt-4 text-sm text-center min-h-[20px]">
+            <p id="msg" class="text-slate-300"></p>
+        </div>
+    </div>
+
+    <!-- Firebase SDK (Standard for this environment) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // VAZIYAT UCHUN GLOBAL O'ZGARUVCHILARNI OLISH
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app, db, auth;
+
+        const msgText = document.getElementById('msg');
+        const loginButton = document.getElementById('google-login');
+        const buttonText = document.getElementById('button-text');
+        
+        function showMessage(text, isError = false) {
+            msgText.textContent = text;
+            msgText.className = isError ? 'text-red-400' : 'text-green-400';
+            console.log(isError ? `XATO: ${text}` : `Xabar: ${text}`);
+        }
+
+        async function initFirebase() {
+            try {
+                if (Object.keys(firebaseConfig).length === 0) {
+                    showMessage("Firebase sozlamalari yuklanmadi. Iltimos, server tomonidan konfiguratsiya qiling.", true);
+                    return null;
+                }
+
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                setLogLevel('debug'); // Debug loglarni yoqish
+
+                // Tizimga kirish (anonim yoki maxsus token orqali)
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                    showMessage(`Tizimga muvaffaqiyatli kirildi! User ID: ${auth.currentUser.uid.substring(0, 8)}...`, false);
+                } else {
+                    await signInAnonymously(auth);
+                    showMessage(`Anonim tizimga muvaffaqiyatli kirildi.`, false);
+                }
+                
+                return auth;
+
+            } catch (error) {
+                showMessage(`Firebase init xatosi: ${error.message}`, true);
+                return null;
+            }
+        }
+        
+        // Google bilan kirish funksiyasi (to'liq ishlaydigan)
+        async function handleGoogleLogin() {
+            if (!auth) {
+                showMessage("Firebase avtorizatsiyasi yuklanmadi.", true);
+                return;
+            }
+            
+            buttonText.textContent = "Yuklanmoqda...";
+            loginButton.disabled = true;
+
+            try {
+                const provider = new GoogleAuthProvider();
+                
+                // Pop-up orqali kirish
+                const result = await signInWithPopup(auth, provider);
+                // Bu joyda siz foydalanuvchi ma'lumotlarini (result.user) o'zgartirishingiz mumkin
+
+                showMessage(`Google orqali muvaffaqiyatli kirildi! Salom, ${result.user.displayName || result.user.email}!`, false);
+                
+            } catch (error) {
+                // Xato kodlarini aniqlash
+                let errorMessage = error.message;
+                if (error.code === 'auth/popup-closed-by-user') {
+                    errorMessage = "Kirish oynasi yopildi. Iltimos, yana urinib ko'ring.";
+                } else if (error.code === 'auth/cancelled-popup-request') {
+                    errorMessage = "Oyna allaqachon ochilgan. Iltimos, uni yopib, yana urinib ko'ring.";
+                }
+
+                showMessage(`Google bilan kirishda xato yuz berdi: ${errorMessage}`, true);
+                
+            } finally {
+                buttonText.textContent = "Google bilan kirish";
+                loginButton.disabled = false;
+            }
+        }
+
+        // 1. Firebase yuklangandan so'ng, tizimga kirishni boshlash
+        initFirebase().then(initializedAuth => {
+            if (initializedAuth) {
+                // 2. Tugmaga hodisani biriktirish
+                loginButton.onclick = handleGoogleLogin;
+            } else {
+                loginButton.disabled = true;
+                loginButton.textContent = "Xato: Avtorizatsiya yuklanmadi";
+            }
+        });
     </script>
+</body>
+</html>
