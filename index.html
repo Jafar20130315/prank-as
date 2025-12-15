@@ -153,12 +153,30 @@ h1 { text-align:center;margin-bottom:40px; text-shadow:0 2px 6px rgba(0,0,0,0.7)
   line-height: 1.6;
   text-align: center;
 }
-  .top-bar {
+ .top-bar {
   position: fixed;
-  top: 0;
-  right: 0;
-  padding: 16px;
+  top: 10px;
+  right: 15px;
   z-index: 999;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* Icon va soat orasidagi masofa */
+}
+
+.desktop-clock {
+  font-size: 16px;
+  background: rgba(0,0,0,0.4);
+  padding: 6px 12px;
+  border-radius: 8px;
+  backdrop-filter: blur(6px);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
 }
 
 .user-icon {
@@ -182,15 +200,15 @@ h1 { text-align:center;margin-bottom:40px; text-shadow:0 2px 6px rgba(0,0,0,0.7)
 }
 
 
-
 </style>
 </head>
 <body>
-  <
-    header class="top-bar">
-  <a href="/auth.html" class="user-icon" title="Login / Sign up">
-    👤
-  </a>
+
+  <header class="top-bar">
+  <div class="top-bar-right">
+    <div id="desktopClock" class="desktop-clock">Hozir</div>
+    <a href="/auth.html" class="user-icon" title="Kirish / Ro'yxatdan o'tish">👤</a>
+  </div>
 </header>
 
 
@@ -379,6 +397,10 @@ function updateClock() {
   document.getElementById("desktopClock").textContent =
     `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} | ${String(now.getDate()).padStart(2,'0')}:${String(now.getMonth()+1).padStart(2,'0')}:${now.getFullYear()}`;
 }
+setInterval(updateClock,1000);
+updateClock();
+
+
 setInterval(updateClock,1000);
 updateClock();
 // Yangi tugmalarni tepaga chiqarish
