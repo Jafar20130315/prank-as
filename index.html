@@ -153,11 +153,46 @@ h1 { text-align:center;margin-bottom:40px; text-shadow:0 2px 6px rgba(0,0,0,0.7)
   line-height: 1.6;
   text-align: center;
 }
+  .top-bar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  padding: 16px;
+  z-index: 999;
+}
+
+.user-icon {
+  font-size: 26px;
+  text-decoration: none;
+  background: #111;
+  color: #fff;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  box-shadow: 0 4px 15px rgba(0,0,0,.3);
+  transition: 0.3s;
+}
+
+.user-icon:hover {
+  transform: scale(1.1);
+  background: #2563eb;
+}
+
 
 
 </style>
 </head>
 <body>
+  <
+    header class="top-bar">
+  <a href="/auth.html" class="user-icon" title="Login / Sign up">
+    👤
+  </a>
+</header>
+
 
 <!-- ❄ Qor -->
 <div class="snow"></div>
