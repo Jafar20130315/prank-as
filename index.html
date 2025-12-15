@@ -123,18 +123,33 @@ h1 { text-align:center;margin-bottom:40px; text-shadow:0 2px 6px rgba(0,0,0,0.7)
 }
 .top-message.show { opacity: 1; }
 
-/* ===== Desktop clock ===== */
+/* ===== Top Bar & Clock Layout Fix ===== */
+ .top-bar {
+  position: fixed;
+  top: 10px;
+  right: 15px;
+  z-index: 9999; /* Z-indexni oshirdik */
+  display: flex;
+  justify-content: flex-end;
+}
+
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* Icon va soat orasidagi masofa */
+}
+
+/* Soat stili o'zgartirildi: fixed olib tashlandi */
 .desktop-clock {
-  position: fixed; top: 10px; right: 15px;
-  font-size: 18px;
+  font-size: 16px;
   background: rgba(0,0,0,0.4);
-  padding: 8px 14px;
+  padding: 6px 12px;
   border-radius: 8px;
   backdrop-filter: blur(6px);
   color: #fff;
   font-weight: 600;
   box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-  z-index: 3000;
+  /* position: fixed; <-- BU OLIB TASHLANDI */
   display: none;
 }
 @media (min-width: 768px) { .desktop-clock { display: block; } }
@@ -153,31 +168,7 @@ h1 { text-align:center;margin-bottom:40px; text-shadow:0 2px 6px rgba(0,0,0,0.7)
   line-height: 1.6;
   text-align: center;
 }
- .top-bar {
-  position: fixed;
-  top: 10px;
-  right: 15px;
-  z-index: 999;
-  display: flex;
-  justify-content: flex-end;
-}
 
-.top-bar-right {
-  display: flex;
-  align-items: center;
-  gap: 12px; /* Icon va soat orasidagi masofa */
-}
-
-.desktop-clock {
-  font-size: 16px;
-  background: rgba(0,0,0,0.4);
-  padding: 6px 12px;
-  border-radius: 8px;
-  backdrop-filter: blur(6px);
-  color: #fff;
-  font-weight: 600;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-}
 
 .user-icon {
   font-size: 26px;
@@ -206,7 +197,9 @@ h1 { text-align:center;margin-bottom:40px; text-shadow:0 2px 6px rgba(0,0,0,0.7)
 
   <header class="top-bar">
   <div class="top-bar-right">
-    <div id="desktopClock" class="desktop-clock">Hozir</div>
+    <!-- Soatni shu yerga ko'chirdik (Top bar ichiga) -->
+    <div class="desktop-clock" id="desktopClock">Hozir</div>
+    <!-- User icon -->
     <a href="/auth.html" class="user-icon" title="Kirish / Ro'yxatdan o'tish">👤</a>
   </div>
 </header>
@@ -219,8 +212,7 @@ h1 { text-align:center;margin-bottom:40px; text-shadow:0 2px 6px rgba(0,0,0,0.7)
 <!-- Overlay layer -->
 <div class="overlay"></div>
 
-<!-- Kompyuterlar uchun vaqt -->
-<div class="desktop-clock" id="desktopClock">Hozir</div>
+<!-- Eski soat joylashuvi o'chirildi, chunki u tepaga ko'chirildi -->
 
 <h1>Prank-as orqali do‘stlaringiz bilan hazillashing!</h1>
   
