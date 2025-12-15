@@ -13,15 +13,14 @@
   <link rel="stylesheet" href="style.css?v=2">
 <script src="app.js?v=3"></script>
   
-  <script type="application/ld+json">
+<script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "Organization",
   "name": "Prank-as",
   "url": "https://prank-as.site",
   "logo": "https://prank-as.site/icons/icon-512.png",
-  "description": Prank-as — tajriba va ko‘ngilochar maqsadlarda yaratilgan onlayn platforma."",
-
+  "description": "Prank-as — tajriba va ko‘ngilochar maqsadlarda yaratilgan onlayn platforma.",
   "contactPoint": {
     "@type": "ContactPoint",
     "email": "admin@prank-as.site",
@@ -29,6 +28,27 @@
   }
 }
 </script>
+  
+  <script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    const reg = await navigator.serviceWorker.register('/sw.js');
+
+    // Yangi SW topilsa
+    reg.addEventListener('updatefound', () => {
+      const newWorker = reg.installing;
+      newWorker.addEventListener('statechange', () => {
+        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+          showMessage("🔄 Sayt yangilandi! Qayta yuklanmoqda...");
+          setTimeout(() => location.reload(), 1500);
+        }
+      });
+    });
+  });
+}
+</script>
+
+
 
 
 
