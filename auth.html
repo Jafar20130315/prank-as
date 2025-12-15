@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Prank-as — Google bilan kirish</title>
-    <link rel="icon" type="image/x icon" img src="favicon.png"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Tailwind CSS -->
@@ -63,15 +62,17 @@
 
         // VAZIYAT UCHUN MA'LUMOTLARINGIZNI KIRITING (ВВЕДИТЕ ВАШИ ДАННЫЕ)
         const SUPABASE_URL = 'https://GEFAQRFJZWEMWUXUOADP.supabase.co'; // Supabase URL
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'; // Supabase anon key - ОБЯЗАТЕЛЬНО ЗАМЕНИТЕ!
+        // ВСТАВЛЕН ВАШ ANON KEY
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'; // Supabase anon key
         
         // Ismni o'zgartirdik: global 'supabase' kutubxonasini ishlatamiz
         // va yaratilgan klientni 'supabaseClient' deb nomlaymiz, shunda
         // 'Cannot access before initialization' xatosi bo'lmaydi.
-        const supabaseClient = supabase.createClient(https://GEFAQRFJZWEMWUXUOADP.supabase.co, eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg);
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         const loginButton = document.getElementById('google-login');
         const msgText = document.getElementById('msg');
+        const originalButtonText = loginButton.textContent;
 
         function showMessage(text, isError = false) {
             msgText.textContent = text;
@@ -92,30 +93,38 @@
         }
         
         document.getElementById('google-login').onclick = async () => {
-            if (SUPABASE_ANON_KEY === 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg') {
-                showMessage("Xato: Iltimos, Supabase anon kalitingizni kiriting!", true);
-                return;
-            }
-
             showMessage("Google login oynasi ochilmoqda...", false);
             
             loginButton.disabled = true;
+            loginButton.textContent = "Yuklanmoqda..."; // Добавляем индикацию загрузки
 
-            const { error } = await supabaseClient.auth.signInWithOAuth({
-                provider: 'google',
-                // Supabase sozlamalaridagi URL o'chirilishi mumkin bo'lgan joy
-                // masalan: options: { redirectTo: window.location.origin } 
-            });
+            try {
+                const { error } = await supabaseClient.auth.signInWithOAuth({
+                    provider: 'google',
+                    // ВАЖНО: При использовании signInWithOAuth, если не указать redirectTo,
+                    // Supabase по умолчанию будет пытаться редиректнуть на текущий URL, 
+                    // что требует его добавления в список Authorized Redirect URLs в Supabase.
+                    // Если вы хотите редирект на конкретную страницу:
+                    // options: { redirectTo: 'ВАШ_URL' }
+                });
 
-            if (error) {
-                showMessage(`Kirishda xato: ${error.message}`, true);
-            } else {
-                // Agar muvaffaqiyatli bo'lsa, foydalanuvchi Google oynasiga yo'naltiriladi
-                // Bu joyda xabarni o'zgartirish kerak emas
+                if (error) {
+                    showMessage(`Kirishda xato yuz berdi: ${error.message}. Iltimos, brauzeringizdagi pop-up blokirovkani tekshiring.`, true);
+                    console.error("Supabase Auth Error:", error);
+                } else {
+                    // Если ошибки нет, значит, pop-up либо открылся, либо произошел редирект.
+                    showMessage("Tizimga kirish oynasi ochildi. Iltimos, brauzerning boshqa oynasini tekshiring.", false);
+                }
+
+            } catch (e) {
+                // Это ловит потенциальные ошибки сети или синхронные ошибки JS
+                 showMessage(`Kutilmagan xato: ${e.message}`, true);
             }
             
-            // Xato bo'lsa tugmani qayta yoqish
-            loginButton.disabled = false;
+            // Восстанавливаем кнопку только если ошибка была синхронной или pop-up заблокирован
+            if (!loginButton.disabled) {
+                loginButton.textContent = originalButtonText;
+            }
         }
 
         // Sahifa yuklanganda avtomatik tizimga kirishni tekshirish
