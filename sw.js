@@ -1,5 +1,5 @@
-const CACHE_NAME = 'cache-v2';
-const urlsToCache = [
+const CACHE_NAME = 'prank-as-v4'; // ← har yangilanishda raqamni oshir
+const STATIC_CACHE = [
   '/',
   '/index',
   '/soxta-ulanish-sistemasi',
@@ -12,41 +12,58 @@ const urlsToCache = [
   '/soxta-parol-aniqlovchi',
   '/soxta-balans-aniqlovchi',
   '/oyin-barabani',
-  '/bizneschi-oka',
   '/tekst-ovoz',
   '/ovoz-olchovchi',
   '/icons/icon-192.png',
   '/icons/icon-512.png'
 ];
 
-// SW install
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+// 📦 INSTALL
+self.addEventListener('install', event => {
+  self.skipWaiting();
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_CACHE))
   );
 });
 
-// SW activate
-self.addEventListener('activate', e => {
-  e.waitUntil(
+// ♻️ ACTIVATE — eski keshlarni O‘CHIRISH
+self.addEventListener('activate', event => {
+  event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
-        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
+        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
       )
     )
   );
+  self.clients.claim();
 });
 
-// SW fetch
-self.addEventListener('fetch', e => {
-  // CSS va JS har doim tarmoqdan yuklansin
-  if (e.request.url.endsWith('.css') || e.request.url.endsWith('.js')) {
-    e.respondWith(fetch(e.request));
+// 🌐 FETCH
+self.addEventListener('fetch', event => {
+  const req = event.request;
+
+  // ❗ CSS / JS doim NETWORK
+  if (req.url.includes('.css') || req.url.includes('.js')) {
+    event.respondWith(fetch(req));
     return;
   }
 
-  // Boshqa fayllar keshdan yoki tarmoqdan
-  e.respondWith(
-    caches.match(e.request).then(r => r || fetch(e.request))
+  // 📄 HTML — avval network, bo‘lmasa cache
+  if (req.headers.get('accept')?.includes('text/html')) {
+    event.respondWith(
+      fetch(req)
+        .then(res => {
+          const resClone = res.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(req, resClone));
+          return res;
+        })
+        .catch(() => caches.match(req))
+    );
+    return;
+  }
+
+  // 🗂 Boshqa fayllar
+  event.respondWith(
+    caches.match(req).then(cached => cached || fetch(req))
   );
 });
