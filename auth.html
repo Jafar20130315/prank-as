@@ -20,8 +20,8 @@
 
   <!-- AVATAR -->
   <img id="avatar"
-       class="hidden absolute top-4 right-4 w-10 h-10 rounded-full border border-white/20"
-       title="Akkaunt rasmi" />
+       class="hidden absolute top-4 right-4 w-10 h-10 rounded-full border border-white/20 cursor-pointer"
+       title="Akkauntdan chiqish" />
 
   <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 w-full max-w-sm text-center">
     <h1 class="text-3xl font-bold mb-2">Prank-as</h1>
@@ -46,18 +46,19 @@
   <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-    const SUPABASE_URL = 'https://GEFAQRFJZWEMWUXUOADP.supabase.co'
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'
-
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    const supabase = createClient(
+      'https://GEFAQRFJZWEMWUXUOADP.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'
+    )
 
     const loginBtn = document.getElementById('google-login')
     const logoutBtn = document.getElementById('logout')
     const status = document.getElementById('status')
     const avatar = document.getElementById('avatar')
 
-    const loadUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
+    // 🔥 ENG MUHIM QISM
+    supabase.auth.onAuthStateChange((event, session) => {
+      const user = session?.user
 
       if (user) {
         status.textContent = 'Siz allaqachon ro‘yxatdan o‘tgansiz'
@@ -66,28 +67,34 @@
 
         avatar.src = user.user_metadata.picture
         avatar.classList.remove('hidden')
-
-        logoutBtn.onclick = async () => {
-          await supabase.auth.signOut()
-          location.reload()
-        }
+      } else {
+        status.textContent = 'Google orqali tizimga kiring'
+        loginBtn.classList.remove('hidden')
+        logoutBtn.classList.add('hidden')
+        avatar.classList.add('hidden')
       }
-    }
+    })
 
     loginBtn.onclick = async () => {
       status.textContent = 'Google oynasi ochilmoqda...'
 
-      const { error } = await supabase.auth.signInWithOAuth({
+      await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: window.location.origin
         }
       })
-
-      if (error) status.textContent = error.message
     }
 
-    loadUser()
+    logoutBtn.onclick = async () => {
+      await supabase.auth.signOut()
+      location.reload()
+    }
+
+    avatar.onclick = async () => {
+      await supabase.auth.signOut()
+      location.reload()
+    }
   </script>
 
 </body>
