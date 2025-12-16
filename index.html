@@ -432,5 +432,39 @@ setInterval(createSnow, 5000);
 
 
 </script>
+  
+  <script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+  // Те же данные, что и в auth.html
+  const supabase = createClient(
+    'https://GEFAQRFJZWEMWUXUOADP.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'
+  )
+
+  async function checkUser() {
+    // 1. Проверяем текущую сессию
+    const { data: { session } } = await supabase.auth.getSession()
+
+    if (session?.user) {
+      console.log('Пользователь найден:', session.user)
+      const userIcon = document.querySelector('.user-icon')
+      
+      // 2. Если пользователь есть, меняем иконку на его фото
+      if (userIcon && session.user.user_metadata.picture) {
+        userIcon.innerHTML = `
+          <img src="${session.user.user_metadata.picture}" 
+               alt="User" 
+               style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+        `
+        // (Опционально) При клике на фото можно отправлять на страницу выхода или профиля
+        userIcon.href = "/auth" 
+      }
+    }
+  }
+
+  // Запускаем проверку
+  checkUser()
+</script>
 </body>
 </html>
