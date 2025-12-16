@@ -18,9 +18,14 @@
     }
   </style>
 </head>
-<body class="min-h-screen flex items-center justify-center">
+<body class="min-h-screen flex items-center justify-center relative text-white">
 
-  <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 w-full max-w-sm text-center text-white">
+  <!-- AVATAR -->
+  <img id="avatar"
+       class="hidden absolute top-4 right-4 w-10 h-10 rounded-full cursor-pointer border border-white/20"
+       title="Akkauntdan chiqish" />
+
+  <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 w-full max-w-sm text-center">
     <h1 class="text-3xl font-bold mb-2">Prank-as</h1>
     <p class="text-slate-400 mb-6">Google orqali tizimga kiring</p>
 
@@ -32,24 +37,33 @@
     <p id="msg" class="mt-4 text-sm"></p>
   </div>
 
-  <!-- SUPABASE (ESM, 100% CONNECT) -->
+  <!-- SUPABASE -->
   <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
     const SUPABASE_URL = 'https://GEFAQRFJZWEMWUXUOADP.supabase.co'
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
     const btn = document.getElementById('google-login')
     const msg = document.getElementById('msg')
+    const avatar = document.getElementById('avatar')
 
-    // Sahifa yuklanganda login holatini tekshirish
-    const checkUser = async () => {
+    const loadUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
+
       if (user) {
-        msg.textContent = `Tizimga kirding: ${user.email}`
-        btn.disabled = true
+        btn.classList.add('hidden')
+        msg.textContent = `Salom, ${user.user_metadata.name}`
+
+        avatar.src = user.user_metadata.picture
+        avatar.classList.remove('hidden')
+
+        avatar.onclick = async () => {
+          await supabase.auth.signOut()
+          location.reload()
+        }
       }
     }
 
@@ -63,12 +77,10 @@
         }
       })
 
-      if (error) {
-        msg.textContent = error.message
-      }
+      if (error) msg.textContent = error.message
     }
 
-    checkUser()
+    loadUser()
   </script>
 
 </body>
