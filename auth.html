@@ -5,10 +5,8 @@
   <title>Prank-as — Google Login</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
   <style>
@@ -22,22 +20,29 @@
 
   <!-- AVATAR -->
   <img id="avatar"
-       class="hidden absolute top-4 right-4 w-10 h-10 rounded-full cursor-pointer border border-white/20"
-       title="Akkauntdan chiqish" />
+       class="hidden absolute top-4 right-4 w-10 h-10 rounded-full border border-white/20"
+       title="Akkaunt rasmi" />
 
   <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 w-full max-w-sm text-center">
     <h1 class="text-3xl font-bold mb-2">Prank-as</h1>
-    <p class="text-slate-400 mb-6">Google orqali tizimga kiring</p>
 
+    <p id="status" class="text-slate-400 mb-6">
+      Google orqali tizimga kiring
+    </p>
+
+    <!-- LOGIN -->
     <button id="google-login"
       class="w-full py-3 rounded-xl bg-red-500 hover:bg-red-600 font-semibold transition">
       Google bilan kirish
     </button>
 
-    <p id="msg" class="mt-4 text-sm"></p>
+    <!-- LOGOUT -->
+    <button id="logout"
+      class="hidden w-full mt-3 py-3 rounded-xl bg-slate-600 hover:bg-slate-700 font-semibold transition">
+      Chiqish
+    </button>
   </div>
 
-  <!-- SUPABASE -->
   <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -46,29 +51,31 @@
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-    const btn = document.getElementById('google-login')
-    const msg = document.getElementById('msg')
+    const loginBtn = document.getElementById('google-login')
+    const logoutBtn = document.getElementById('logout')
+    const status = document.getElementById('status')
     const avatar = document.getElementById('avatar')
 
     const loadUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
 
       if (user) {
-        btn.classList.add('hidden')
-        msg.textContent = `Salom, ${user.user_metadata.name}`
+        status.textContent = 'Siz allaqachon ro‘yxatdan o‘tgansiz'
+        loginBtn.classList.add('hidden')
+        logoutBtn.classList.remove('hidden')
 
         avatar.src = user.user_metadata.picture
         avatar.classList.remove('hidden')
 
-        avatar.onclick = async () => {
+        logoutBtn.onclick = async () => {
           await supabase.auth.signOut()
           location.reload()
         }
       }
     }
 
-    btn.onclick = async () => {
-      msg.textContent = 'Google oynasi ochilmoqda...'
+    loginBtn.onclick = async () => {
+      status.textContent = 'Google oynasi ochilmoqda...'
 
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -77,7 +84,7 @@
         }
       })
 
-      if (error) msg.textContent = error.message
+      if (error) status.textContent = error.message
     }
 
     loadUser()
