@@ -94,11 +94,13 @@
     // Логика кнопок
     loginBtn.onclick = async () => {
       status.textContent = 'Google oynasi ochilmoqda...'
+
       await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          // Важно: Убедитесь, что этот URL добавлен в Redirect URLs в Supabase Dashboard
-          redirectTo: window.location.href 
+          // 👇 ЗДЕСЬ УКАЗЫВАЕМ ГЛАВНУЮ СТРАНИЦУ
+          redirectTo: 'https://prank-as.site' 
+          // Если тестируете на компьютере локально, то: 'http://localhost:XXXX'
         }
       })
     }
