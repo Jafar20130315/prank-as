@@ -57,12 +57,12 @@
     const status = document.getElementById('status')
     const avatar = document.getElementById('avatar')
 
-    // 🔥 ENG MUHIM QISM
-    supabase.auth.onAuthStateChange((event, session) => {
-      const user = session?.user
-
+    // Функция обновления UI
+    const updateUI = (user) => {
       if (user) {
-        status.textContent = 'Siz allaqachon ro‘yxatdan o‘tgansiz'
+        status.textContent = `Salom, ${user.user_metadata.full_name || 'Foydalanuvchi'}!`
+        status.classList.add('text-green-400') // Зеленый текст для успеха
+        
         loginBtn.classList.add('hidden')
         logoutBtn.classList.remove('hidden')
 
@@ -70,33 +70,47 @@
         avatar.classList.remove('hidden')
       } else {
         status.textContent = 'Google orqali tizimga kiring'
+        status.classList.remove('text-green-400')
+        
         loginBtn.classList.remove('hidden')
         logoutBtn.classList.add('hidden')
         avatar.classList.add('hidden')
       }
+    }
+
+    // 1. Проверяем сессию сразу при загрузке страницы
+    async function checkSession() {
+      const { data: { session } } = await supabase.auth.getSession()
+      updateUI(session?.user)
+    }
+    
+    checkSession()
+
+    // 2. Слушаем изменения (вход/выход)
+    supabase.auth.onAuthStateChange((event, session) => {
+      updateUI(session?.user)
     })
 
+    // Логика кнопок
     loginBtn.onclick = async () => {
       status.textContent = 'Google oynasi ochilmoqda...'
-
       await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin
+          // Важно: Убедитесь, что этот URL добавлен в Redirect URLs в Supabase Dashboard
+          redirectTo: window.location.href 
         }
       })
     }
 
-    logoutBtn.onclick = async () => {
+    const handleLogout = async () => {
       await supabase.auth.signOut()
-      location.reload()
+      window.location.reload()
     }
 
-    avatar.onclick = async () => {
-      await supabase.auth.signOut()
-      location.reload()
-    }
-  </script>
+    logoutBtn.onclick = handleLogout
+    avatar.onclick = handleLogout
+</script>
 
 </body>
 </html>
