@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -380,14 +380,14 @@ document.getElementById('installAppBtn').addEventListener('click', async()=>{
 
 // Tugmalar animatsiya delay
 document.querySelectorAll('.button-container a').forEach((btn,i)=>{
-  btn.style.animationDelay=${i*0.15}s;
+  btn.style.animationDelay=`${i*0.15}s`;
 });
 
 // Kompyuter soati
 function updateClock() {
   const now = new Date();
   document.getElementById("desktopClock").textContent =
-    ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} | ${String(now.getDate()).padStart(2,'0')}:${String(now.getMonth()+1).padStart(2,'0')}:${now.getFullYear()};
+    `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} | ${String(now.getDate()).padStart(2,'0')}:${String(now.getMonth()+1).padStart(2,'0')}:${now.getFullYear()}`;
 }
 setInterval(updateClock,1000);
 updateClock();
@@ -409,7 +409,7 @@ newBtns.forEach(btn => {
 
 // 🔁 Animatsiya delay'ni QAYTA hisoblash
 Array.from(container.children).forEach((btn, i) => {
-  btn.style.animationDelay = ${i * 0.15}s;
+  btn.style.animationDelay = `${i * 0.15}s`;
 });
 
 
@@ -452,11 +452,11 @@ setInterval(createSnow, 5000);
       
       // 2. Если пользователь есть, меняем иконку на его фото
       if (userIcon && session.user.user_metadata.picture) {
-        userIcon.innerHTML = 
+        userIcon.innerHTML = `
           <img src="${session.user.user_metadata.picture}" 
                alt="User" 
                style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
-        
+        `
         // (Опционально) При клике на фото можно отправлять на страницу выхода или профиля
         userIcon.href = "/auth" 
       }
@@ -465,68 +465,40 @@ setInterval(createSnow, 5000);
 
   // Запускаем проверку
   checkUser()
+
+    // SUPABASE UCHUN! O'CHIB KETMASIN! 
   </script>
 
-    <script type="module">
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+  <script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co'
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'
+  const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co'
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-const openedAt = new Date()
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-// PRANK nomi URL’dan olish
-const PRANK_NAME = location.pathname.replace(/\//g,'') || 'unknown'
+  const openedAt = new Date()
 
-// Foydalanuvchini olish
-async function trackUser() {
+  // 🧠 PRANK NOMINI URL’dan olish
+  const PRANK_NAME = location.pathname
+    .replaceAll('/', '')
+    .replace('.html', '')
+    || 'unknown'
+
   const { data: { user } } = await supabase.auth.getUser()
 
   if (user) {
-    // User ikonkasi
-    const userIcon = document.querySelector('.user-icon')
-    if (userIcon && user.user_metadata?.picture) {
-      userIcon.innerHTML = `<img src="${user.user_metadata.picture}" alt="User" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`
-      userIcon.href = "/auth"
-    }
-
-    // Page unload uchun duration hisoblash
-    window.addEventListener('beforeunload', () => {
+    window.addEventListener('beforeunload', async () => {
       const duration = Math.floor((Date.now() - openedAt.getTime()) / 1000)
 
-      // sendBeacon bilan yuborish brauzer o‘chishida ham ishlaydi
-      const payload = JSON.stringify({
+      await supabase.from('user_activity').insert({
         user_id: user.id,
-        email: user.email,
         prank_name: PRANK_NAME,
         opened_at: openedAt.toISOString(),
         duration
       })
-      navigator.sendBeacon('https://gefaqrfjzwemwuxuoadp.supabase.co/functions/v1/track-activity', payload)
     })
-
-    // Real-time insert (agar xohlansa)
-    await supabase.from('user_activity').insert({
-      user_id: user.id,
-      prank_name: PRANK_NAME,
-      opened_at: openedAt.toISOString(),
-      duration: 0
-    })
-  } else {
-    // Ro'yxatdan o'tmagan foydalanuvchi
-    const payload = JSON.stringify({
-      user_id: null,
-      email: null,
-      prank_name: PRANK_NAME,
-      opened_at: openedAt.toISOString(),
-      duration: 0
-    })
-    navigator.sendBeacon('https://gefaqrfjzwemwuxuoadp.supabase.co/functions/v1/track-activity', payload)
   }
-}
-
-trackUser()
 </script>
 
 </body>
