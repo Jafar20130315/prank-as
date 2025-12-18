@@ -2,27 +2,34 @@
 <html lang="uz">
 <head>
 <meta charset="UTF-8">
-<title>Admin — User Activity</title>
+<title>Sozlamalar</title>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="bg-slate-900 text-white p-6">
 
-<h1 class="text-2xl font-bold mb-4">User Activity (IP bilan)</h1>
+<h1 class="text-2xl font-bold mb-4">Statistika</h1>
 
 <table class="w-full text-sm border border-white/10">
 <thead class="bg-white/10">
 <tr>
-  <th class="p-2">User</th>
+  <th class="p-2">Foydalanuvchi</th>
   <th class="p-2">Email</th>
-  <th class="p-2">Prank</th>
+  <th class="p-2">Sahifa</th>
   <th class="p-2">IP</th>
   <th class="p-2">Joylashuv</th>
   <th class="p-2">Vaqt</th>
+  <th class="p-2">Davomiylik</th>
 </tr>
 </thead>
 <tbody id="body"></tbody>
 </table>
+
+<script type="module">
+const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co'
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'
+const ADMIN_UUID = 'f5c0015c-51ef-4f5a-a989-afa85250f012'
+</script>
 
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
@@ -30,7 +37,21 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 const body = document.getElementById('body')
 
-async function load() {
+// Admin tekshiruvi
+async function checkAdmin() {
+  const { data: { user }, error } = await supabase.auth.getUser()
+  if (error || !user || user.id !== ADMIN_UUID) {
+    location.href = '/'
+    return null
+  }
+  return user
+}
+
+// Jadvalni yuklash
+async function loadStats() {
+  const admin = await checkAdmin()
+  if (!admin) return
+
   const { data } = await supabase
     .from('user_activity')
     .select('*')
@@ -38,25 +59,49 @@ async function load() {
 
   body.innerHTML = ''
 
-  data.forEach(r => {
+  for (let r of data) {
+    let user_name = 'No’malum'
+    let user_email = '-'
+    let profile_img = ''
+
+    if (r.user_id) {
+      const { data: userData } = await supabase
+        .from('users')
+        .select('email, user_metadata')
+        .eq('id', r.user_id)
+        .single()
+
+      if (userData) {
+        user_email = userData.email ?? '-'
+        user_name = userData.user_metadata?.full_name ?? 'No’malum'
+        profile_img = userData.user_metadata?.picture ?? ''
+      }
+    }
+
     body.innerHTML += `
-    <tr class="border-t border-white/10">
-      <td class="p-2">${r.user_id ? '🟢 User' : '⚪ Guest'}</td>
-      <td class="p-2">${r.email ?? '-'}</td>
-      <td class="p-2">${r.prank_name}</td>
-      <td class="p-2">${r.ip}</td>
-      <td class="p-2">${r.country}, ${r.city}</td>
-      <td class="p-2">${new Date(r.opened_at).toLocaleString()}</td>
-    </tr>`
-  })
+      <tr class="border-t border-white/10">
+        <td class="p-2 flex items-center gap-2">
+          ${profile_img ? `<img src="${profile_img}" alt="Profil" class="w-6 h-6 rounded-full object-cover">` : ''}
+          ${user_name}
+        </td>
+        <td class="p-2">${user_email}</td>
+        <td class="p-2">${r.prank_name ?? 'unknown'}</td>
+        <td class="p-2">${r.ip ?? '-'}</td>
+        <td class="p-2">${r.country ?? '-'}, ${r.city ?? '-'}</td>
+        <td class="p-2">${new Date(r.opened_at).toLocaleString()}</td>
+        <td class="p-2 text-center">${r.duration ?? '-'}</td>
+      </tr>`
+  }
 }
 
-load()
+// Boshlang‘ich yuklash
+loadStats()
 
+// Real-time yangilanish
 supabase.channel('rt')
 .on('postgres_changes',
  { event:'INSERT', schema:'public', table:'user_activity' },
- () => load()
+ () => loadStats()
 ).subscribe()
 </script>
 
