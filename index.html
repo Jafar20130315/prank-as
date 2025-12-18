@@ -4,11 +4,29 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Prank-as</title>
-<meta name="description" content="Prank-as — ko‘ngilochar va ta’limiy onlayn platforma.">
+<meta name="description" content="Prank-as — ko‘ngilochar va ta’limiy onlayn platforma. Internetdagi prank va tajriba elementlari qanday ishlashini tushuntirish uchun yaratilgan loyiha.">
 <link rel="icon" type="image/x-icon" href="favicon.png"/>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+<link rel="manifest" href="/manifest.json">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1867701562878781" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="style.css?v=2">
 <script src="app.js?v=3"></script>
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Prank-as",
+  "url": "https://prank-as.site",
+  "logo": "https://prank-as.site/icons/icon-512.png",
+  "description": "Prank-as — tajriba va ko‘ngilochar maqsadlarda yaratilgan onlayn platforma.",
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "email": "admin@prank-as.site",
+    "contactType": "customer support"
+  }
+}
+</script>
 
 <style>
 /* ===== Global ===== */
@@ -82,7 +100,7 @@ h1 { text-align:center;margin-bottom:40px; text-shadow:0 2px 6px rgba(0,0,0,0.7)
 .top-message.show { opacity: 1; }
 
 /* ===== Top Bar ===== */
- .top-bar {
+.top-bar {
   position: fixed;
   top: 10px;
   right: 15px;
@@ -141,158 +159,153 @@ h1 { text-align:center;margin-bottom:40px; text-shadow:0 2px 6px rgba(0,0,0,0.7)
 </head>
 <body>
 
-  <header class="top-bar">
-    <div class="top-bar-right">
-      <div class="desktop-clock" id="desktopClock">Hozir</div>
-      <a href="/auth" class="user-icon" title="Kirish / Ro'yxatdan o'tish">👤</a>
-    </div>
-  </header>
-
-  <div class="snow"></div>
-  <div class="overlay"></div>
-
-  <h1>Prank-as orqali do‘stlaringiz bilan hazillashing!</h1>
-  
-  <p class="subtitle">Prank-as — tajriba va ko‘ngilochar maqsadlarda yaratilgan onlayn platforma.</p>
-
-  <div class="button-container">
-    <a class="btn" href="/soxta-ulanish-sistemasi">Soxta ulanish sistemasi</a>
-    <a class="btn" href="/soxta-uyin-bank-kartasi">Soxta o‘yin bank kartasi</a>
-    <a class="btn" href="/soxta-wifi-parol-aniqlovchi">Soxta Wi-Fi parol aniqlovchi</a>
-    <a class="btn" href="/soxta-joylashuv-aniqlovchi">Soxta joylashuv aniqlovchi</a>
-    <a class="btn" href="/soxta-random-yashash-joyi">Soxta random yashash joyi</a>
-    <a class="btn" href="/soxta-shaxs-aniqlovchi">Soxta shaxs aniqlovchi</a>
-    <a class="btn" href="/avtoraqam-rasm-generatori">Avtoraqam rasm generatori</a>
-    <a class="btn" href="/soxta-parol-aniqlovchi">Soxta parol aniqlovchi</a>
-    <a class="btn" href="/soxta-balans-aniqlovchi">Soxta balans aniqlovchi</a>
-    <a class="btn" href="/oyin-barabani">O‘yin barabani</a>
-    <a class="btn" href="/ovoz-olchovchi">Ovoz o‘lchovchi</a>
-    <a class="btn" href="/tekst-ovoz">Tekst → Ovo‍z</a>
-    <a class="btn" href="/soxta-wifi-parol-joylashuv-aniqlovchi">Soxta Wi-Fi parol aniqlovchi PRO</a>
-    <a class="btn" href="/rangligradient">Rangli sensor</a>
-    <a class="btn new" href="/3d-qol-boshqaruvi">3D Shakl boshqaruvi</a>
-    <a class="btn new" href="/ai-kamera">Aqlli kamera</a>
-    <a class="btn new" href="/musiqa-zarba-kuzatuvchi">Musiqa pleyeri</a>
+<header class="top-bar">
+  <div class="top-bar-right">
+    <div class="desktop-clock" id="desktopClock">Hozir</div>
+    <a href="/auth" class="user-icon" title="Kirish / Ro'yxatdan o'tish">👤</a>
   </div>
+</header>
 
-  <p class="subtitle">Vaqti-vaqti bilan yangilanib turadigan faktlar:</p>
+<div class="snow"></div>
+<div class="overlay"></div>
+
+<h1>Prank-as orqali do‘stlaringiz bilan hazillashing!</h1>
   
-  <section style="max-width:900px;margin:50px auto;background:rgba(0,0,0,0.4);padding:25px;border-radius:12px;backdrop-filter:blur(8px);box-shadow:0 8px 25px rgba(0,0,0,0.4);">
-    <h2 style="margin-bottom:20px;font-size:28px;font-weight:700;text-align:center;">🌐 2025-yilda Internetdagi Eng Foydali Saytlar</h2>
-    <p style="margin-bottom:15px;">Internetda millionlab saytlar bor, lekin ularning barchasi foydali emas...</p>
-    <h3 style="margin-top:25px;">1️⃣ Google.com — Eng kuchli qidiruv tizimi</h3>
-    <p>Google internetda eng ko‘p ishlatiladigan qidiruv tizimi bo‘lib, deyarli barcha savollarga javob topish mumkin.</p>
-    </section>
+<p class="subtitle">Prank-as — tajriba va ko‘ngilochar maqsadlarda yaratilgan onlayn platforma.</p>
 
-  <button class="top-left-menu-toggle">
-    <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
-  </button>
+<div class="button-container">
+  <a class="btn" href="/soxta-ulanish-sistemasi">Soxta ulanish sistemasi</a>
+  <a class="btn" href="/soxta-uyin-bank-kartasi">Soxta o‘yin bank kartasi</a>
+  <a class="btn" href="/soxta-wifi-parol-aniqlovchi">Soxta Wi-Fi parol aniqlovchi</a>
+  <a class="btn" href="/soxta-joylashuv-aniqlovchi">Soxta joylashuv aniqlovchi</a>
+  <a class="btn" href="/soxta-random-yashash-joyi">Soxta random yashash joyi</a>
+  <a class="btn" href="/soxta-shaxs-aniqlovchi">Soxta shaxs aniqlovchi</a>
+  <a class="btn" href="/avtoraqam-rasm-generatori">Avtoraqam rasm generatori</a>
+  <a class="btn" href="/soxta-parol-aniqlovchi">Soxta parol aniqlovchi</a>
+  <a class="btn" href="/soxta-balans-aniqlovchi">Soxta balans aniqlovchi</a>
+  <a class="btn" href="/oyin-barabani">O‘yin barabani</a>
+  <a class="btn" href="/ovoz-olchovchi">Ovoz o‘lchovchi</a>
+  <a class="btn" href="/tekst-ovoz">Tekst → Ovo‍z</a>
+  <a class="btn" href="/soxta-wifi-parol-joylashuv-aniqlovchi">Soxta Wi-Fi parol aniqlovchi PRO</a>
+  <a class="btn" href="/rangligradient">Rangli sensor</a>
+  <a class="btn new" href="/3d-qol-boshqaruvi">3D Shakl boshqaruvi</a>
+  <a class="btn new" href="/ai-kamera">Aqlli kamera</a>
+  <a class="btn new" href="/musiqa-zarba-kuzatuvchi">Musiqa pleyeri</a>
+</div>
 
-  <nav id="dropdown-menu" class="dropdown-menu-small">
-    <a href="/index">🏠 Bosh sahifa</a>
-    <a href="/disclaimer">Disclaimer</a>
-    <a href="#" id="installAppBtn">📱 Ilovani o‘rnatish</a>
-    <a href="#" id="resetChoice">♻️ Tanlovni tiklash</a>
-    <a href="https://help.prank-as.site">Yordam</a>
-    <a href="https://old.prank-as.site">Oldingi saytga qaytish</a>
-    <a href="/about">About</a>
-    <a href="/contact">Contact</a>
-  </nav>
+<button class="top-left-menu-toggle">
+  <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+</button>
 
-  <div class="top-message" id="topMsg"></div>
+<nav id="dropdown-menu" class="dropdown-menu-small">
+  <a href="/index">🏠 Bosh sahifa</a>
+  <a href="/disclaimer">Disclaimer</a>
+  <a href="#" id="installAppBtn">📱 Ilovani o‘rnatish</a>
+  <a href="#" id="resetChoice">♻️ Tanlovni tiklash</a>
+  <a href="https://help.prank-as.site">Yordam</a>
+  <a href="https://old.prank-as.site">Oldingi saytga qaytish</a>
+  <a href="/about">About</a>
+  <a href="/contact">Contact</a>
+</nav>
+
+<div class="top-message" id="topMsg"></div>
 
 <script type="module">
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-  // KONFIGURATSIYA
   const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co'
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'
   
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-  // 1. Foydalanuvchi tekshirish va Icon o'zgartirish
-  async function checkUser() {
+  // 1. Foydalanuvchi tekshiruvi va Icon o'zgartirish
+  async function initApp() {
     const { data: { session } } = await supabase.auth.getSession()
-    if (session?.user) {
-      console.log('Foydalanuvchi:', session.user)
+    const user = session?.user || null
+
+    if (user) {
       const userIcon = document.querySelector('.user-icon')
-      if (userIcon && session.user.user_metadata?.picture) {
-        userIcon.innerHTML = `<img src="${session.user.user_metadata.picture}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`
-        userIcon.href = "/auth"
+      if (userIcon && user.user_metadata?.picture) {
+        userIcon.innerHTML = `<img src="${user.user_metadata.picture}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`
       }
     }
-    return session?.user
+
+    // Statistika yuborish (Edge Function)
+    sendActivity(user)
   }
 
-  // 2. Statistikani yuborish (Edge Function orqali)
-  async function sendStats() {
-    const user = await checkUser() // Userni olamiz
-
-    // Sahifa nomini to'g'irlash
-    let pageName = location.pathname.replaceAll('/', '').replace('.html', '');
-    if (!pageName || pageName.trim() === '') {
-        pageName = 'Bosh sahifa';
-    }
-
-    console.log("Statistika yuborilmoqda:", pageName);
-
-    // Edge Function chaqiramiz (Bu yerda IP avtomatik aniqlanadi)
-    fetch(`${SUPABASE_URL}/functions/v1/track-activity`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-      },
-      body: JSON.stringify({
-        user_id: user?.id ?? null,
-        email: user?.email ?? null,
-        prank_name: pageName,
-        duration: 0 // Boshlanishida 0
+  async function sendActivity(user) {
+    let pageName = location.pathname.replace(/\//g, '').replace('.html', '') || 'Bosh sahifa'
+    
+    try {
+      await fetch(`${SUPABASE_URL}/functions/v1/track-activity`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+        },
+        body: JSON.stringify({
+          user_id: user?.id ?? null,
+          email: user?.email ?? null,
+          prank_name: pageName,
+          duration: 10
+        })
       })
-    }).catch(err => console.error("Statistika xatosi:", err));
+    } catch (e) { console.error("Tracking error:", e) }
   }
 
-  // Ishga tushirish
-  sendStats();
+  initApp()
 
-  // --- UI SKRIPTLARI ---
-  // Menu toggle
-  const menuBtn=document.querySelector('.top-left-menu-toggle');
-  const menu=document.getElementById('dropdown-menu');
-  const overlay=document.querySelector('.overlay');
-  function toggleMenu(e){e.preventDefault();menu.classList.toggle('show');overlay.classList.toggle('show');}
-  menuBtn.addEventListener('click', toggleMenu);
-  overlay.addEventListener('click',()=>{menu.classList.remove('show');overlay.classList.remove('show');});
-
-  // Soat
-  function updateClock() {
-    const now = new Date();
-    document.getElementById("desktopClock").textContent =
-      `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} | ${String(now.getDate()).padStart(2,'0')}:${String(now.getMonth()+1).padStart(2,'0')}:${now.getFullYear()}`;
-  }
-  setInterval(updateClock,1000); updateClock();
-
-  // Yangi tugmalar
-  const container = document.querySelector('.button-container');
-  const newBtns = Array.from(container.querySelectorAll('.btn.new'));
-  newBtns.forEach(btn => {
-    const tag = document.createElement('span'); tag.className = 'tag'; tag.textContent = 'YANGI';
-    btn.appendChild(tag); container.prepend(btn);
-  });
+  // --- UI FUNKSIYALARI ---
+  const menuBtn=document.querySelector('.top-left-menu-toggle')
+  const menu=document.getElementById('dropdown-menu')
+  const overlay=document.querySelector('.overlay')
   
-  // Qor
+  menuBtn.onclick = (e) => {
+    e.preventDefault()
+    menu.classList.toggle('show')
+    overlay.classList.toggle('show')
+  }
+  overlay.onclick = () => {
+    menu.classList.remove('show')
+    overlay.classList.remove('show')
+  }
+
+  function updateClock() {
+    const now = new Date()
+    document.getElementById("desktopClock").textContent = now.toLocaleTimeString('uz-UZ') + ' | ' + now.toLocaleDateString('uz-UZ')
+  }
+  setInterval(updateClock, 1000); updateClock()
+
+  // "YANGI" taglarini qo'shish va tartiblash
+  const container = document.querySelector('.button-container')
+  const newBtns = Array.from(container.querySelectorAll('.btn.new'))
+  newBtns.forEach((btn, i) => {
+    const tag = document.createElement('span'); tag.className = 'tag'; tag.textContent = 'YANGI'
+    btn.appendChild(tag)
+    container.prepend(btn)
+  })
+
+  // Tugmalar animatsiyasi
+  document.querySelectorAll('.btn').forEach((btn, i) => {
+    btn.style.animationDelay = `${i * 0.1}s`
+  })
+
+  // Qor effekti
   function createSnow() {
-    const container = document.querySelector('.snow');
-    for (let i = 0; i < 10; i++) {
-      let flake = document.createElement("div"); flake.className = "snowflake"; flake.textContent = "❄";
-      flake.style.left = Math.random() * 100 + "vw";
-      flake.style.fontSize = (6 + Math.random() * 6) + "px";
-      flake.style.animationDuration = (6 + Math.random() * 8) + "s";
-      container.appendChild(flake);
-      setTimeout(() => flake.remove(), 15000);
+    const snowContainer = document.querySelector('.snow')
+    for (let i = 0; i < 5; i++) {
+      let flake = document.createElement("div")
+      flake.className = "snowflake"; flake.textContent = "❄"
+      flake.style.left = Math.random() * 100 + "vw"
+      flake.style.fontSize = (Math.random() * 10 + 5) + "px"
+      flake.style.animationDuration = (Math.random() * 5 + 5) + "s"
+      snowContainer.appendChild(flake)
+      setTimeout(() => flake.remove(), 8000)
     }
   }
-  createSnow(); setInterval(createSnow, 5000);
+  setInterval(createSnow, 3000)
 </script>
+
 </body>
 </html>
