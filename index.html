@@ -4,53 +4,11 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Prank-as</title>
-<meta name="description" content="Prank-as — ko‘ngilochar va ta’limiy onlayn platforma. Internetdagi prank va tajriba elementlari qanday ishlashini tushuntirish uchun yaratilgan loyiha.">
+<meta name="description" content="Prank-as — ko‘ngilochar va ta’limiy onlayn platforma.">
 <link rel="icon" type="image/x-icon" href="favicon.png"/>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
-<link rel="manifest" href="/manifest.json">
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1867701562878781"
-     crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="style.css?v=2">
+<link rel="stylesheet" href="style.css?v=2">
 <script src="app.js?v=3"></script>
-  
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "Prank-as",
-  "url": "https://prank-as.site",
-  "logo": "https://prank-as.site/icons/icon-512.png",
-  "description": "Prank-as — tajriba va ko‘ngilochar maqsadlarda yaratilgan onlayn platforma.",
-  "contactPoint": {
-    "@type": "ContactPoint",
-    "email": "admin@prank-as.site",
-    "contactType": "customer support"
-  }
-}
-</script>
-  
-  <script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', async () => {
-    const reg = await navigator.serviceWorker.register('/sw.js');
-
-    // Yangi SW topilsa
-    reg.addEventListener('updatefound', () => {
-      const newWorker = reg.installing;
-      newWorker.addEventListener('statechange', () => {
-        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-          showMessage("🔄 Sayt yangilandi! Qayta yuklanmoqda...");
-          setTimeout(() => location.reload(), 1500);
-        }
-      });
-    });
-  });
-}
-</script>
-
-
-
-
 
 <style>
 /* ===== Global ===== */
@@ -93,7 +51,7 @@ h1 { text-align:center;margin-bottom:40px; text-shadow:0 2px 6px rgba(0,0,0,0.7)
 .top-left-menu-toggle{
   position:fixed;top:15px;left:15px;background:rgba(255,255,255,0.15);
   border:none;border-radius:12px;padding:10px 12px;cursor:pointer;
-  z-index:99999; /* eng yuqori */
+  z-index:99999;
   box-shadow:0 4px 12px rgba(0,0,0,0.4);backdrop-filter:blur(6px);transition:0.3s;width:48px;height:48px;
   display:flex;align-items:center;justify-content:center;
 }
@@ -123,23 +81,20 @@ h1 { text-align:center;margin-bottom:40px; text-shadow:0 2px 6px rgba(0,0,0,0.7)
 }
 .top-message.show { opacity: 1; }
 
-/* ===== Top Bar & Clock Layout Fix ===== */
+/* ===== Top Bar ===== */
  .top-bar {
   position: fixed;
   top: 10px;
   right: 15px;
-  z-index: 9999; /* Z-indexni oshirdik */
+  z-index: 9999;
   display: flex;
   justify-content: flex-end;
 }
-
 .top-bar-right {
   display: flex;
   align-items: center;
-  gap: 12px; /* Icon va soat orasidagi masofa */
+  gap: 12px;
 }
-
-/* Soat stili o'zgartirildi: fixed olib tashlandi */
 .desktop-clock {
   font-size: 16px;
   background: rgba(0,0,0,0.4);
@@ -149,26 +104,23 @@ h1 { text-align:center;margin-bottom:40px; text-shadow:0 2px 6px rgba(0,0,0,0.7)
   color: #fff;
   font-weight: 600;
   box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-  /* position: fixed; <-- BU OLIB TASHLANDI */
   display: none;
 }
 @media (min-width: 768px) { .desktop-clock { display: block; } }
 
-
-/* ===== Minimal qor ===== */
+/* ===== Snow ===== */
 .snow { pointer-events: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: 5000; }
 .snowflake { position: absolute; top: -10px; color: #fff; opacity: 0.7; font-size: 8px; animation: fall linear infinite; }
 @keyframes fall { to { transform: translateY(105vh); } }
 
-  .subtitle {
-  font-size: 16px;      /* kichikroq matn */
-  color: #666;          /* yumshoq rang */
+.subtitle {
+  font-size: 16px;
+  color: #666;
   max-width: 700px;
   margin: 12px auto 30px;
   line-height: 1.6;
   text-align: center;
 }
-
 
 .user-icon {
   font-size: 26px;
@@ -184,339 +136,163 @@ h1 { text-align:center;margin-bottom:40px; text-shadow:0 2px 6px rgba(0,0,0,0.7)
   box-shadow: 0 4px 15px rgba(0,0,0,.3);
   transition: 0.3s;
 }
-
-.user-icon:hover {
-  transform: scale(1.1);
-  background: #2563eb;
-}
-
-
+.user-icon:hover { transform: scale(1.1); background: #2563eb; }
 </style>
 </head>
 <body>
 
   <header class="top-bar">
-  <div class="top-bar-right">
-    <!-- Soatni shu yerga ko'chirdik (Top bar ichiga) -->
-    <div class="desktop-clock" id="desktopClock">Hozir</div>
-    <!-- User icon -->
-    <a href="/auth" class="user-icon" title="Kirish / Ro'yxatdan o'tish">👤</a>
+    <div class="top-bar-right">
+      <div class="desktop-clock" id="desktopClock">Hozir</div>
+      <a href="/auth" class="user-icon" title="Kirish / Ro'yxatdan o'tish">👤</a>
+    </div>
+  </header>
+
+  <div class="snow"></div>
+  <div class="overlay"></div>
+
+  <h1>Prank-as orqali do‘stlaringiz bilan hazillashing!</h1>
+  
+  <p class="subtitle">Prank-as — tajriba va ko‘ngilochar maqsadlarda yaratilgan onlayn platforma.</p>
+
+  <div class="button-container">
+    <a class="btn" href="/soxta-ulanish-sistemasi">Soxta ulanish sistemasi</a>
+    <a class="btn" href="/soxta-uyin-bank-kartasi">Soxta o‘yin bank kartasi</a>
+    <a class="btn" href="/soxta-wifi-parol-aniqlovchi">Soxta Wi-Fi parol aniqlovchi</a>
+    <a class="btn" href="/soxta-joylashuv-aniqlovchi">Soxta joylashuv aniqlovchi</a>
+    <a class="btn" href="/soxta-random-yashash-joyi">Soxta random yashash joyi</a>
+    <a class="btn" href="/soxta-shaxs-aniqlovchi">Soxta shaxs aniqlovchi</a>
+    <a class="btn" href="/avtoraqam-rasm-generatori">Avtoraqam rasm generatori</a>
+    <a class="btn" href="/soxta-parol-aniqlovchi">Soxta parol aniqlovchi</a>
+    <a class="btn" href="/soxta-balans-aniqlovchi">Soxta balans aniqlovchi</a>
+    <a class="btn" href="/oyin-barabani">O‘yin barabani</a>
+    <a class="btn" href="/ovoz-olchovchi">Ovoz o‘lchovchi</a>
+    <a class="btn" href="/tekst-ovoz">Tekst → Ovo‍z</a>
+    <a class="btn" href="/soxta-wifi-parol-joylashuv-aniqlovchi">Soxta Wi-Fi parol aniqlovchi PRO</a>
+    <a class="btn" href="/rangligradient">Rangli sensor</a>
+    <a class="btn new" href="/3d-qol-boshqaruvi">3D Shakl boshqaruvi</a>
+    <a class="btn new" href="/ai-kamera">Aqlli kamera</a>
+    <a class="btn new" href="/musiqa-zarba-kuzatuvchi">Musiqa pleyeri</a>
   </div>
-</header>
 
-
-<!-- ❄ Qor -->
-<div class="snow"></div>
-
-
-<!-- Overlay layer -->
-<div class="overlay"></div>
-
-<!-- Eski soat joylashuvi o'chirildi, chunki u tepaga ko'chirildi -->
-
-<h1>Prank-as orqali do‘stlaringiz bilan hazillashing!</h1>
+  <p class="subtitle">Vaqti-vaqti bilan yangilanib turadigan faktlar:</p>
   
-  <p class="subtitle">
-Prank-as — tajriba va ko‘ngilochar maqsadlarda
-yaratilgan onlayn platforma.
-</p>
+  <section style="max-width:900px;margin:50px auto;background:rgba(0,0,0,0.4);padding:25px;border-radius:12px;backdrop-filter:blur(8px);box-shadow:0 8px 25px rgba(0,0,0,0.4);">
+    <h2 style="margin-bottom:20px;font-size:28px;font-weight:700;text-align:center;">🌐 2025-yilda Internetdagi Eng Foydali Saytlar</h2>
+    <p style="margin-bottom:15px;">Internetda millionlab saytlar bor, lekin ularning barchasi foydali emas...</p>
+    <h3 style="margin-top:25px;">1️⃣ Google.com — Eng kuchli qidiruv tizimi</h3>
+    <p>Google internetda eng ko‘p ishlatiladigan qidiruv tizimi bo‘lib, deyarli barcha savollarga javob topish mumkin.</p>
+    </section>
 
+  <button class="top-left-menu-toggle">
+    <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+  </button>
 
+  <nav id="dropdown-menu" class="dropdown-menu-small">
+    <a href="/index">🏠 Bosh sahifa</a>
+    <a href="/disclaimer">Disclaimer</a>
+    <a href="#" id="installAppBtn">📱 Ilovani o‘rnatish</a>
+    <a href="#" id="resetChoice">♻️ Tanlovni tiklash</a>
+    <a href="https://help.prank-as.site">Yordam</a>
+    <a href="https://old.prank-as.site">Oldingi saytga qaytish</a>
+    <a href="/about">About</a>
+    <a href="/contact">Contact</a>
+  </nav>
 
-<div class="button-container">
-  <a class="btn" href="/soxta-ulanish-sistemasi">Soxta ulanish sistemasi</a>
-  <a class="btn" href="/soxta-uyin-bank-kartasi">Soxta o‘yin bank kartasi</a>
-  <a class="btn" href="/soxta-wifi-parol-aniqlovchi">Soxta Wi-Fi parol aniqlovchi</a>
-  <a class="btn" href="/soxta-joylashuv-aniqlovchi">Soxta joylashuv aniqlovchi</a>
-  <a class="btn" href="/soxta-random-yashash-joyi">Soxta random yashash joyi</a>
-  <a class="btn" href="/soxta-shaxs-aniqlovchi">Soxta shaxs aniqlovchi</a>
-  <a class="btn" href="/avtoraqam-rasm-generatori">Avtoraqam rasm generatori</a>
-  <a class="btn" href="/soxta-parol-aniqlovchi">Soxta parol aniqlovchi</a>
-  <a class="btn" href="/soxta-balans-aniqlovchi">Soxta balans aniqlovchi</a>
-  <a class="btn" href="/oyin-barabani">O‘yin barabani</a>
-  <a class="btn" href="/ovoz-olchovchi">Ovoz o‘lchovchi</a>
-  <a class="btn" href="/tekst-ovoz">Tekst → Ovo‍z</a>
-  <a class="btn" href="/soxta-wifi-parol-joylashuv-aniqlovchi">Soxta Wi-Fi parol aniqlovchi PRO</a>
-  <a class="btn" href="/rangligradient">Rangli sensor</a>
-  <a class="btn new" href="/3d-qol-boshqaruvi">3D Shakl boshqaruvi</a>
-  <a class="btn new" href="/ai-kamera">Aqlli kamera</a>
-  <a class="btn new" href="/musiqa-zarba-kuzatuvchi">Musiqa pleyeri</a>
-</div>
+  <div class="top-message" id="topMsg"></div>
 
-
-<p class="subtitle">
-Vaqti-vaqti bilan yangilanib turadigan faktlar:</p>
-
-  
-<section style="max-width:900px;margin:50px auto;background:rgba(0,0,0,0.4);padding:25px;border-radius:12px;backdrop-filter:blur(8px);box-shadow:0 8px 25px rgba(0,0,0,0.4);">
-  <h2 style="margin-bottom:20px;font-size:28px;font-weight:700;text-align:center;">
-    🌐 2025-yilda Internetdagi Eng Foydali Saytlar
-  </h2>
-
-  <p style="margin-bottom:15px;">
-    Internetda millionlab saytlar bor, lekin ularning barchasi foydali emas. Quyida 2025-yilda 
-    foydalanuvchilar eng ko‘p tashrif buyurgan, haqiqiy yordam beradigan va hayotni osonlashtiradigan saytlar ro‘yxati keltirilgan.
-  </p>
-
-  <h3 style="margin-top:25px;">1️⃣ Google.com — Eng kuchli qidiruv tizimi</h3>
-  <p>
-    Google internetda eng ko‘p ishlatiladigan qidiruv tizimi bo‘lib, deyarli barcha savollarga javob topish mumkin. 
-    Qidiruv, xaritalar, tarjimon, Gmail, Drive — bularning barchasi hayotni yengillashtiradi.
-  </p>
-
-  <h3 style="margin-top:25px;">2️⃣ Wikipedia.org — Bepul bilimlar ensiklopediyasi</h3>
-  <p>
-    50 milliondan ortiq maqolalari bilan Wikipedia dunyodagi eng katta ochiq ensiklopediyadir. 
-    O‘quvchilar, talabalar, tadqiqotchilar uchun bebaho manba.
-  </p>
-
-  <h3 style="margin-top:25px;">3️⃣ YouTube.com — Video darslar va ko‘ngilochar kontent</h3>
-  <p>
-    YouTube faqat ko‘ngilochar emas, balki ta’lim, dasturlash, matematika, musiqa va boshqa ko‘plab 
-    sohalar bo‘yicha bepul darsliklar joylashgan platforma hisoblanadi.
-  </p>
-
-  <h3 style="margin-top:25px;">4️⃣ Archive.org — Eski kitoblar, filmlar va saytlar arxivi</h3>
-  <p>
-    Kerakli eski saytlar, dasturlar yoki tarixiy hujjatlarni topmoqchi bo‘lsang — Archive.org eng yaxshi manba. 
-    Internet tarixini ko‘rish imkonini beradi.
-  </p>
-
-  <h3 style="margin-top:25px;">5️⃣ Canva.com — Onlayn dizayn platformasi</h3>
-  <p>
-    Instagram postlari, vizitkalar, bannerlar, logotiplar, prezentatsiyalar — hammasini hech qanday 
-    dastur o‘rnatmasdan yaratish mumkin.
-  </p>
-
-  <h3 style="margin-top:25px;">6️⃣ ChatGPT — sun’iy intellekt yordamchisi</h3>
-  <p>
-    Matn yozish, tarjima qilish, kod yaratish, g‘oya topish va murakkab muammolarni tushuntirishda 
-    ChatGPT yordam beradi. 2025-yilda eng ommabop AI vositalaridan biri.
-  </p>
-
-  <h3 style="margin-top:25px;">7️⃣ Udemy.com — Onlayn kurslar platformasi</h3>
-  <p>
-    Dasturlash, dizayn, marketing, biznes va boshqa yuzlab sohalarda pullik va bepul kurslar mavjud. 
-    Sertifikat ham olish mumkin.
-  </p>
-
-  <h3 style="margin-top:25px;">8️⃣ Cloudflare.com — Sayt xavfsizligi va tezligi</h3>
-  <p>
-    Sayt egalari uchun muhim vosita: DDoS himoyasi, SSL sertifikatlari va kech-reaksiyani kamaytiradigan CDN xizmatlari mavjud.
-  </p>
-
-  <p style="margin-top:30px;margin-bottom:10px;font-weight:600;">
-    🔚 Xulosa: Ushbu saytlar 2025-yilda internetdan samarali foydalanish uchun eng asosiy foydali manbalardir.
-  </p>
-</section>
-
-<button class="top-left-menu-toggle">
-  <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
-</button>
-
-<div class="overlay"></div>
-
-<nav id="dropdown-menu" class="dropdown-menu-small">
-  <a href="/index">🏠 Bosh sahifa</a>
-  <a href="/disclaimer">Disclaimer</a>
-  <a href="#" id="installAppBtn">📱 Ilovani o‘rnatish</a>
-  <a href="#" id="resetChoice">♻️ Tanlovni tiklash</a>
-  <a href="https://help.prank-as.site">Yordam</a>
-  <a href="https://old.prank-as.site">Oldingi saytga qaytish</a>
-<a href="/about">About</a>
-  <a href="/contact">Contact</a>
-</nav>
-
-<div class="top-message" id="topMsg"></div>
-
-<script>
-// Fade message
-function showMessage(text,time=2500){
-  const msg=document.getElementById('topMsg');
-  msg.textContent=text;
-  msg.classList.add('show');
-  setTimeout(()=>msg.classList.remove('show'),time);
-}
-
-// Service Worker
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js');});
-}
-
-// Menu toggle (click + touchstart)
-const menuBtn=document.querySelector('.top-left-menu-toggle');
-const menu=document.getElementById('dropdown-menu');
-const overlay=document.querySelector('.overlay');
-
-function toggleMenu(e){
-  e.preventDefault();
-  menu.classList.toggle('show');
-  overlay.classList.toggle('show');
-}
-
-menuBtn.addEventListener('click', toggleMenu);
-menuBtn.addEventListener('touchstart', toggleMenu);
-overlay.addEventListener('click',()=>{menu.classList.remove('show');overlay.classList.remove('show');});
-
-// Reset choice
-document.getElementById('resetChoice').addEventListener('click',()=>{
-  localStorage.removeItem('continueChoice');
-  localStorage.removeItem('promo');
-  showMessage("Tanlov tiklandi! Endi yangilang 🔄");
-});
-
-// PWA install
-let installPrompt;
-window.addEventListener('beforeinstallprompt', e=>{e.preventDefault();installPrompt=e;});
-document.getElementById('installAppBtn').addEventListener('click', async()=>{
-  if(installPrompt){
-    installPrompt.prompt();
-    const {outcome}=await installPrompt.userChoice;
-    if(outcome==='accepted') showMessage("✅ Ilova o‘rnatilmoqda...");
-    else showMessage("❌ O‘rnatish bekor qilindi");
-    installPrompt=null;
-  } else showMessage("Bu brauzer qo‘llamaydi 😕");
-});
-
-// Tugmalar animatsiya delay
-document.querySelectorAll('.button-container a').forEach((btn,i)=>{
-  btn.style.animationDelay=`${i*0.15}s`;
-});
-
-// Kompyuter soati
-function updateClock() {
-  const now = new Date();
-  document.getElementById("desktopClock").textContent =
-    `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} | ${String(now.getDate()).padStart(2,'0')}:${String(now.getMonth()+1).padStart(2,'0')}:${now.getFullYear()}`;
-}
-setInterval(updateClock,1000);
-updateClock();
-
-
-setInterval(updateClock,1000);
-updateClock();
-// Yangi tugmalarni tepaga chiqarish
-const container = document.querySelector('.button-container');
-const newBtns = Array.from(container.querySelectorAll('.btn.new'));
-
-newBtns.forEach(btn => {
-  const tag = document.createElement('span');
-  tag.className = 'tag';
-  tag.textContent = 'YANGI';
-  btn.appendChild(tag);
-  container.prepend(btn);
-});
-
-// 🔁 Animatsiya delay'ni QAYTA hisoblash
-Array.from(container.children).forEach((btn, i) => {
-  btn.style.animationDelay = `${i * 0.15}s`;
-});
-
-
-// ❄ Minimal qor funksiyasi
-function createSnow() {
-  const container = document.querySelector('.snow');
-  for (let i = 0; i < 10; i++) {
-    let flake = document.createElement("div");
-    flake.className = "snowflake";
-    flake.textContent = "❄";
-    flake.style.left = Math.random() * 100 + "vw";
-    flake.style.fontSize = (6 + Math.random() * 6) + "px";
-    flake.style.animationDuration = (6 + Math.random() * 8) + "s";
-    container.appendChild(flake);
-    setTimeout(() => flake.remove(), 15000);
-  }
-}
-createSnow();
-setInterval(createSnow, 5000);
-  
-  // SUPABASE UCHUN! O'CHIB KETMASIN
-</script>
-  
-  <script type="module">
+<script type="module">
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-  // Те же данные, что и в auth.html
-  const supabase = createClient(
-    'https://GEFAQRFJZWEMWUXUOADP.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'
-  )
-
-  async function checkUser() {
-    // 1. Проверяем текущую сессию
-    const { data: { session } } = await supabase.auth.getSession()
-
-    if (session?.user) {
-      console.log('Пользователь найден:', session.user)
-      const userIcon = document.querySelector('.user-icon')
-      
-      // 2. Если пользователь есть, меняем иконку на его фото
-      if (userIcon && session.user.user_metadata.picture) {
-        userIcon.innerHTML = `
-          <img src="${session.user.user_metadata.picture}" 
-               alt="User" 
-               style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
-        `
-        // (Опционально) При клике на фото можно отправлять на страницу выхода или профиля
-        userIcon.href = "/auth" 
-      }
-    }
-  }
-
-  // Запускаем проверку
-  checkUser()
-
-    // SUPABASE UCHUN! O'CHIB KETMASIN! 
-  
-  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
+  // KONFIGURATSIYA
   const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co'
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'
-
+  
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-  const openedAt = new Date()
-
-  // 🧠 PRANK NOMINI URL’dan olish
-  const PRANK_NAME = location.pathname
-    .replaceAll('/', '')
-    .replace('.html', '')
-    || 'unknown'
-
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (user) {
-    window.addEventListener('beforeunload', async () => {
-      const duration = Math.floor((Date.now() - openedAt.getTime()) / 1000)
-
-      await supabase.from('user_activity').insert({
-        user_id: user.id,
-        prank_name: PRANK_NAME,
-        opened_at: openedAt.toISOString(),
-        duration
-      })
-    })
+  // 1. Foydalanuvchi tekshirish va Icon o'zgartirish
+  async function checkUser() {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session?.user) {
+      console.log('Foydalanuvchi:', session.user)
+      const userIcon = document.querySelector('.user-icon')
+      if (userIcon && session.user.user_metadata?.picture) {
+        userIcon.innerHTML = `<img src="${session.user.user_metadata.picture}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`
+        userIcon.href = "/auth"
+      }
+    }
+    return session?.user
   }
 
+  // 2. Statistikani yuborish (Edge Function orqali)
+  async function sendStats() {
+    const user = await checkUser() // Userni olamiz
 
-  // SUPABASE UCHUN! O'CHIB KETMASIN
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+    // Sahifa nomini to'g'irlash
+    let pageName = location.pathname.replaceAll('/', '').replace('.html', '');
+    if (!pageName || pageName.trim() === '') {
+        pageName = 'Bosh sahifa';
+    }
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    console.log("Statistika yuborilmoqda:", pageName);
 
-const { data } = await supabase.auth.getUser()
-const user = data.user
+    // Edge Function chaqiramiz (Bu yerda IP avtomatik aniqlanadi)
+    fetch(`${SUPABASE_URL}/functions/v1/track-activity`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+      },
+      body: JSON.stringify({
+        user_id: user?.id ?? null,
+        email: user?.email ?? null,
+        prank_name: pageName,
+        duration: 0 // Boshlanishida 0
+      })
+    }).catch(err => console.error("Statistika xatosi:", err));
+  }
 
-fetch('https://gefaqrfjzwemwuxuoadp.supabase.co/functions/v1/track-activity', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    user_id: user?.id ?? null,
-    email: user?.email ?? null,
-    prank_name: location.pathname.replace(/\//g,''),
-    duration: 15
-  })
-})
+  // Ishga tushirish
+  sendStats();
+
+  // --- UI SKRIPTLARI ---
+  // Menu toggle
+  const menuBtn=document.querySelector('.top-left-menu-toggle');
+  const menu=document.getElementById('dropdown-menu');
+  const overlay=document.querySelector('.overlay');
+  function toggleMenu(e){e.preventDefault();menu.classList.toggle('show');overlay.classList.toggle('show');}
+  menuBtn.addEventListener('click', toggleMenu);
+  overlay.addEventListener('click',()=>{menu.classList.remove('show');overlay.classList.remove('show');});
+
+  // Soat
+  function updateClock() {
+    const now = new Date();
+    document.getElementById("desktopClock").textContent =
+      `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} | ${String(now.getDate()).padStart(2,'0')}:${String(now.getMonth()+1).padStart(2,'0')}:${now.getFullYear()}`;
+  }
+  setInterval(updateClock,1000); updateClock();
+
+  // Yangi tugmalar
+  const container = document.querySelector('.button-container');
+  const newBtns = Array.from(container.querySelectorAll('.btn.new'));
+  newBtns.forEach(btn => {
+    const tag = document.createElement('span'); tag.className = 'tag'; tag.textContent = 'YANGI';
+    btn.appendChild(tag); container.prepend(btn);
+  });
+  
+  // Qor
+  function createSnow() {
+    const container = document.querySelector('.snow');
+    for (let i = 0; i < 10; i++) {
+      let flake = document.createElement("div"); flake.className = "snowflake"; flake.textContent = "❄";
+      flake.style.left = Math.random() * 100 + "vw";
+      flake.style.fontSize = (6 + Math.random() * 6) + "px";
+      flake.style.animationDuration = (6 + Math.random() * 8) + "s";
+      container.appendChild(flake);
+      setTimeout(() => flake.remove(), 15000);
+    }
+  }
+  createSnow(); setInterval(createSnow, 5000);
 </script>
 </body>
 </html>
