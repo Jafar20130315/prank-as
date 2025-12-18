@@ -1,109 +1,155 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-<meta charset="UTF-8">
-<title>Sozlamalar</title>
-<script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sozlamalar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="bg-slate-900 text-white p-6">
 
-<h1 class="text-2xl font-bold mb-4">Statistika</h1>
+    <div class="max-w-7xl mx-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold">Statistika</h1>
+            <button onclick="location.reload()" class="text-sm bg-white/10 hover:bg-white/20 px-3 py-1 rounded transition">
+                Yangilash
+            </button>
+        </div>
 
-<table class="w-full text-sm border border-white/10">
-<thead class="bg-white/10">
-<tr>
-  <th class="p-2">Foydalanuvchi</th>
-  <th class="p-2">Email</th>
-  <th class="p-2">Sahifa</th>
-  <th class="p-2">IP</th>
-  <th class="p-2">Joylashuv</th>
-  <th class="p-2">Vaqt</th>
-  <th class="p-2">Davomiylik</th>
-</tr>
-</thead>
-<tbody id="body"></tbody>
-</table>
+        <div class="overflow-x-auto rounded-lg border border-white/10">
+            <table class="w-full text-sm text-left">
+                <thead class="bg-white/10 text-xs uppercase text-gray-300">
+                    <tr>
+                        <th class="p-3">Foydalanuvchi</th>
+                        <th class="p-3">Email</th>
+                        <th class="p-3">Sahifa</th>
+                        <th class="p-3">IP</th>
+                        <th class="p-3">Joylashuv</th>
+                        <th class="p-3">Vaqt</th>
+                        <th class="p-3 text-center">Davomiylik</th>
+                    </tr>
+                </thead>
+                <tbody id="body" class="divide-y divide-white/10">
+                    <tr>
+                        <td colspan="7" class="p-4 text-center text-gray-400">Yuklanmoqda...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-<script type="module">
-const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co'
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'
-const ADMIN_UUID = 'f5c0015c-51ef-4f5a-a989-afa85250f012'
-</script>
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-<script type="module">
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+        // Konfiguratsiya (Bitta joyda)
+        const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co'
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'
+        const ADMIN_UUID = 'f5c0015c-51ef-4f5a-a989-afa85250f012'
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-const body = document.getElementById('body')
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        const body = document.getElementById('body')
 
-// Admin tekshiruvi
-async function checkAdmin() {
-  const { data: { user }, error } = await supabase.auth.getUser()
-  if (error || !user || user.id !== ADMIN_UUID) {
-    location.href = '/'
-    return null
-  }
-  return user
-}
+        // 1. Admin tekshiruvi
+        async function checkAdmin() {
+            try {
+                const { data: { user }, error } = await supabase.auth.getUser()
+                
+                if (error || !user || user.id !== ADMIN_UUID) {
+                    console.warn("Ruxsat yo'q yoki foydalanuvchi admin emas")
+                    // Agar admin bo'lmasa, bosh sahifaga yo'naltirish
+                    window.location.href = '/' 
+                    return null
+                }
+                return user
+            } catch (err) {
+                console.error("Auth xatosi:", err)
+                return null
+            }
+        }
 
-// Jadvalni yuklash
-async function loadStats() {
-  const admin = await checkAdmin()
-  if (!admin) return
+        // 2. Jadvalni yuklash
+        async function loadStats() {
+            const admin = await checkAdmin()
+            if (!admin) return
 
-  const { data } = await supabase
-    .from('user_activity')
-    .select('*')
-    .order('opened_at', { ascending: false })
+            // Asosiy ma'lumotlarni olish
+            const { data, error } = await supabase
+                .from('user_activity')
+                .select('*')
+                .order('opened_at', { ascending: false })
+                .limit(100) // Juda ko'p ma'lumot bo'lsa qotib qolmasligi uchun limit
 
-  body.innerHTML = ''
+            if (error) {
+                console.error("Ma'lumot olishda xato:", error)
+                body.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-red-400">Xatolik yuz berdi: ${error.message}</td></tr>`
+                return
+            }
 
-  for (let r of data) {
-    let user_name = 'No’malum'
-    let user_email = '-'
-    let profile_img = ''
+            if (!data || data.length === 0) {
+                body.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-gray-400">Ma'lumot topilmadi</td></tr>`
+                return
+            }
 
-    if (r.user_id) {
-      const { data: userData } = await supabase
-        .from('users')
-        .select('email, user_metadata')
-        .eq('id', r.user_id)
-        .single()
+            // HTML generatsiya qilish
+            let htmlContent = ''
 
-      if (userData) {
-        user_email = userData.email ?? '-'
-        user_name = userData.user_metadata?.full_name ?? 'No’malum'
-        profile_img = userData.user_metadata?.picture ?? ''
-      }
-    }
+            for (let r of data) {
+                let user_name = 'No’malum'
+                let user_email = '-'
+                let profile_img = ''
 
-    body.innerHTML += `
-      <tr class="border-t border-white/10">
-        <td class="p-2 flex items-center gap-2">
-          ${profile_img ? `<img src="${profile_img}" alt="Profil" class="w-6 h-6 rounded-full object-cover">` : ''}
-          ${user_name}
-        </td>
-        <td class="p-2">${user_email}</td>
-        <td class="p-2">${r.prank_name ?? 'unknown'}</td>
-        <td class="p-2">${r.ip ?? '-'}</td>
-        <td class="p-2">${r.country ?? '-'}, ${r.city ?? '-'}</td>
-        <td class="p-2">${new Date(r.opened_at).toLocaleString()}</td>
-        <td class="p-2 text-center">${r.duration ?? '-'}</td>
-      </tr>`
-  }
-}
+                // Agar user_id bo'lsa, 'users' jadvalidan ma'lumot izlaymiz
+                if (r.user_id) {
+                    const { data: userData } = await supabase
+                        .from('users') // DIQQAT: Bu yerda 'users' jadvali public schemada bo'lishi kerak
+                        .select('email, user_metadata')
+                        .eq('id', r.user_id)
+                        .single()
 
-// Boshlang‘ich yuklash
-loadStats()
+                    if (userData) {
+                        user_email = userData.email ?? '-'
+                        // user_metadata ichidagi maydonlar Supabase sozlamalariga qarab farq qilishi mumkin
+                        user_name = userData.user_metadata?.full_name || userData.user_metadata?.name || 'Foydalanuvchi'
+                        profile_img = userData.user_metadata?.picture || userData.user_metadata?.avatar_url || ''
+                    }
+                }
 
-// Real-time yangilanish
-supabase.channel('rt')
-.on('postgres_changes',
- { event:'INSERT', schema:'public', table:'user_activity' },
- () => loadStats()
-).subscribe()
-</script>
+                htmlContent += `
+                    <tr class="hover:bg-white/5 transition">
+                        <td class="p-3 flex items-center gap-3">
+                            ${profile_img 
+                                ? `<img src="${profile_img}" alt="Ava" class="w-8 h-8 rounded-full object-cover border border-white/20">` 
+                                : `<div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs">?</div>`
+                            }
+                            <span class="font-medium">${user_name}</span>
+                        </td>
+                        <td class="p-3 text-gray-300">${user_email}</td>
+                        <td class="p-3"><span class="bg-blue-500/20 text-blue-300 px-2 py-1 rounded text-xs">${r.prank_name ?? 'unknown'}</span></td>
+                        <td class="p-3 font-mono text-xs text-gray-400">${r.ip ?? '-'}</td>
+                        <td class="p-3 text-gray-300">${r.country ?? ''} ${r.city ? `(${r.city})` : '-'}</td>
+                        <td class="p-3 text-gray-400 whitespace-nowrap">${new Date(r.opened_at).toLocaleString('uz-UZ')}</td>
+                        <td class="p-3 text-center">${r.duration ?? '-'}</td>
+                    </tr>`
+            }
 
+            body.innerHTML = htmlContent
+        }
+
+        // 3. Ishga tushirish
+        loadStats()
+
+        // 4. Real-time (Real vaqtda kuzatish)
+        supabase.channel('rt_activity')
+            .on('postgres_changes',
+                { event: 'INSERT', schema: 'public', table: 'user_activity' },
+                (payload) => {
+                    console.log('Yangi faollik:', payload)
+                    loadStats() // Yangi ma'lumot kelganda jadvalni yangilash
+                }
+            )
+            .subscribe()
+
+    </script>
 </body>
 </html>
