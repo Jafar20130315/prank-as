@@ -4,14 +4,12 @@
   <meta charset="UTF-8">
   <title>Settings</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- Tailwind (dev uchun) -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="bg-slate-900 text-white p-6">
 
-  <h1 class="text-3xl font-bold mb-6">Admin statistika</h1>
+  <h1 class="text-3xl font-bold mb-6">Admin statistika (Real-Time)</h1>
 
   <table class="w-full border border-white/10 text-sm">
     <thead class="bg-white/10">
@@ -28,73 +26,75 @@
   <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-    // 🔐 SUPABASE
     const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co'
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'
 
-    // 👑 ADMIN UUID (Auth → Users dan olingan)
     const ADMIN_UUID = 'f5c0015c-51ef-4f5a-a989-afa85250f012'
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
     const tbody = document.getElementById('stats')
 
+    // 🔹 Jadvalni yangilash funksiyasi
     async function loadAdminStats() {
-      // 1️⃣ Hozirgi user
-      const { data: { user }, error } = await supabase.auth.getUser()
+      try {
+        const { data, error } = await supabase
+          .from('user_activity')
+          .select('user_id, prank_name, opened_at, duration')
+          .order('opened_at', { ascending: false })
 
-      if (error || !user) {
-        location.href = '/'
-        return
-      }
+        if (error) throw error
 
-      // 2️⃣ UUID orqali ADMIN tekshiruv
-      if (user.id !== ADMIN_UUID) {
-        location.href = '/'
-        return
-      }
+        tbody.innerHTML = ''
 
-      // 3️⃣ DATA olish
-      const { data, error: selectError } = await supabase
-        .from('user_activity')
-        .select('user_id, prank_name, opened_at, duration')
-        .order('opened_at', { ascending: false })
+        if (!data || data.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="4" class="p-4 text-center text-white/50">
+                Maʼlumot yo‘q
+              </td>
+            </tr>
+          `
+          return
+        }
 
-      if (selectError) {
-        alert(selectError.message)
-        return
-      }
-
-      // 4️⃣ Jadvalni to‘ldirish
-      tbody.innerHTML = ''
-
-      if (!data || data.length === 0) {
+        data.forEach(row => {
+          const tr = document.createElement('tr')
+          tr.innerHTML = `
+            <td class="p-2 border-t border-white/10 break-all">${row.user_id}</td>
+            <td class="p-2 border-t border-white/10">${row.prank_name}</td>
+            <td class="p-2 border-t border-white/10">
+              ${new Date(row.opened_at).toLocaleString()}
+            </td>
+            <td class="p-2 border-t border-white/10 text-center">
+              ${row.duration ?? '-'}
+            </td>
+          `
+          tbody.appendChild(tr)
+        })
+      } catch (err) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="4" class="p-4 text-center text-white/50">
-              Maʼlumot yo‘q
+            <td colspan="4" class="p-4 text-center text-red-400">
+              Xatolik: ${err.message}
             </td>
           </tr>
         `
-        return
       }
-
-      data.forEach(row => {
-        const tr = document.createElement('tr')
-        tr.innerHTML = `
-          <td class="p-2 border-t border-white/10 break-all">${row.user_id}</td>
-          <td class="p-2 border-t border-white/10">${row.prank_name}</td>
-          <td class="p-2 border-t border-white/10">
-            ${new Date(row.opened_at).toLocaleString()}
-          </td>
-          <td class="p-2 border-t border-white/10 text-center">
-            ${row.duration ?? '-'}
-          </td>
-        `
-        tbody.appendChild(tr)
-      })
     }
 
+    // 🔹 Real-time obuna
+    const channel = supabase.channel('public:user_activity')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'user_activity' }, payload => {
+        loadAdminStats()
+      })
+      .subscribe()
+
+    // 🔹 Dastlabki yuklash
     loadAdminStats()
+
+    // 🔹 Har 10 soniyada zaxira yangilash (agar real-time ishlamasa)
+    setInterval(loadAdminStats, 10000)
+
   </script>
 
 </body>
