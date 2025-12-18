@@ -2,9 +2,10 @@
 <html lang="uz">
 <head>
   <meta charset="UTF-8">
-  <title>Prank-as — Admin</title>
+  <title>Admin Panel</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
+  <!-- Tailwind (dev uchun) -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
@@ -27,46 +28,73 @@
   <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+    // 🔐 SUPABASE
     const SUPABASE_URL = 'https://GEFAQRFJZWEMWUXUOADP.supabase.co'
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'
 
-    const ADMIN_ID = 'f5c0015c-51ef-4f5a-a989-afa85250f012' // supabase.auth.getUser() orqali olingan admin id
+    // 👑 ADMIN UUID (Auth → Users dan olingan)
+    const ADMIN_UUID = 'f5c0015c-51ef-4f5a-a989-afa85250f012'
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
     const tbody = document.getElementById('stats')
 
-    const checkAdminAndLoad = async () => {
-      const { data: { user }, error: userError } = await supabase.auth.getUser()
-      if (userError || !user || user.id !== ADMIN_ID) {
-        location.href = '/'  // Admin emas → bosh sahifaga
+    async function loadAdminStats() {
+      // 1️⃣ Hozirgi user
+      const { data: { user }, error } = await supabase.auth.getUser()
+
+      if (error || !user) {
+        location.href = '/'
         return
       }
 
-      const { data, error } = await supabase
+      // 2️⃣ UUID orqali ADMIN tekshiruv
+      if (user.id !== ADMIN_UUID) {
+        location.href = '/'
+        return
+      }
+
+      // 3️⃣ DATA olish
+      const { data, error: selectError } = await supabase
         .from('user_activity')
-        .select('*')
-        .order('opened_at', { ascending: false }) // oldin created_at edi, endi opened_at
+        .select('user_id, prank_name, opened_at, duration')
+        .order('opened_at', { ascending: false })
 
-      if (error) {
-        alert(error.message)
+      if (selectError) {
+        alert(selectError.message)
         return
       }
 
-      tbody.innerHTML = '' // eski satrlarni tozalash
+      // 4️⃣ Jadvalni to‘ldirish
+      tbody.innerHTML = ''
+
+      if (!data || data.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4" class="p-4 text-center text-white/50">
+              Maʼlumot yo‘q
+            </td>
+          </tr>
+        `
+        return
+      }
 
       data.forEach(row => {
         const tr = document.createElement('tr')
         tr.innerHTML = `
-          <td class="p-2 border-t border-white/10">${row.user_id}</td>
+          <td class="p-2 border-t border-white/10 break-all">${row.user_id}</td>
           <td class="p-2 border-t border-white/10">${row.prank_name}</td>
-          <td class="p-2 border-t border-white/10">${new Date(row.opened_at).toLocaleString()}</td>
-          <td class="p-2 border-t border-white/10">${row.duration || '-'}</td>
+          <td class="p-2 border-t border-white/10">
+            ${new Date(row.opened_at).toLocaleString()}
+          </td>
+          <td class="p-2 border-t border-white/10 text-center">
+            ${row.duration ?? '-'}
+          </td>
         `
         tbody.appendChild(tr)
       })
     }
 
-    checkAdminAndLoad()
+    loadAdminStats()
   </script>
 
 </body>
