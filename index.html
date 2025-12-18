@@ -429,8 +429,8 @@ function createSnow() {
 }
 createSnow();
 setInterval(createSnow, 5000);
-
-
+  
+  // SUPABASE UCHUN! O'CHIB KETMASIN
 </script>
   
   <script type="module">
@@ -465,6 +465,41 @@ setInterval(createSnow, 5000);
 
   // Запускаем проверку
   checkUser()
+
+    // SUPABASE UCHUN! O'CHIB KETMASIN! 
+  </script>
+
+  <script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+  const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co'
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+  const openedAt = new Date()
+
+  // 🧠 PRANK NOMINI URL’dan olish
+  const PRANK_NAME = location.pathname
+    .replaceAll('/', '')
+    .replace('.html', '')
+    || 'unknown'
+
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (user) {
+    window.addEventListener('beforeunload', async () => {
+      const duration = Math.floor((Date.now() - openedAt.getTime()) / 1000)
+
+      await supabase.from('user_activity').insert({
+        user_id: user.id,
+        prank_name: PRANK_NAME,
+        opened_at: openedAt.toISOString(),
+        duration
+      })
+    })
+  }
 </script>
+
 </body>
 </html>
