@@ -14,7 +14,8 @@
   <table class="w-full border border-white/10 text-sm">
     <thead class="bg-white/10">
       <tr>
-        <th class="p-2 text-left">User ID</th>
+        <th class="p-2 text-left">User</th>
+        <th class="p-2 text-left">Email</th>
         <th class="p-2 text-left">Prank</th>
         <th class="p-2 text-left">Vaqt</th>
         <th class="p-2 text-left">Davomiylik (sec)</th>
@@ -34,12 +35,37 @@
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
     const tbody = document.getElementById('stats')
 
-    // 🔹 Jadvalni yangilash funksiyasi
+    const PRANK_TITLES = {
+      'soxta-ulanish-sistemasi': 'Soxta ulanish sistemasi',
+      'soxta-uyin-bank-kartasi': 'Soxta o‘yin bank kartasi',
+      'soxta-wifi-parol-aniqlovchi': 'Soxta Wi-Fi parol aniqlovchi',
+      'soxta-joylashuv-aniqlovchi': 'Soxta joylashuv aniqlovchi',
+      'soxta-random-yashash-joyi': 'Soxta random yashash joyi',
+      'soxta-shaxs-aniqlovchi': 'Soxta shaxs aniqlovchi',
+      'avtoraqam-rasm-generatori': 'Avtoraqam rasm generatori',
+      'soxta-parol-aniqlovchi': 'Soxta parol aniqlovchi',
+      'soxta-balans-aniqlovchi': 'Soxta balans aniqlovchi',
+      'oyin-barabani': 'O‘yin barabani',
+      'ovoz-olchovchi': 'Ovoz o‘lchovchi',
+      'tekst-ovoz': 'Tekst → Ovo‍z',
+      'soxta-wifi-parol-joylashuv-aniqlovchi': 'Soxta Wi-Fi parol aniqlovchi PRO',
+      'rangligradient': 'Rangli sensor',
+      '3d-qol-boshqaruvi': '3D Shakl boshqaruvi',
+      'ai-kamera': 'Aqlli kamera',
+      'musiqa-zarba-kuzatuvchi': 'Musiqa pleyeri'
+    }
+
     async function loadAdminStats() {
       try {
         const { data, error } = await supabase
           .from('user_activity')
-          .select('user_id, prank_name, opened_at, duration')
+          .select(`
+            user_id,
+            prank_name,
+            opened_at,
+            duration,
+            users(email, user_metadata)
+          `)
           .order('opened_at', { ascending: false })
 
         if (error) throw error
@@ -49,7 +75,7 @@
         if (!data || data.length === 0) {
           tbody.innerHTML = `
             <tr>
-              <td colspan="4" class="p-4 text-center text-white/50">
+              <td colspan="5" class="p-4 text-center text-white/50">
                 Maʼlumot yo‘q
               </td>
             </tr>
@@ -58,23 +84,28 @@
         }
 
         data.forEach(row => {
+          const title = PRANK_TITLES[row.prank_name] || row.prank_name || 'unknown'
+          const email = row.users?.email || '-'
+          const name = row.users?.user_metadata?.full_name || 'Noma’lum'
+          const picture = row.users?.user_metadata?.picture || ''
+
           const tr = document.createElement('tr')
           tr.innerHTML = `
-            <td class="p-2 border-t border-white/10 break-all">${row.user_id}</td>
-            <td class="p-2 border-t border-white/10">${row.prank_name}</td>
-            <td class="p-2 border-t border-white/10">
-              ${new Date(row.opened_at).toLocaleString()}
+            <td class="p-2 border-t border-white/10 flex items-center gap-2">
+              ${picture ? `<img src="${picture}" class="w-8 h-8 rounded-full object-cover">` : ''}
+              <span>${name}</span>
             </td>
-            <td class="p-2 border-t border-white/10 text-center">
-              ${row.duration ?? '-'}
-            </td>
+            <td class="p-2 border-t border-white/10 break-all">${email}</td>
+            <td class="p-2 border-t border-white/10">${title}</td>
+            <td class="p-2 border-t border-white/10">${new Date(row.opened_at).toLocaleString()}</td>
+            <td class="p-2 border-t border-white/10 text-center">${row.duration ?? '-'}</td>
           `
           tbody.appendChild(tr)
         })
       } catch (err) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="4" class="p-4 text-center text-red-400">
+            <td colspan="5" class="p-4 text-center text-red-400">
               Xatolik: ${err.message}
             </td>
           </tr>
@@ -92,7 +123,7 @@
     // 🔹 Dastlabki yuklash
     loadAdminStats()
 
-    // 🔹 Har 10 soniyada zaxira yangilash (agar real-time ishlamasa)
+    // 🔹 Har 10 soniyada zaxira yangilash
     setInterval(loadAdminStats, 10000)
 
   </script>
