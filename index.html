@@ -501,5 +501,28 @@ setInterval(createSnow, 5000);
   }
 </script>
 
+
+  // SUPABASE UCHUN! O'CHIB KETMASIN
+  <script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+const { data } = await supabase.auth.getUser()
+const user = data.user
+
+fetch('https://gefaqrfjzwemwuxuoadp.supabase.co/functions/v1/track-activity', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    user_id: user?.id ?? null,
+    email: user?.email ?? null,
+    prank_name: location.pathname.replace(/\//g,''),
+    duration: 15
+  })
+})
+</script>
+
+
 </body>
 </html>
