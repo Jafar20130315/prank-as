@@ -1,155 +1,112 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sozlamalar</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Statistika</title>
+<script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="bg-slate-900 text-white p-6">
 
-    <div class="max-w-7xl mx-auto">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold">Statistika</h1>
-            <button onclick="location.reload()" class="text-sm bg-white/10 hover:bg-white/20 px-3 py-1 rounded transition">
-                Yangilash
-            </button>
-        </div>
+<div class="max-w-7xl mx-auto">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">📊 Statistika</h1>
+    <button onclick="location.reload()"
+      class="text-sm bg-white/10 hover:bg-white/20 px-3 py-1 rounded">
+      Yangilash
+    </button>
+  </div>
 
-        <div class="overflow-x-auto rounded-lg border border-white/10">
-            <table class="w-full text-sm text-left">
-                <thead class="bg-white/10 text-xs uppercase text-gray-300">
-                    <tr>
-                        <th class="p-3">Foydalanuvchi</th>
-                        <th class="p-3">Email</th>
-                        <th class="p-3">Sahifa</th>
-                        <th class="p-3">IP</th>
-                        <th class="p-3">Joylashuv</th>
-                        <th class="p-3">Vaqt</th>
-                        <th class="p-3 text-center">Davomiylik</th>
-                    </tr>
-                </thead>
-                <tbody id="body" class="divide-y divide-white/10">
-                    <tr>
-                        <td colspan="7" class="p-4 text-center text-gray-400">Yuklanmoqda...</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+  <div class="overflow-x-auto rounded-lg border border-white/10">
+    <table class="w-full text-sm">
+      <thead class="bg-white/10 text-xs uppercase text-gray-300">
+        <tr>
+          <th class="p-3">User</th>
+          <th class="p-3">Email</th>
+          <th class="p-3">Sahifa</th>
+          <th class="p-3">IP</th>
+          <th class="p-3">Joylashuv</th>
+          <th class="p-3">Vaqt</th>
+          <th class="p-3 text-center">Davomiylik</th>
+        </tr>
+      </thead>
+      <tbody id="body" class="divide-y divide-white/10">
+        <tr>
+          <td colspan="7" class="p-4 text-center text-gray-400">
+            Yuklanmoqda...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 
-    <script type="module">
-        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-        // Konfiguratsiya (Bitta joyda)
-        const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co'
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'
-        const ADMIN_UUID = 'c11bed70-f718-47dd-85ae-4764717a566c'
+const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co'
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'
+const ADMIN_UUID = 'c11bed70-f718-47dd-85ae-4764717a566c'
 
-        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-        const body = document.getElementById('body')
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+const body = document.getElementById('body')
 
-        // 1. Admin tekshiruvi
-        async function checkAdmin() {
-            try {
-                const { data: { user }, error } = await supabase.auth.getUser()
-                
-                if (error || !user || user.id !== ADMIN_UUID) {
-                    console.warn("Ruxsat yo'q yoki foydalanuvchi admin emas")
-                    // Agar admin bo'lmasa, bosh sahifaga yo'naltirish
-                    window.location.href = '/' 
-                    return null
-                }
-                return user
-            } catch (err) {
-                console.error("Auth xatosi:", err)
-                return null
-            }
+// Admin check
+async function checkAdmin() {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user || user.id !== ADMIN_UUID) {
+    location.href = '/'
+    return false
+  }
+  return true
+}
+
+async function loadStats() {
+  if (!(await checkAdmin())) return
+
+  const { data, error } = await supabase
+    .from('user_activity')
+    .select('*')
+    .order('opened_at', { ascending: false })
+    .limit(200)
+
+  if (error || !data?.length) {
+    body.innerHTML = `
+      <tr><td colspan="7" class="p-4 text-center text-gray-400">
+        Ma'lumot yo'q
+      </td></tr>`
+    return
+  }
+
+  body.innerHTML = data.map(r => `
+    <tr class="hover:bg-white/5">
+      <td class="p-3 flex items-center gap-3">
+        ${r.avatar_url
+          ? `<img src="${r.avatar_url}" class="w-8 h-8 rounded-full">`
+          : `<div class="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center">?</div>`
         }
+        <span>${r.user_name || 'Guest'}</span>
+      </td>
+      <td class="p-3 text-gray-300">${r.user_email || '-'}</td>
+      <td class="p-3">${r.prank_name}</td>
+      <td class="p-3 text-xs font-mono">${r.ip || '-'}</td>
+      <td class="p-3">${r.country || '-'} ${r.city ? `(${r.city})` : ''}</td>
+      <td class="p-3 text-gray-400">${new Date(r.opened_at).toLocaleString()}</td>
+      <td class="p-3 text-center">${r.duration || 0}s</td>
+    </tr>
+  `).join('')
+}
 
-        // 2. Jadvalni yuklash
-        async function loadStats() {
-            const admin = await checkAdmin()
-            if (!admin) return
+loadStats()
 
-            // Asosiy ma'lumotlarni olish
-            const { data, error } = await supabase
-                .from('user_activity')
-                .select('*')
-                .order('opened_at', { ascending: false })
-                .limit(100) // Juda ko'p ma'lumot bo'lsa qotib qolmasligi uchun limit
+supabase.channel('rt')
+  .on('postgres_changes',
+    { event: 'INSERT', schema: 'public', table: 'user_activity' },
+    loadStats
+  )
+  .subscribe()
+</script>
 
-            if (error) {
-                console.error("Ma'lumot olishda xato:", error)
-                body.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-red-400">Xatolik yuz berdi: ${error.message}</td></tr>`
-                return
-            }
-
-            if (!data || data.length === 0) {
-                body.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-gray-400">Ma'lumot topilmadi</td></tr>`
-                return
-            }
-
-            // HTML generatsiya qilish
-            let htmlContent = ''
-
-            for (let r of data) {
-                let user_name = 'No’malum'
-                let user_email = '-'
-                let profile_img = ''
-
-                // Agar user_id bo'lsa, 'users' jadvalidan ma'lumot izlaymiz
-                if (r.user_id) {
-                    const { data: userData } = await supabase
-                        .from('users') // DIQQAT: Bu yerda 'users' jadvali public schemada bo'lishi kerak
-                        .select('email, user_metadata')
-                        .eq('id', r.user_id)
-                        .single()
-
-                    if (userData) {
-                        user_email = userData.email ?? '-'
-                        // user_metadata ichidagi maydonlar Supabase sozlamalariga qarab farq qilishi mumkin
-                        user_name = userData.user_metadata?.full_name || userData.user_metadata?.name || 'Foydalanuvchi'
-                        profile_img = userData.user_metadata?.picture || userData.user_metadata?.avatar_url || ''
-                    }
-                }
-
-                htmlContent += `
-                    <tr class="hover:bg-white/5 transition">
-                        <td class="p-3 flex items-center gap-3">
-                            ${profile_img 
-                                ? `<img src="${profile_img}" alt="Ava" class="w-8 h-8 rounded-full object-cover border border-white/20">` 
-                                : `<div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs">?</div>`
-                            }
-                            <span class="font-medium">${user_name}</span>
-                        </td>
-                        <td class="p-3 text-gray-300">${user_email}</td>
-                        <td class="p-3"><span class="bg-blue-500/20 text-blue-300 px-2 py-1 rounded text-xs">${r.prank_name ?? 'unknown'}</span></td>
-                        <td class="p-3 font-mono text-xs text-gray-400">${r.ip ?? '-'}</td>
-                        <td class="p-3 text-gray-300">${r.country ?? ''} ${r.city ? `(${r.city})` : '-'}</td>
-                        <td class="p-3 text-gray-400 whitespace-nowrap">${new Date(r.opened_at).toLocaleString('uz-UZ')}</td>
-                        <td class="p-3 text-center">${r.duration ?? '-'}</td>
-                    </tr>`
-            }
-
-            body.innerHTML = htmlContent
-        }
-
-        // 3. Ishga tushirish
-        loadStats()
-
-        // 4. Real-time (Real vaqtda kuzatish)
-        supabase.channel('rt_activity')
-            .on('postgres_changes',
-                { event: 'INSERT', schema: 'public', table: 'user_activity' },
-                (payload) => {
-                    console.log('Yangi faollik:', payload)
-                    loadStats() // Yangi ma'lumot kelganda jadvalni yangilash
-                }
-            )
-            .subscribe()
-
-    </script>
 </body>
 </html>
