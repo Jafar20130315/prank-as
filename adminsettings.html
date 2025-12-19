@@ -52,7 +52,7 @@ const ADMIN_UUID = 'c11bed70-f718-47dd-85ae-4764717a566c'
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 const body = document.getElementById('body')
 
-// Admin check
+/* 🔐 Admin check */
 async function checkAdmin() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user || user.id !== ADMIN_UUID) {
@@ -62,51 +62,68 @@ async function checkAdmin() {
   return true
 }
 
+/* 🧱 HTML row */
+function renderRow(r) {
+  return `
+  <tr class="hover:bg-white/5 animate-pulse">
+    <td class="p-3 flex items-center gap-3">
+      ${r.avatar_url
+        ? `<img src="${r.avatar_url}" class="w-8 h-8 rounded-full">`
+        : `<div class="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center">?</div>`
+      }
+      <span>${r.user_name || 'Guest'}</span>
+    </td>
+    <td class="p-3 text-gray-300">${r.user_email || '-'}</td>
+    <td class="p-3">${r.prank_name}</td>
+    <td class="p-3 text-xs font-mono">${r.ip || '-'}</td>
+    <td class="p-3">${r.country || '-'} ${r.city ? `(${r.city})` : ''}</td>
+    <td class="p-3 text-gray-400">${new Date(r.opened_at).toLocaleString()}</td>
+    <td class="p-3 text-center">${r.duration || 0}s</td>
+  </tr>`
+}
+
+/* 📦 Initial load */
 async function loadStats() {
   if (!(await checkAdmin())) return
 
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('user_activity')
     .select('*')
     .order('opened_at', { ascending: false })
-    .limit(200)
+    .limit(100)
 
-  if (error || !data?.length) {
-    body.innerHTML = `
-      <tr><td colspan="7" class="p-4 text-center text-gray-400">
-        Ma'lumot yo'q
-      </td></tr>`
-    return
-  }
-
-  body.innerHTML = data.map(r => `
-    <tr class="hover:bg-white/5">
-      <td class="p-3 flex items-center gap-3">
-        ${r.avatar_url
-          ? `<img src="${r.avatar_url}" class="w-8 h-8 rounded-full">`
-          : `<div class="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center">?</div>`
-        }
-        <span>${r.user_name || 'Guest'}</span>
-      </td>
-      <td class="p-3 text-gray-300">${r.user_email || '-'}</td>
-      <td class="p-3">${r.prank_name}</td>
-      <td class="p-3 text-xs font-mono">${r.ip || '-'}</td>
-      <td class="p-3">${r.country || '-'} ${r.city ? `(${r.city})` : ''}</td>
-      <td class="p-3 text-gray-400">${new Date(r.opened_at).toLocaleString()}</td>
-      <td class="p-3 text-center">${r.duration || 0}s</td>
-    </tr>
-  `).join('')
+  body.innerHTML = data.map(renderRow).join('')
 }
 
-loadStats()
+/* ⚡ REAL-TIME */
+function enableRealtime() {
+  supabase.channel('realtime_activity')
+    .on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'user_activity' },
+      payload => {
+        console.log('🟢 New activity:', payload.new)
 
-supabase.channel('rt')
-  .on('postgres_changes',
-    { event: 'INSERT', schema: 'public', table: 'user_activity' },
-    loadStats
-  )
-  .subscribe()
+        // 🔝 add to top
+        body.insertAdjacentHTML(
+          'afterbegin',
+          renderRow(payload.new)
+        )
+
+        // 🧹 keep max 100 rows
+        if (body.children.length > 100) {
+          body.lastElementChild.remove()
+        }
+      }
+    )
+    .subscribe()
+}
+
+/* 🚀 Start */
+await loadStats()
+enableRealtime()
 </script>
+
 
 </body>
 </html>
