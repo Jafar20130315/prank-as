@@ -3,18 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Statistika</title>
+<title>Admin Panel</title>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="bg-slate-900 text-white p-6">
-
 <div class="max-w-7xl mx-auto">
   <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold">📊 Statistika</h1>
-    <button onclick="location.reload()"
+    <h1 class="text-2xl font-bold">📊 Admin Panel</h1>
+    <button onclick="loadUsers()"
       class="text-sm bg-white/10 hover:bg-white/20 px-3 py-1 rounded">
-      Yangilash
+      Refresh
     </button>
   </div>
 
@@ -22,73 +21,60 @@
     <table class="w-full text-sm">
       <thead class="bg-white/10 text-xs uppercase text-gray-300">
         <tr>
-          <th class="p-3">User</th>
+          <th class="p-3">ID</th>
           <th class="p-3">Email</th>
-          <th class="p-3">Sahifa</th>
-          <th class="p-3">IP</th>
-          <th class="p-3">Joylashuv</th>
-          <th class="p-3">Vaqt</th>
-          <th class="p-3 text-center">Davomiylik</th>
+          <th class="p-3">Phone</th>
+          <th class="p-3">Confirmed</th>
+          <th class="p-3">Created At</th>
         </tr>
       </thead>
-      <tbody id="body" class="divide-y divide-white/10">
+      <tbody id="userTable" class="divide-y divide-white/10">
         <tr>
-          <td colspan="7" class="p-4 text-center text-gray-400">
-            Yuklanmoqda...
-          </td>
+          <td colspan="5" class="p-4 text-center text-gray-400">Loading...</td>
         </tr>
       </tbody>
     </table>
   </div>
 </div>
 
-<script type="module">
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+<script>
+const FUNCTION_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co/functions/v1/track-activity'; // Replace with your Edge Function URL
+const userTable = document.getElementById('userTable');
 
-const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co'
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'
+async function loadUsers() {
+  userTable.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">Loading...</td></tr>`;
+  try {
+    const res = await fetch(FUNCTION_URL);
+    const json = await res.json();
+    
+    if (json.error) {
+      userTable.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-red-400">${json.error}</td></tr>`;
+      return;
+    }
+    
+    const users = json.data;
+    if (!users || users.length === 0) {
+      userTable.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">No users found</td></tr>`;
+      return;
+    }
+    
+    userTable.innerHTML = users.map(u => `
+      <tr class="hover:bg-white/5">
+        <td class="p-3">${u.id}</td>
+        <td class="p-3">${u.email || '-'}</td>
+        <td class="p-3">${u.phone || '-'}</td>
+        <td class="p-3">${u.confirmed_at ? 'Yes' : 'No'}</td>
+        <td class="p-3">${new Date(u.created_at).toLocaleString()}</td>
+      </tr>
+    `).join('');
+    
+  } catch (err) {
+    userTable.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-red-400">${err.message}</td></tr>`;
+  }
+}
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-
-const openedAt = new Date()
-
-const PRANK_NAME =
-  location.pathname.replaceAll('/', '').replace('.html', '') || 'index'
-
-const { data: { user } } = await supabase.auth.getUser()
-
-// 🌍 Получаем IP + страну
-const geo = await fetch('https://ipapi.co/json/')
-  .then(r => r.json())
-  .catch(() => ({}))
-
-window.addEventListener('beforeunload', async () => {
-  const duration = Math.floor((Date.now() - openedAt.getTime()) / 1000)
-
-  await supabase.from('user_activity').insert({
-    user_id: user?.id || null,
-    user_email: user?.email || null,
-    user_name:
-      user?.user_metadata?.full_name ||
-      user?.user_metadata?.name ||
-      'Guest',
-    avatar_url:
-      user?.user_metadata?.picture ||
-      user?.user_metadata?.avatar_url ||
-      null,
-
-    prank_name: PRANK_NAME,
-    opened_at: openedAt.toISOString(),
-    duration,
-
-    ip: geo.ip || null,
-    country: geo.country_name || null,
-    city: geo.city || null
-  })
-})
+// Load users immediately
+loadUsers();
 </script>
-
-
-
 </body>
 </html>
