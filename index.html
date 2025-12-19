@@ -470,36 +470,44 @@ setInterval(createSnow, 5000);
   </script>
 
   <script type="module">
-  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-  const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co'
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'
+const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co'
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'
 
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-  const openedAt = new Date()
+const openedAt = new Date()
 
-  // 🧠 PRANK NOMINI URL’dan olish
-  const PRANK_NAME = location.pathname
-    .replaceAll('/', '')
-    .replace('.html', '')
-    || 'unknown'
+// PRANK nomi URL’dan
+const PRANK_NAME =
+  location.pathname.replaceAll('/', '').replace('.html', '') || 'index'
 
-  const { data: { user } } = await supabase.auth.getUser()
+// Foydalanuvchi
+const { data: { user } } = await supabase.auth.getUser()
 
-  if (user) {
-    window.addEventListener('beforeunload', async () => {
-      const duration = Math.floor((Date.now() - openedAt.getTime()) / 1000)
+// Sahifadan chiqishda yozamiz
+window.addEventListener('beforeunload', async () => {
+  const duration = Math.floor((Date.now() - openedAt.getTime()) / 1000)
 
-      await supabase.from('user_activity').insert({
-        user_id: user.id,
-        prank_name: PRANK_NAME,
-        opened_at: openedAt.toISOString(),
-        duration
-      })
-    })
-  }
+  await supabase.from('user_activity').insert({
+    user_id: user?.id || null,
+    user_email: user?.email || null,
+    user_name:
+      user?.user_metadata?.full_name ||
+      user?.user_metadata?.name ||
+      'Guest',
+    avatar_url:
+      user?.user_metadata?.picture ||
+      user?.user_metadata?.avatar_url ||
+      null,
+    prank_name: PRANK_NAME,
+    opened_at: openedAt.toISOString(),
+    duration
+  })
+})
 </script>
+
 
 </body>
 </html>
