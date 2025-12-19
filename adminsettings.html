@@ -47,82 +47,47 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co'
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'
-const ADMIN_UUID = 'c11bed70-f718-47dd-85ae-4764717a566c'
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-const body = document.getElementById('body')
 
-/* 🔐 Admin check */
-async function checkAdmin() {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user || user.id !== ADMIN_UUID) {
-    location.href = '/'
-    return false
-  }
-  return true
-}
+const openedAt = new Date()
 
-/* 🧱 HTML row */
-function renderRow(r) {
-  return `
-  <tr class="hover:bg-white/5 animate-pulse">
-    <td class="p-3 flex items-center gap-3">
-      ${r.avatar_url
-        ? `<img src="${r.avatar_url}" class="w-8 h-8 rounded-full">`
-        : `<div class="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center">?</div>`
-      }
-      <span>${r.user_name || 'Guest'}</span>
-    </td>
-    <td class="p-3 text-gray-300">${r.user_email || '-'}</td>
-    <td class="p-3">${r.prank_name}</td>
-    <td class="p-3 text-xs font-mono">${r.ip || '-'}</td>
-    <td class="p-3">${r.country || '-'} ${r.city ? `(${r.city})` : ''}</td>
-    <td class="p-3 text-gray-400">${new Date(r.opened_at).toLocaleString()}</td>
-    <td class="p-3 text-center">${r.duration || 0}s</td>
-  </tr>`
-}
+const PRANK_NAME =
+  location.pathname.replaceAll('/', '').replace('.html', '') || 'index'
 
-/* 📦 Initial load */
-async function loadStats() {
-  if (!(await checkAdmin())) return
+const { data: { user } } = await supabase.auth.getUser()
 
-  const { data } = await supabase
-    .from('user_activity')
-    .select('*')
-    .order('opened_at', { ascending: false })
-    .limit(100)
+// 🌍 Получаем IP + страну
+const geo = await fetch('https://ipapi.co/json/')
+  .then(r => r.json())
+  .catch(() => ({}))
 
-  body.innerHTML = data.map(renderRow).join('')
-}
+window.addEventListener('beforeunload', async () => {
+  const duration = Math.floor((Date.now() - openedAt.getTime()) / 1000)
 
-/* ⚡ REAL-TIME */
-function enableRealtime() {
-  supabase.channel('realtime_activity')
-    .on(
-      'postgres_changes',
-      { event: 'INSERT', schema: 'public', table: 'user_activity' },
-      payload => {
-        console.log('🟢 New activity:', payload.new)
+  await supabase.from('user_activity').insert({
+    user_id: user?.id || null,
+    user_email: user?.email || null,
+    user_name:
+      user?.user_metadata?.full_name ||
+      user?.user_metadata?.name ||
+      'Guest',
+    avatar_url:
+      user?.user_metadata?.picture ||
+      user?.user_metadata?.avatar_url ||
+      null,
 
-        // 🔝 add to top
-        body.insertAdjacentHTML(
-          'afterbegin',
-          renderRow(payload.new)
-        )
+    prank_name: PRANK_NAME,
+    opened_at: openedAt.toISOString(),
+    duration,
 
-        // 🧹 keep max 100 rows
-        if (body.children.length > 100) {
-          body.lastElementChild.remove()
-        }
-      }
-    )
-    .subscribe()
-}
-
-/* 🚀 Start */
-await loadStats()
-enableRealtime()
+    ip: geo.ip || null,
+    country: geo.country_name || null,
+    city: geo.city || null
+  })
+})
 </script>
+
 
 
 </body>
