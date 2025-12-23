@@ -3,14 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Panel</title>
+<title>Admin Panel - Активность розыгрышей</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<!-- Подключаем клиентскую библиотеку Supabase -->
+<script src="https://esm.sh/@supabase/supabase-js@2"></script>
 </head>
 
 <body class="bg-slate-900 text-white p-6">
 <div class="max-w-7xl mx-auto">
   <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold">Admin Panel</h1>
+    <h1 class="text-2xl font-bold">📊 Admin Panel - Активность розыгрышей</h1>
     <button onclick="loadActivity()"
       class="text-sm bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded transition">
       Обновить активность
@@ -52,15 +54,91 @@
 </div>
 
 <script>
-// ЗАМЕНИТЕ на ваш способ получения токена
-async function getAuthToken() {
-  // Пример: получение токена из localStorage
-  // return localStorage.getItem('sb-access-token');
-  // ВРЕМЕННО - ЗАМЕНИТЕ НА РЕАЛЬНЫЙ ТОКЕН АДМИНИСТРАТОРА
-  return null;
+// --- ИНИЦИАЛИЗАЦИЯ SUPABASE КЛИЕНТА ---
+// Замените на ваши реальные URL и Anon Key из панели управления Supabase
+const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg';
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// --- /ИНИЦИАЛИЗАЦИЯ SUPABASE КЛИЕНТА ---
+
+// Функция для проверки, является ли пользователь администратором
+// Принимает токен и возвращает true/false
+async function isAdmin(token) {
+  if (!token) {
+    console.error('Токен отсутствует');
+    return false;
+  }
+
+  try {
+    // Замените URL на вашу Edge Function для проверки токена
+    // Это может быть та же функция, что и для получения данных,
+    // или отдельная функция, которая только проверяет права
+    const res = await fetch('https://gefaqrfjzwemwuxuoadp.supabase.co/functions/v1/track-activity', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      }
+    });
+
+    // Если статус 403 - значит, пользователь не администратор
+    if (res.status === 403) {
+      console.error('Пользователь не является администратором');
+      return false;
+    }
+
+    // Если статус 401 - значит, токен недействителен
+    if (res.status === 401) {
+      console.error('Токен недействителен');
+      return false;
+    }
+
+    // Если статус 200 - запрос прошел, но нужно проверить ответ
+    if (res.ok) {
+      const json = await res.json();
+      // Если в ответе есть ошибка, связанная с правами
+      if (json.error && (json.error.includes('Admin') || json.error.includes('Forbidden'))) {
+        console.error('Пользователь не является администратором (из ответа API)');
+        return false;
+      }
+      // Если данные успешно получены, пользователь администратор
+      return true;
+    }
+
+    // Для других статусов (например, 500) возвращаем false
+    console.error('Неожиданный статус ответа:', res.status);
+    return false;
+
+  } catch (error) {
+    console.error('Ошибка при проверке администратора:', error);
+    return false;
+  }
 }
 
-const ACTIVITY_FUNCTION_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co/functions/v1/user-activity';
+// Функция редиректа на главную страницу
+function redirectToHome() {
+  // Замените '/index.html' на путь к вашей главной странице
+  window.location.href = '/'; // Редирект на корень сайта
+  // window.location.href = './index.html'; // Редирект на index.html в той же папке
+}
+
+// Функция получения токена из текущей сессии Supabase
+async function getAuthToken() {
+  try {
+    const {  { session }, error } = await supabase.auth.getSession();
+    if (error) {
+      console.error('Ошибка получения сессии:', error);
+      return null;
+    }
+    // Возвращаем access_token из сессии
+    return session?.access_token || null;
+  } catch (error) {
+    console.error('Ошибка при получении токена:', error);
+    return null;
+  }
+}
+
+const ACTIVITY_FUNCTION_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co/functions/v1/track-activity';
 
 const activityTable = document.getElementById('activityTable');
 const debugInfo = document.getElementById('debugInfo');
@@ -91,11 +169,23 @@ function safeGet(obj, path, defaultValue = '-') {
 }
 
 async function loadActivity() {
+  // Сначала проверяем, является ли пользователь администратором
+  const token = await getAuthToken();
+  const userIsAdmin = await isAdmin(token);
+
+  if (!userIsAdmin) {
+    // Если не администратор - редиректим на главную
+    debugInfo.innerHTML = '<div class="text-red-400">Доступ запрещен. Перенаправление...</div>';
+    setTimeout(() => {
+      redirectToHome();
+    }, 1500); // Задержка 1.5 секунды для отображения сообщения
+    return; // Прерываем выполнение функции
+  }
+
   activityTable.innerHTML = `<tr><td colspan="9" class="p-4 text-center text-gray-400">Загрузка активности...</td></tr>`;
   debugInfo.textContent = 'Получение токена и загрузка активности...';
 
   try {
-    const token = await getAuthToken();
     if (!token) {
         throw new Error('Токен аутентификации не найден. Пожалуйста, войдите как администратор.');
     }
@@ -110,6 +200,14 @@ async function loadActivity() {
 
     if (!res.ok) {
       const errorText = await res.text();
+      // Если получили 403 Forbidden, значит пользователь не администратор
+      if (res.status === 403) {
+        debugInfo.innerHTML = '<div class="text-red-400">Доступ запрещен. Перенаправление...</div>';
+        setTimeout(() => {
+          redirectToHome();
+        }, 1500);
+        return;
+      }
       throw new Error(`Ошибка сервера: ${res.status} ${res.statusText}. Ответ: ${errorText}`);
     }
 
@@ -161,6 +259,14 @@ async function loadActivity() {
 
   } catch (err) {
     console.error('Ошибка при загрузке активности:', err);
+    // Если ошибка связана с доступом, редиректим
+    if (err.message.includes('403') || err.message.includes('Forbidden') || err.message.includes('Admin')) {
+      debugInfo.innerHTML = '<div class="text-red-400">Доступ запрещен. Перенаправление...</div>';
+      setTimeout(() => {
+        redirectToHome();
+      }, 1500);
+      return;
+    }
     activityTable.innerHTML = `
       <tr>
         <td colspan="9" class="p-4 text-center text-red-400">
