@@ -3,17 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Panel</title>
+<title>Admin Panel - Активность розыгрышей</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://esm.sh/@supabase/supabase-js@2?global"></script>
+<!-- Подключаем Supabase JS через UMD сборку -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 
 <body class="bg-slate-900 text-white p-6">
 <div class="max-w-7xl mx-auto">
   <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold">📊 Admin Panel </h1>
+    <h1 class="text-2xl font-bold">📊 Admin Panel - Активность розыгрышей</h1>
     <button id="loadActivityBtn" onclick="loadActivity()"
-      class="text-sm bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded transition">
+      class="text-sm bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded transition" disabled>
       Обновить активность
     </button>
   </div>
@@ -26,7 +27,7 @@
 
   <!-- Таблица активности -->
   <div>
-    <h2 class="text-xl font-semibold mb-4 text-green-300">📍 Активность</h2>
+    <h2 class="text-xl font-semibold mb-4 text-green-300">📍 Активность розыгрышей</h2>
     <div class="overflow-x-auto rounded-lg border border-white/10">
       <table class="w-full text-sm">
         <thead class="bg-white/10 text-xs uppercase text-gray-300">
@@ -54,6 +55,7 @@
 
 <script>
 // --- ИНИЦИАЛИЗАЦИЯ SUPABASE КЛИЕНТА ---
+// Библиотека загружена глобально, доступна как window.supabase
 const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -78,12 +80,12 @@ async function checkAdminStatus() {
   debugInfo.textContent = 'Получение сессии...';
 
   try {
+    // Используем клиент Supabase для получения сессии
     const {  { session }, error } = await supabase.auth.getSession();
-    
+
     if (error) {
       console.error('Ошибка получения сессии:', error);
       debugInfo.innerHTML = `<span class="text-red-400">Ошибка получения сессии: ${error.message}</span>`;
-      // Не редиректим при ошибке получения сессии, а показываем сообщение
       activityTable.innerHTML = `<tr><td colspan="9" class="p-4 text-center text-red-400">Ошибка аутентификации</td></tr>`;
       loadActivityBtn.disabled = true;
       return false;
@@ -161,7 +163,7 @@ function safeGet(obj, path, defaultValue = '-') {
   }, obj);
 }
 
-// Функция загрузки активности (теперь без проверки администратора)
+// Функция загрузки активности
 async function loadActivity() {
   // Проверим еще раз, на всякий случай (опционально)
   const isAdmin = await checkAdminStatus();
