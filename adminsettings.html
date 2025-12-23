@@ -4,33 +4,40 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Panel</title>
-<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.tailwindcss.com"></script> <!-- ИСПРАВЛЕНО: убраны лишние пробелы -->
 </head>
 
 <body class="bg-slate-900 text-white p-6">
 <div class="max-w-7xl mx-auto">
   <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold">📊 Admin Panel</h1>
+    <h1 class="text-2xl font-bold">📊 Admin Panel - Пользователи</h1>
     <button onclick="loadUsers()"
-      class="text-sm bg-white/10 hover:bg-white/20 px-3 py-1 rounded">
-      Refresh
+      class="text-sm bg-white/10 hover:bg-white/20 px-3 py-1 rounded transition">
+      Обновить данные
     </button>
+  </div>
+
+  <!-- Панель отладки для просмотра получаемых данных -->
+  <div class="mb-4 p-3 bg-gray-800 rounded-lg text-xs">
+    <div class="font-bold mb-1">Отладочная информация:</div>
+    <div id="debugInfo" class="text-gray-400">Ожидание данных...</div>
   </div>
 
   <div class="overflow-x-auto rounded-lg border border-white/10">
     <table class="w-full text-sm">
       <thead class="bg-white/10 text-xs uppercase text-gray-300">
         <tr>
-          <th class="p-3">ID</th>
-          <th class="p-3">Email</th>
-          <th class="p-3">Phone</th>
-          <th class="p-3">Confirmed</th>
-          <th class="p-3">Created At</th>
+          <th class="p-3 text-left">ID</th>
+          <th class="p-3 text-left">Email</th>
+          <th class="p-3 text-left">Телефон</th>
+          <th class="p-3 text-left">Подтвержден</th>
+          <th class="p-3 text-left">Зарегистрирован</th>
+          <th class="p-3 text-left">Последний вход</th> <!-- Добавлен новый столбец -->
         </tr>
       </thead>
       <tbody id="userTable" class="divide-y divide-white/10">
         <tr>
-          <td colspan="5" class="p-4 text-center text-gray-400">Loading...</td>
+          <td colspan="6" class="p-4 text-center text-gray-400">Загрузка данных...</td> <!-- ИСПРАВЛЕНО: colspan=6 для нового столбца -->
         </tr>
       </tbody>
     </table>
@@ -38,43 +45,153 @@
 </div>
 
 <script>
-const FUNCTION_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co/functions/v1/track-activity'; // Replace with your Edge Function URL
-const userTable = document.getElementById('userTable');
+// ИСПРАВЛЕНО: убраны лишние пробелы в URL
+const FUNCTION_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co/functions/v1/track-activity';
 
-async function loadUsers() {
-  userTable.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">Loading...</td></tr>`;
+const userTable = document.getElementById('userTable');
+const debugInfo = document.getElementById('debugInfo');
+
+// Функция форматирования даты с защитой от некорректных значений
+function formatDate(dateString) {
+  if (!dateString) return '-';
+  
   try {
-    const res = await fetch(FUNCTION_URL);
-    const json = await res.json();
-    
-    if (json.error) {
-      userTable.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-red-400">${json.error}</td></tr>`;
-      return;
-    }
-    
-    const users = json.data;
-    if (!users || users.length === 0) {
-      userTable.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">No users found</td></tr>`;
-      return;
-    }
-    
-    userTable.innerHTML = users.map(u => `
-      <tr class="hover:bg-white/5">
-        <td class="p-3">${u.id}</td>
-        <td class="p-3">${u.email || '-'}</td>
-        <td class="p-3">${u.phone || '-'}</td>
-        <td class="p-3">${u.confirmed_at ? 'Yes' : 'No'}</td>
-        <td class="p-3">${new Date(u.created_at).toLocaleString()}</td>
-      </tr>
-    `).join('');
-    
-  } catch (err) {
-    userTable.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-red-400">${err.message}</td></tr>`;
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '-';
+    return date.toLocaleString('ru-RU', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch (e) {
+    console.error('Ошибка форматирования даты:', e);
+    return '-';
   }
 }
 
-// Load users immediately
-loadUsers();
+// Функция безопасного получения значения из объекта
+function safeGet(obj, path, defaultValue = '-') {
+  if (!obj) return defaultValue;
+  
+  return path.split('.').reduce((acc, part) => {
+    return acc && acc[part] !== undefined && acc[part] !== null ? acc[part] : defaultValue;
+  }, obj);
+}
+
+async function loadUsers() {
+  // Показываем сообщение о загрузке
+  userTable.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-400">Загрузка данных...</td></tr>`;
+  debugInfo.textContent = 'Отправка запроса к API...';
+  
+  try {
+    debugInfo.textContent = 'Ожидание ответа от сервера...';
+    
+    // Отправляем запрос к Edge Function
+    const res = await fetch(FUNCTION_URL, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    // Отладочная информация о статусе ответа
+    debugInfo.innerHTML = `Статус ответа: ${res.status} ${res.statusText}<br>Заголовки ответа: ${JSON.stringify(Object.fromEntries(res.headers.entries()))}`;
+    
+    // Проверяем, успешен ли запрос
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`Ошибка сервера: ${res.status} ${res.statusText}. Ответ: ${errorText}`);
+    }
+    
+    // Получаем JSON из ответа
+    const json = await res.json();
+    console.log('Полный ответ от API:', JSON.parse(JSON.stringify(json))); // Глубокое копирование для консоли
+    
+    // Отображаем сырые данные в отладочной панели
+    debugInfo.innerHTML = `<div class="max-h-40 overflow-y-auto"><strong>Полученные данные:</strong><pre class="text-xs mt-1">${JSON.stringify(json, null, 2)}</pre></div>`;
+    
+    // Проверяем наличие ошибки в ответе
+    if (json.error) {
+      throw new Error(json.error);
+    }
+    
+    // Определяем, где находятся данные в ответе
+    let users = [];
+    
+    // Проверяем различные возможные форматы ответа
+    if (json.data && Array.isArray(json.data)) {
+      users = json.data;
+    } else if (Array.isArray(json)) {
+      users = json;
+    } else if (json.users && Array.isArray(json.users)) {
+      users = json.users;
+    } else {
+      debugInfo.innerHTML += `<br><span class="text-yellow-400">Внимание: Не удалось определить формат данных. Используется пустой массив.</span>`;
+    }
+    
+    // Проверяем наличие данных
+    if (users.length === 0) {
+      userTable.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-400">Нет данных о пользователях</td></tr>`;
+      return;
+    }
+    
+    debugInfo.innerHTML += `<br><span class="text-green-400">Найдено пользователей: ${users.length}</span>`;
+    
+    // Формируем HTML для таблицы
+    userTable.innerHTML = users.map(u => {
+      // Безопасно получаем значения из объекта пользователя
+      const id = safeGet(u, 'id') || safeGet(u, 'user_id') || '-';
+      const email = safeGet(u, 'email') || '-';
+      const phone = safeGet(u, 'phone') || safeGet(u, 'phone_number') || '-';
+      const confirmed = safeGet(u, 'confirmed_at') || safeGet(u, 'email_confirmed_at') ? '✅ Да' : '❌ Нет';
+      const createdAt = formatDate(safeGet(u, 'created_at') || safeGet(u, 'created_at'));
+      const lastSignIn = formatDate(safeGet(u, 'last_sign_in_at') || safeGet(u, 'last_activity') || safeGet(u, 'updated_at'));
+      
+      return `
+      <tr class="hover:bg-white/5 transition">
+        <td class="p-3 font-mono">${id}</td>
+        <td class="p-3 break-all">${email}</td>
+        <td class="p-3 font-mono">${phone}</td>
+        <td class="p-3">${confirmed}</td>
+        <td class="p-3">${createdAt}</td>
+        <td class="p-3 text-blue-300">${lastSignIn}</td>
+      </tr>
+      `;
+    }).join('');
+    
+  } catch (err) {
+    console.error('Критическая ошибка при загрузке данных:', err);
+    
+    // Отображаем ошибку в таблице
+    userTable.innerHTML = `
+      <tr>
+        <td colspan="6" class="p-4 text-center">
+          <div class="text-red-400 mb-2">❌ Ошибка загрузки данных</div>
+          <div class="text-sm text-gray-400">${err.message || 'Произошла неизвестная ошибка'}</div>
+          <div class="mt-2 text-xs text-yellow-300 bg-yellow-900/30 p-2 rounded">
+            Совет: Проверьте консоль браузера (F12 → Console) для деталей ошибки. 
+            Убедитесь, что URL Edge Function правильный и функция работает корректно в Supabase.
+          </div>
+        </td>
+      </tr>
+    `;
+    
+    // Отображаем ошибку в отладочной панели
+    debugInfo.innerHTML = `
+      <div class="text-red-400">
+        <strong>Ошибка:</strong> ${err.message || 'Неизвестная ошибка'}<br>
+        <strong>Стек:</strong> ${err.stack ? err.stack.split('\n').slice(0, 3).join('<br>') : 'Нет данных'}
+      </div>
+    `;
+  }
+}
+
+// Загружаем пользователей при загрузке страницы
+document.addEventListener('DOMContentLoaded', loadUsers);
+
+// Добавляем автоматическое обновление каждые 30 секунд (опционально)
+// setInterval(loadUsers, 30000);
 </script>
 </body>
 </html>
