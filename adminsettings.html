@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Panel - Активность розыгрышей</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<!-- Подключаем клиентскую библиотеку Supabase через глобальный объект window -->
 <script src="https://esm.sh/@supabase/supabase-js@2?global"></script>
 </head>
 
@@ -13,7 +12,7 @@
 <div class="max-w-7xl mx-auto">
   <div class="flex justify-between items-center mb-6">
     <h1 class="text-2xl font-bold">📊 Admin Panel - Активность розыгрышей</h1>
-    <button onclick="loadActivity()"
+    <button id="loadActivityBtn" onclick="loadActivity()"
       class="text-sm bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded transition">
       Обновить активность
     </button>
@@ -22,7 +21,7 @@
   <!-- Панель отладки -->
   <div class="mb-4 p-3 bg-gray-800 rounded-lg text-xs">
     <div class="font-bold mb-1">Отладочная информация:</div>
-    <div id="debugInfo" class="text-gray-400">Ожидание данных...</div>
+    <div id="debugInfo" class="text-gray-400">Проверка прав администратора...</div>
   </div>
 
   <!-- Таблица активности -->
@@ -45,7 +44,7 @@
         </thead>
         <tbody id="activityTable" class="divide-y divide-white/10">
           <tr>
-            <td colspan="9" class="p-4 text-center text-gray-400">Загрузка активности...</td>
+            <td colspan="9" class="p-4 text-center text-gray-400">Проверка доступа...</td>
           </tr>
         </tbody>
       </table>
@@ -55,70 +54,76 @@
 
 <script>
 // --- ИНИЦИАЛИЗАЦИЯ SUPABASE КЛИЕНТА ---
-// Замените на ваши реальные URL и Anon Key из панели управления Supabase
 const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg';
-
-// Используем глобальный объект window.supabase
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // --- /ИНИЦИАЛИЗАЦИЯ SUPABASE КЛИЕНТА ---
 
 // Укажите здесь UID администратора (его UUID из таблицы auth.users)
-const ADMIN_USER_ID = 'c11bed70-f718-47dd-85ae-4764717a566c'; // ЗАМЕНИТЕ НА РЕАЛЬНЫЙ UUID АДМИНИСТРАТОРА
+// ЗАМЕНИТЕ ЭТО НА РЕАЛЬНЫЙ UUID АДМИНИСТРАТОРА!
+const ADMIN_USER_ID = 'admin_user_uuid_here';
 
-// Функция для проверки, является ли пользователь администратором по UID
-// Получает токен, извлекает из него UID и сравнивает с ADMIN_USER_ID
-async function isAdminByUID() {
+// Функция редиректа на главную страницу
+function redirectToHome() {
+  console.log("Выполняется редирект на главную страницу...");
+  window.location.href = '/';
+}
+
+// Функция проверки администратора по UID
+async function checkAdminStatus() {
+  const debugInfo = document.getElementById('debugInfo');
+  const activityTable = document.getElementById('activityTable');
+  const loadActivityBtn = document.getElementById('loadActivityBtn');
+
+  debugInfo.textContent = 'Получение сессии...';
+
   try {
-    // Получаем текущую сессию
     const {  { session }, error } = await supabase.auth.getSession();
+    
     if (error) {
       console.error('Ошибка получения сессии:', error);
+      debugInfo.innerHTML = `<span class="text-red-400">Ошибка получения сессии: ${error.message}</span>`;
+      // Не редиректим при ошибке получения сессии, а показываем сообщение
+      activityTable.innerHTML = `<tr><td colspan="9" class="p-4 text-center text-red-400">Ошибка аутентификации</td></tr>`;
+      loadActivityBtn.disabled = true;
       return false;
     }
 
-    // Проверяем, есть ли сессия и действителен ли токен
     if (!session || !session.user) {
-      console.error('Сессия отсутствует или токен недействителен');
+      console.log('Пользователь не вошёл в систему');
+      debugInfo.innerHTML = '<span class="text-yellow-400">Пользователь не вошёл в систему. Перенаправление...</span>';
+      setTimeout(redirectToHome, 1000); // Редирект через 1 секунду
       return false;
     }
 
-    // Извлекаем UID пользователя из сессии
     const currentUserId = session.user.id;
+    debugInfo.innerHTML = `UID текущего пользователя: ${currentUserId}<br>UID администратора: ${ADMIN_USER_ID}`;
 
-    // Сравниваем с UID администратора
-    const isUserAdmin = currentUserId === ADMIN_USER_ID;
-
-    if (isUserAdmin) {
-      console.log('Пользователь является администратором (по UID)');
+    if (currentUserId === ADMIN_USER_ID) {
+      console.log('Пользователь является администратором');
+      debugInfo.innerHTML += '<br><span class="text-green-400">✅ Доступ разрешен. Готово.</span>';
+      activityTable.innerHTML = `<tr><td colspan="9" class="p-4 text-center text-gray-400">Нажмите "Обновить активность", чтобы загрузить данные</td></tr>`;
+      loadActivityBtn.disabled = false; // Активируем кнопку
+      return true;
     } else {
-      console.error('Пользователь не является администратором (UID не совпадает)');
+      console.log('Пользователь не является администратором (UID не совпадает)');
+      debugInfo.innerHTML += '<br><span class="text-red-400">❌ UID не совпадает. Перенаправление...</span>';
+      setTimeout(redirectToHome, 1500); // Редирект через 1.5 секунды
+      return false;
     }
-
-    return isUserAdmin;
-
   } catch (error) {
-    console.error('Ошибка при проверке администратора по UID:', error);
+    console.error('Критическая ошибка при проверке администратора:', error);
+    debugInfo.innerHTML = `<span class="text-red-400">Критическая ошибка: ${error.message}</span>`;
+    activityTable.innerHTML = `<tr><td colspan="9" class="p-4 text-center text-red-400">Критическая ошибка</td></tr>`;
+    loadActivityBtn.disabled = true;
     return false;
   }
 }
 
-// Функция редиректа на главную страницу
-function redirectToHome() {
-  // Замените '/index.html' на путь к вашей главной странице
-  window.location.href = '/'; // Редирект на корень сайта
-  // window.location.href = './index.html'; // Редирект на index.html в той же папке
-}
-
-// Функция получения токена из текущей сессии Supabase
+// Функция получения токена (для использования в fetch)
 async function getAuthToken() {
   try {
-    const {  { session }, error } = await supabase.auth.getSession();
-    if (error) {
-      console.error('Ошибка получения сессии:', error);
-      return null;
-    }
-    // Возвращаем access_token из сессии
+    const {  { session } } = await supabase.auth.getSession();
     return session?.access_token || null;
   } catch (error) {
     console.error('Ошибка при получении токена:', error);
@@ -156,26 +161,21 @@ function safeGet(obj, path, defaultValue = '-') {
   }, obj);
 }
 
+// Функция загрузки активности (теперь без проверки администратора)
 async function loadActivity() {
-  // Сначала проверяем, является ли пользователь администратором по UID
-  const userIsAdmin = await isAdminByUID();
-
-  if (!userIsAdmin) {
-    // Если не администратор - редиректим на главную
-    debugInfo.innerHTML = '<div class="text-red-400">Доступ запрещен. Перенаправление...</div>';
-    setTimeout(() => {
-      redirectToHome();
-    }, 1500); // Задержка 1.5 секунды для отображения сообщения
-    return; // Прерываем выполнение функции
+  // Проверим еще раз, на всякий случай (опционально)
+  const isAdmin = await checkAdminStatus();
+  if (!isAdmin) {
+    console.warn("Попытка загрузки активности не администратором");
+    return;
   }
 
   activityTable.innerHTML = `<tr><td colspan="9" class="p-4 text-center text-gray-400">Загрузка активности...</td></tr>`;
-  debugInfo.textContent = 'Получение токена и загрузка активности...';
 
   try {
     const token = await getAuthToken();
     if (!token) {
-        throw new Error('Токен аутентификации не найден. Пожалуйста, войдите как администратор.');
+        throw new Error('Токен аутентификации не найден.');
     }
 
     const res = await fetch(ACTIVITY_FUNCTION_URL, {
@@ -188,21 +188,11 @@ async function loadActivity() {
 
     if (!res.ok) {
       const errorText = await res.text();
-      // Если получили 403 Forbidden, значит пользователь не администратор
-      if (res.status === 403) {
-        debugInfo.innerHTML = '<div class="text-red-400">Доступ запрещен. Перенаправление...</div>';
-        setTimeout(() => {
-          redirectToHome();
-        }, 1500);
-        return;
-      }
       throw new Error(`Ошибка сервера: ${res.status} ${res.statusText}. Ответ: ${errorText}`);
     }
 
     const json = await res.json();
     console.log('Активность:', json);
-
-    debugInfo.innerHTML = `<div class="max-h-40 overflow-y-auto"><strong>Полученная активность:</strong><pre class="text-xs mt-1">${JSON.stringify(json, null, 2)}</pre></div>`;
 
     let activities = [];
     if (json.data && Array.isArray(json.data)) {
@@ -247,14 +237,6 @@ async function loadActivity() {
 
   } catch (err) {
     console.error('Ошибка при загрузке активности:', err);
-    // Если ошибка связана с доступом, редиректим
-    if (err.message.includes('403') || err.message.includes('Forbidden') || err.message.includes('Admin')) {
-      debugInfo.innerHTML = '<div class="text-red-400">Доступ запрещен. Перенаправление...</div>';
-      setTimeout(() => {
-        redirectToHome();
-      }, 1500);
-      return;
-    }
     activityTable.innerHTML = `
       <tr>
         <td colspan="9" class="p-4 text-center text-red-400">
@@ -266,7 +248,7 @@ async function loadActivity() {
 }
 
 // Загружаем данные при загрузке страницы
-document.addEventListener('DOMContentLoaded', loadActivity);
+document.addEventListener('DOMContentLoaded', checkAdminStatus);
 </script>
 </body>
 </html>
