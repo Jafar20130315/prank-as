@@ -517,47 +517,31 @@ window.addEventListener('beforeunload', async () => {
 </script>
 
 <script>
-  // Soundeffect
-document.addEventListener("DOMContentLoaded", () => {
+// =======================
+// SOUNDEFFECT
+// =======================
+const clickSound = document.getElementById("clickSound");
+const errorSound = document.getElementById("errorSound");
 
-  const clickSound = document.getElementById("clickSound");
+clickSound.volume = 0.25;
+errorSound.volume = 0.35;
 
-  const menuBtn = document.querySelector('.top-left-menu-toggle');
-  const menu = document.getElementById('dropdown-menu');
-  const overlay = document.querySelector('.overlay');
+// ✅ Oddiy tugma / link bosilganda
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("button, a");
+  if (!btn) return;
 
-  clickSound.volume = 0.3;
-
-  function toggleMenu(e){
-    e.preventDefault();
-
-    // 🔄 OLDIN holatini tekshiramiz
-    const wasOpen = menu.classList.contains('show');
-
-    menu.classList.toggle('show');
-    overlay.classList.toggle('show');
-
-    // 🔊 OCHILGANDA ham, YOPILGANDA ham
-    clickSound.currentTime = 0;
-    clickSound.play().catch(()=>{});
-  }
-
-  menuBtn.addEventListener('click', toggleMenu);
-  menuBtn.addEventListener('touchstart', toggleMenu);
-
-  overlay.addEventListener('click', () => {
-    if (menu.classList.contains('show')) {
-      menu.classList.remove('show');
-      overlay.classList.remove('show');
-
-      // 🔊 YOPILGANDA
-      clickSound.currentTime = 0;
-      clickSound.play().catch(()=>{});
-    }
-  });
-
+  clickSound.currentTime = 0;
+  clickSound.play().catch(()=>{});
 });
+
+// ❌ XATOLIK OVOZI — global funksiya
+function playErrorSound() {
+  errorSound.currentTime = 0;
+  errorSound.play().catch(()=>{});
+}
 </script>
+
 
 
 
