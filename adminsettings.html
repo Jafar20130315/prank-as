@@ -10,66 +10,85 @@
 
 <body class="bg-slate-900 text-white p-4 md:p-6">
     <div class="max-w-7xl mx-auto">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-            <h1 class="text-2xl font-bold flex items-center gap-2">
-                <span>📊</span> Admin Panel - Активность
-            </h1>
-            <div class="flex gap-2">
-                <button id="loadActivityBtn" onclick="loadActivity()"
-                    class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 rounded-lg transition font-medium" 
-                    disabled>
-                    Обновить данные
-                </button>
-                <button onclick="handleLogout()" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg transition text-sm">
-                    Выйти
+        <!-- Контейнер для ввода пароля -->
+        <div id="passwordContainer" class="mb-6 bg-gray-800/30 rounded-2xl border border-white/10 p-6 text-center">
+            <h2 class="text-xl font-bold mb-4">Доступ к админ-панели</h2>
+            <p class="text-gray-400 mb-4">Введите пароль для просмотра активности пользователей.</p>
+            <div class="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
+                <input type="password" id="adminPassword" placeholder="Введите пароль" class="flex-grow px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button onclick="checkPassword()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition font-medium">
+                    Войти
                 </button>
             </div>
         </div>
 
-        <!-- Отладка -->
-        <div class="mb-6 p-4 bg-gray-800/50 border border-white/5 rounded-xl text-xs font-mono">
-            <div class="text-gray-400 uppercase tracking-wider mb-2 font-bold">Статус системы:</div>
-            <div id="debugInfo" class="space-y-1">Инициализация...</div>
-        </div>
+        <!-- Основной контент админ-панели (изначально скрыт) -->
+        <div id="adminContent" class="hidden">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                <h1 class="text-2xl font-bold flex items-center gap-2">
+                    <span>📊</span> Admin Panel - Активность
+                </h1>
+                <div class="flex gap-2">
+                    <button id="loadActivityBtn" onclick="loadActivity()"
+                        class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 rounded-lg transition font-medium" 
+                        disabled>
+                        Обновить данные
+                    </button>
+                    <button onclick="handleLogout()" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg transition text-sm">
+                        Выйти
+                    </button>
+                </div>
+            </div>
 
-        <!-- Таблица -->
-        <div class="bg-gray-800/30 rounded-2xl border border-white/10 overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left">
-                    <thead class="bg-white/5 text-gray-400 uppercase text-[10px] tracking-widest">
-                        <tr>
-                            <th class="p-4">Пользователь</th>
-                            <th class="p-4">Розыгрыш</th>
-                            <th class="p-4">Дата</th>
-                            <th class="p-4">Время (сек)</th>
-                            <th class="p-4">Локация</th>
-                            <th class="p-4">IP</th>
-                        </tr>
-                    </thead>
-                    <tbody id="activityTable" class="divide-y divide-white/5">
-                        <tr>
-                            <td colspan="6" class="p-12 text-center text-gray-500 italic">
-                                Ожидание авторизации...
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <!-- Отладка -->
+            <div class="mb-6 p-4 bg-gray-800/50 border border-white/5 rounded-xl text-xs font-mono">
+                <div class="text-gray-400 uppercase tracking-wider mb-2 font-bold">Статус системы:</div>
+                <div id="debugInfo" class="space-y-1">Инициализация...</div>
+            </div>
+
+            <!-- Таблица -->
+            <div class="bg-gray-800/30 rounded-2xl border border-white/10 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-white/5 text-gray-400 uppercase text-[10px] tracking-widest">
+                            <tr>
+                                <th class="p-4">Пользователь</th>
+                                <th class="p-4">Розыгрыш</th>
+                                <th class="p-4">Дата</th>
+                                <th class="p-4">Время (сек)</th>
+                                <th class="p-4">Локация</th>
+                                <th class="p-4">IP</th>
+                            </tr>
+                        </thead>
+                        <tbody id="activityTable" class="divide-y divide-white/5">
+                            <tr>
+                                <td colspan="6" class="p-12 text-center text-gray-500 italic">
+                                    Ожидание загрузки данных...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
         // КОНФИГУРАЦИЯ (убраны лишние пробелы)
-        const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co'; // Убран пробел
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'; // Убран пробел
-        const ADMIN_UID = 'c11bed70-f718-47dd-85ae-4764717a566c';
-        // const FUNCTION_URL = `https://gefaqrfjzwemwuxuoadp.supabase.co/functions/v1/track-activity`; // Не используется
+        const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg';
+
+        // --- НАСТРОЙКА ПАРОЛЯ ---
+        const ADMIN_PASSWORD = 'admin21100'; // <<<===== Установите СВОЙ СЛОЖНЫЙ пароль здесь!
+        // --- /НАСТРОЙКА ПАРОЛЯ ---
 
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         const debugEl = document.getElementById('debugInfo');
         const tableEl = document.getElementById('activityTable');
         const btnEl = document.getElementById('loadActivityBtn');
+        const passwordContainer = document.getElementById('passwordContainer');
+        const adminContent = document.getElementById('adminContent');
 
         function updateDebug(msg, color = 'text-gray-400') {
             const time = new Date().toLocaleTimeString();
@@ -78,41 +97,45 @@
             console.log(`[Admin] ${msg}`);
         }
 
-        async function checkAuth() {
-            updateDebug('Проверка сессии...');
-            const { data: { session }, error } = await supabase.auth.getSession();
+        // Функция проверки пароля
+        function checkPassword() {
+            const input = document.getElementById('adminPassword');
+            const enteredPassword = input.value.trim();
 
-            if (error || !session) {
-                updateDebug('Сессия не найдена. Редирект на /auth...', 'text-yellow-500');
-                tableEl.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-yellow-500">Авторизуйтесь для доступа</td></tr>`;
-                setTimeout(() => window.location.href = '/auth', 2000);
-                return;
+            if (enteredPassword === ADMIN_PASSWORD) {
+                updateDebug('Пароль верен. Загрузка данных...', 'text-green-400');
+                // Скрываем контейнер с паролем и показываем основной контент
+                passwordContainer.classList.add('hidden');
+                adminContent.classList.remove('hidden');
+                btnEl.disabled = false;
+                loadActivity(); // Загружаем данные после ввода правильного пароля
+            } else {
+                updateDebug('Неверный пароль!', 'text-red-500');
+                input.value = ''; // Очищаем поле ввода
+                input.focus(); // Фокус на поле ввода
             }
-
-            const user = session.user;
-            updateDebug(`Вошел как: ${user.email || user.id}`);
-
-            if (user.id !== ADMIN_UID) {
-                updateDebug('ОШИБКА: Нет прав администратора!', 'text-red-500');
-                tableEl.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500">Доступ запрещен (UID mismatch)</td></tr>`;
-                return;
-            }
-
-            updateDebug('Доступ разрешен ✅', 'text-green-400');
-            btnEl.disabled = false;
-            // Загружаем данные после успешной проверки аутентификации
-            await loadActivity();
         }
 
+        // Глобальная функция для выхода (возвращает к вводу пароля)
+        window.handleLogout = function() {
+            updateDebug('Выход из админ-панели...', 'text-yellow-500');
+            // Скрываем основной контент и показываем контейнер с паролем
+            adminContent.classList.add('hidden');
+            passwordContainer.classList.remove('hidden');
+            // Очищаем таблицу
+            tableEl.innerHTML = `<tr><td colspan="6" class="p-12 text-center text-gray-500 italic">Введите пароль для доступа...</td></tr>`;
+            btnEl.disabled = true;
+        };
+
         async function loadActivity() {
-            if (!btnEl.disabled) { // Проверяем, разрешена ли кнопка (т.е. аутентификация прошла)
+            if (!btnEl.disabled) { // Проверяем, разрешена ли кнопка (т.е. пароль введен)
+                updateDebug('Запрос данных из таблицы user_activity...');
                 tableEl.innerHTML = `<tr><td colspan="6" class="p-8 text-center"><div class="animate-pulse">Загрузка данных...</div></td></tr>`;
-                
+
                 try {
-                    updateDebug('Запрос данных из таблицы activity_log...');
-                    // Запрос напрямую к таблице
+                    // Запрос напрямую к таблице user_activity
                     const { data, error, status } = await supabase
-                        .from('user_activity') // Замените 'activity_log' на точное имя вашей таблицы
+                        .from('user_activity')
                         .select(`
                             user_id,
                             email,
@@ -125,7 +148,7 @@
                         `)
                         .order('opened_at', { ascending: false }); // Сортировка по дате, новые сверху
 
-                    if (error && status !== 406) { // 406 - No Content, может означать пустую таблицу
+                    if (error && status !== 406) {
                         throw error;
                     }
 
@@ -163,22 +186,28 @@
                     updateDebug(`Успешно загружено ${data.length} записей`, 'text-green-400');
 
                 } catch (err) {
+                    console.error("Ошибка загрузки данных:", err);
                     updateDebug(`Ошибка загрузки: ${err.message}`, 'text-red-400');
                     tableEl.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-400">Не удалось загрузить данные: ${err.message}</td></tr>`;
                 }
             } else {
-                updateDebug('Нет доступа. Проверьте аутентификацию.', 'text-red-500');
+                updateDebug('Сначала введите пароль.', 'text-red-500');
             }
         }
 
-        async function handleLogout() {
-            updateDebug('Выход из системы...');
-            await supabase.auth.signOut();
-            window.location.reload();
-        }
-
         // Инициализация при загрузке
-        window.addEventListener('DOMContentLoaded', checkAuth);
+        window.addEventListener('DOMContentLoaded', () => {
+            updateDebug('Ожидание ввода пароля...', 'text-gray-400');
+            // Фокус на поле ввода пароля при загрузке страницы
+            document.getElementById('adminPassword').focus();
+        });
+
+        // Обработка нажатия Enter в поле ввода
+        document.getElementById('adminPassword').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                checkPassword();
+            }
+        });
     </script>
 </body>
 </html>
