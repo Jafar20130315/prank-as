@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fikr qoldirish - Baholash</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ===== Глобальные стили ===== */
+    @keyframes gradientBG { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'Poppins',sans-serif; line-height:1.6; color:#fff;
+      background:linear-gradient(270deg,#1f1f1f,#111,#222,#333);
+      background-size:800% 800%; animation:gradientBG 20s ease infinite;
+      min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:20px;
+    }
+
+    .container { width: 100%; max-width: 600px; margin-top: 60px; }
+    h1 { text-align: center; margin-bottom: 20px; }
+
+    /* ===== Форма отзыва ===== */
+    .review-form {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 25px;
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 30px;
+    }
+    .user-info-preview {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 15px;
+      padding: 10px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 10px;
+    }
+    .user-info-preview img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      color: #fff;
+      font-family: inherit;
+    }
+    .btn-submit {
+      width: 100%;
+      padding: 15px;
+      margin-top: 20px;
+      background: #2563eb;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .btn-submit:hover { background: #1d4ed8; transform: translateY(-2px); }
+
+    /* ===== Список отзывов ===== */
+    .review-list { display: flex; flex-direction: column; gap: 15px; width: 100%; }
+    .review-card {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 20px;
+      border-radius: 12px;
+      border-left: 4px solid #2563eb;
+      position: relative;
+    }
+    .review-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; color: #aaa; align-items: center; }
+    .author-name { color: #fff; font-weight: 600; }
+    
+    /* Кнопка удаления */
+    .btn-delete {
+      background: none;
+      border: none;
+      color: #ff4d4d;
+      cursor: pointer;
+      font-size: 18px;
+      opacity: 0.6;
+      transition: 0.3s;
+      padding: 5px;
+      display: flex;
+      align-items: center;
+    }
+    .btn-delete:hover { opacity: 1; transform: scale(1.1); }
+
+    .back-link { margin-bottom: 20px; color: #aaa; text-decoration: none; display: inline-block; }
+    .back-link:hover { color: #fff; }
+
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <a href="/" class="back-link">←</a>
+    <h1>Fikr qoldirish</h1>
+
+    <!-- Форма -->
+    <div class="review-form">
+      <div id="logged-in-view" class="hidden">
+        <div class="user-info-preview">
+          <img id="user-avatar" src="" alt="avatar">
+          <div>
+            <span id="user-display-name">Ism</span>
+            <small style="display: block; opacity: 0.6;">Ro'yxatdan o'tilgan</small>
+          </div>
+        </div>
+      </div>
+
+      <div id="guest-view">
+        <label>Ismingiz (ixtiyoriy):</label>
+        <input type="text" id="manual-name" placeholder="Ismingizni kiriting">
+      </div>
+
+      <textarea id="review-text" rows="4" placeholder="Fikringiz..." required></textarea>
+      <button class="btn-submit" id="send-review">Yuborish</button>
+    </div>
+
+    <!-- Список -->
+    <div class="review-list" id="reviews-container">
+      <p style="text-align: center; opacity: 0.5;">Yuklanmoqda...</p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+    const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co'
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+    let currentUser = null;
+
+    // 1. Проверка пользователя
+    async function init() {
+      const { data: { session } } = await supabase.auth.getSession()
+      currentUser = session?.user || null;
+
+      if (currentUser) {
+        document.getElementById('logged-in-view').classList.remove('hidden');
+        document.getElementById('guest-view').classList.add('hidden');
+        
+        const metadata = currentUser.user_metadata;
+        document.getElementById('user-avatar').src = metadata.picture || metadata.avatar_url || 'https://ui-avatars.com/api/?name=' + (metadata.full_name || 'U');
+        document.getElementById('user-display-name').textContent = metadata.full_name || metadata.name || currentUser.email;
+      }
+      
+      loadReviews();
+    }
+
+    // 2. Загрузка отзывов
+    async function loadReviews() {
+      const { data, error } = await supabase
+        .from('reviews')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      const container = document.getElementById('reviews-container');
+      
+      if (error) {
+        container.innerHTML = '<p>Iltimos internet aloqasini tekshiring.</p>';
+        return;
+      }
+
+      if (data.length === 0) {
+        container.innerHTML = '<p style="text-align: center; opacity: 0.5;">Hozircha sharhlar yo\'q.</p>';
+        return;
+      }
+
+      container.innerHTML = data.map(rev => {
+        // Проверяем, является ли текущий пользователь автором
+        const isOwner = currentUser && rev.author_id === currentUser.id;
+        
+        return `
+          <div class="review-card" id="rev-${rev.id}">
+            <div class="review-header">
+              <div>
+                <span class="author-name">${rev.author_name}</span>
+                <span style="margin-left: 10px; font-size: 12px; opacity: 0.7;">${new Date(rev.created_at).toLocaleDateString()}</span>
+              </div>
+              ${isOwner ? `
+                <button class="btn-delete" onclick="window.deleteReview('${rev.id}')" title="Ochirish">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                </button>
+              ` : ''}
+            </div>
+            <p>${rev.content}</p>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 3. Удаление отзыва
+    window.deleteReview = async (id) => {
+      if (!confirm("Haqiqatan ham ushbu fikrni yo'q qilmoqchimisiz?")) return;
+
+      const { error } = await supabase
+        .from('reviews')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        alert("Xatolik: " + error.message);
+      } else {
+        // Удаляем элемент из DOM для мгновенного эффекта
+        const el = document.getElementById(`rev-${id}`);
+        if (el) el.remove();
+        // Можно также вызвать loadReviews(), если нужно обновить список полностью
+      }
+    };
+
+    // 4. Отправка отзыва
+    document.getElementById('send-review').onclick = async () => {
+      const text = document.getElementById('review-text').value.trim();
+      if (!text) return alert("Iltimos matn kiriting.");
+
+      let authorName = "Anonim";
+      let avatarUrl = null;
+
+      if (currentUser) {
+        authorName = currentUser.user_metadata.full_name || currentUser.user_metadata.name || currentUser.email;
+        avatarUrl = currentUser.user_metadata.picture || currentUser.user_metadata.avatar_url;
+      } else {
+        const manual = document.getElementById('manual-name').value.trim();
+        if (manual) authorName = manual;
+      }
+
+      const { error } = await supabase.from('reviews').insert({
+        author_name: authorName,
+        author_id: currentUser?.id || null, // Сохраняем ID, чтобы потом проверить право на удаление
+        avatar_url: avatarUrl,
+        content: text
+      });
+
+      if (error) {
+        alert("Xatolik: " + error.message);
+      } else {
+        document.getElementById('review-text').value = "";
+        loadReviews();
+      }
+    };
+
+    init();
+  </script>
+</body>
+</html>
