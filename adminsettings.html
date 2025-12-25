@@ -75,8 +75,8 @@
 
     <script>
         // КОНФИГУРАЦИЯ (убраны лишние пробелы)
-        const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg';
+        const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co'; // УБРАНЫ ПРОБЕЛЫ
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'; // УБРАНЫ ПРОБЕЛЫ
 
         // --- НАСТРОЙКА ПАРОЛЯ ---
         const ADMIN_PASSWORD = 'admin21100'; // <<<===== Установите СВОЙ СЛОЖНЫЙ пароль здесь!
@@ -97,7 +97,7 @@
             console.log(`[Admin] ${msg}`);
         }
 
-        // Функция проверки пароля
+        // Функция проверки пароля - теперь ГЛОБАЛЬНАЯ
         function checkPassword() {
             const input = document.getElementById('adminPassword');
             const enteredPassword = input.value.trim();
@@ -200,13 +200,13 @@
             updateDebug('Ожидание ввода пароля...', 'text-gray-400');
             // Фокус на поле ввода пароля при загрузке страницы
             document.getElementById('adminPassword').focus();
-        });
 
-        // Обработка нажатия Enter в поле ввода
-        document.getElementById('adminPassword').addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                checkPassword();
-            }
+            // Также добавляем обработчик Enter через JavaScript, чтобы избежать зависимости от HTML-атрибута
+            document.getElementById('adminPassword').addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    checkPassword(); // Теперь функция доступна
+                }
+            });
         });
     </script>
 </body>
