@@ -1,256 +1,165 @@
 <!DOCTYPE html>
-<html lang="uz">
+<html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Panel - Активность розыгрышей</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<!-- Подключаем Supabase JS через UMD сборку -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Активность</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
-<body class="bg-slate-900 text-white p-6">
-<div class="max-w-7xl mx-auto">
-  <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold">📊 Admin Panel - Активность розыгрышей</h1>
-    <button id="loadActivityBtn" onclick="loadActivity()"
-      class="text-sm bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded transition" disabled>
-      Обновить активность
-    </button>
-  </div>
+<body class="bg-slate-900 text-white p-4 md:p-6">
+    <div class="max-w-7xl mx-auto">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+            <h1 class="text-2xl font-bold flex items-center gap-2">
+                <span>📊</span> Admin Panel - Активность
+            </h1>
+            <div class="flex gap-2">
+                <button id="loadActivityBtn" onclick="loadActivity()"
+                    class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 rounded-lg transition font-medium" 
+                    disabled>
+                    Обновить данные
+                </button>
+                <button onclick="handleLogout()" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg transition text-sm">
+                    Выйти
+                </button>
+            </div>
+        </div>
 
-  <!-- Панель отладки -->
-  <div class="mb-4 p-3 bg-gray-800 rounded-lg text-xs">
-    <div class="font-bold mb-1">Отладочная информация:</div>
-    <div id="debugInfo" class="text-gray-400">Проверка прав администратора...</div>
-  </div>
+        <!-- Отладка -->
+        <div class="mb-6 p-4 bg-gray-800/50 border border-white/5 rounded-xl text-xs font-mono">
+            <div class="text-gray-400 uppercase tracking-wider mb-2 font-bold">Статус системы:</div>
+            <div id="debugInfo" class="space-y-1">Инициализация...</div>
+        </div>
 
-  <!-- Таблица активности -->
-  <div>
-    <h2 class="text-xl font-semibold mb-4 text-green-300">📍 Активность розыгрышей</h2>
-    <div class="overflow-x-auto rounded-lg border border-white/10">
-      <table class="w-full text-sm">
-        <thead class="bg-white/10 text-xs uppercase text-gray-300">
-          <tr>
-            <th class="p-3 text-left">ID</th>
-            <th class="p-3 text-left">User ID</th>
-            <th class="p-3 text-left">Email</th>
-            <th class="p-3 text-left">Розыгрыш</th>
-            <th class="p-3 text-left">Открыт</th>
-            <th class="p-3 text-left">Длительность (с)</th>
-            <th class="p-3 text-left">IP-адрес</th>
-            <th class="p-3 text-left">Город</th>
-            <th class="p-3 text-left">Страна</th>
-          </tr>
-        </thead>
-        <tbody id="activityTable" class="divide-y divide-white/10">
-          <tr>
-            <td colspan="9" class="p-4 text-center text-gray-400">Проверка доступа...</td>
-          </tr>
-        </tbody>
-      </table>
+        <!-- Таблица -->
+        <div class="bg-gray-800/30 rounded-2xl border border-white/10 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                    <thead class="bg-white/5 text-gray-400 uppercase text-[10px] tracking-widest">
+                        <tr>
+                            <th class="p-4">Пользователь</th>
+                            <th class="p-4">Розыгрыш</th>
+                            <th class="p-4">Дата</th>
+                            <th class="p-4">Время (сек)</th>
+                            <th class="p-4">Локация</th>
+                            <th class="p-4">IP</th>
+                        </tr>
+                    </thead>
+                    <tbody id="activityTable" class="divide-y divide-white/5">
+                        <tr>
+                            <td colspan="6" class="p-12 text-center text-gray-500 italic">
+                                Ожидание авторизации...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
-<script>
-// --- ИНИЦИАЛИЗАЦИЯ SUPABASE КЛИЕНТА ---
-// Библиотека загружена глобально, доступна как window.supabase
-const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-// --- /ИНИЦИАЛИЗАЦИЯ SUPABASE КЛИЕНТА ---
+    <script>
+        // КОНФИГУРАЦИЯ
+        const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg';
+        const ADMIN_UID = 'c11bed70-f718-47dd-85ae-4764717a566c';
+        const FUNCTION_URL = `${SUPABASE_URL}/functions/v1/track-activity`;
 
-// Укажите здесь UID администратора (его UUID из таблицы auth.users)
-// ЗАМЕНИТЕ ЭТО НА РЕАЛЬНЫЙ UUID АДМИНИСТРАТОРА!
-const ADMIN_USER_ID = 'c11bed70-f718-47dd-85ae-4764717a566c';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Функция редиректа на главную страницу
-function redirectToHome() {
-  console.log("Выполняется редирект на главную страницу...");
-  window.location.href = '/';
-}
+        const debugEl = document.getElementById('debugInfo');
+        const tableEl = document.getElementById('activityTable');
+        const btnEl = document.getElementById('loadActivityBtn');
 
-// Функция проверки администратора по UID
-async function checkAdminStatus() {
-  const debugInfo = document.getElementById('debugInfo');
-  const activityTable = document.getElementById('activityTable');
-  const loadActivityBtn = document.getElementById('loadActivityBtn');
+        function updateDebug(msg, color = 'text-gray-400') {
+            const time = new Date().toLocaleTimeString();
+            debugEl.innerHTML += `<div class="${color}">[${time}] ${msg}</div>`;
+            console.log(`[Admin] ${msg}`);
+        }
 
-  debugInfo.textContent = 'Получение сессии...';
+        async function checkAuth() {
+            updateDebug('Проверка сессии...');
+            const { data: { session }, error } = await supabase.auth.getSession();
 
-  try {
-    // Используем клиент Supabase для получения сессии
-    const {  { session }, error } = await supabase.auth.getSession();
+            if (error || !session) {
+                updateDebug('Сессия не найдена. Редирект на /auth...', 'text-yellow-500');
+                tableEl.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-yellow-500">Авторизуйтесь для доступа</td></tr>`;
+                setTimeout(() => window.location.href = '/auth', 2000);
+                return;
+            }
 
-    if (error) {
-      console.error('Ошибка получения сессии:', error);
-      debugInfo.innerHTML = `<span class="text-red-400">Ошибка получения сессии: ${error.message}</span>`;
-      activityTable.innerHTML = `<tr><td colspan="9" class="p-4 text-center text-red-400">Ошибка аутентификации</td></tr>`;
-      loadActivityBtn.disabled = true;
-      return false;
-    }
+            const user = session.user;
+            updateDebug(`Вошел как: ${user.email}`);
 
-    if (!session || !session.user) {
-      console.log('Пользователь не вошёл в систему');
-      debugInfo.innerHTML = '<span class="text-yellow-400">Пользователь не вошёл в систему. Перенаправление...</span>';
-      setTimeout(redirectToHome, 1000); // Редирект через 1 секунду
-      return false;
-    }
+            if (user.id !== ADMIN_UID) {
+                updateDebug('ОШИБКА: Нет прав администратора!', 'text-red-500');
+                tableEl.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500">Доступ запрещен (UID mismatch)</td></tr>`;
+                return;
+            }
 
-    const currentUserId = session.user.id;
-    debugInfo.innerHTML = `UID текущего пользователя: ${currentUserId}<br>UID администратора: ${ADMIN_USER_ID}`;
+            updateDebug('Доступ разрешен ✅', 'text-green-400');
+            btnEl.disabled = false;
+            loadActivity();
+        }
 
-    if (currentUserId === ADMIN_USER_ID) {
-      console.log('Пользователь является администратором');
-      debugInfo.innerHTML += '<br><span class="text-green-400">✅ Доступ разрешен. Готово.</span>';
-      activityTable.innerHTML = `<tr><td colspan="9" class="p-4 text-center text-gray-400">Нажмите "Обновить активность", чтобы загрузить данные</td></tr>`;
-      loadActivityBtn.disabled = false; // Активируем кнопку
-      return true;
-    } else {
-      console.log('Пользователь не является администратором (UID не совпадает)');
-      debugInfo.innerHTML += '<br><span class="text-red-400">❌ UID не совпадает. Перенаправление...</span>';
-      setTimeout(redirectToHome, 1500); // Редирект через 1.5 секунды
-      return false;
-    }
-  } catch (error) {
-    console.error('Критическая ошибка при проверке администратора:', error);
-    debugInfo.innerHTML = `<span class="text-red-400">Критическая ошибка: ${error.message}</span>`;
-    activityTable.innerHTML = `<tr><td colspan="9" class="p-4 text-center text-red-400">Критическая ошибка</td></tr>`;
-    loadActivityBtn.disabled = true;
-    return false;
-  }
-}
+        async function loadActivity() {
+            tableEl.innerHTML = `<tr><td colspan="6" class="p-8 text-center"><div class="animate-pulse">Загрузка данных...</div></td></tr>`;
+            
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                
+                // Пробуем GET, но если функция требует POST, нужно изменить method
+                const response = await fetch(FUNCTION_URL, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${session.access_token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
 
-// Функция получения токена (для использования в fetch)
-async function getAuthToken() {
-  try {
-    const {  { session } } = await supabase.auth.getSession();
-    return session?.access_token || null;
-  } catch (error) {
-    console.error('Ошибка при получении токена:', error);
-    return null;
-  }
-}
+                if (!response.ok) throw new Error(`Ошибка: ${response.status}`);
 
-const ACTIVITY_FUNCTION_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co/functions/v1/track-activity';
+                const result = await response.json();
+                const data = Array.isArray(result) ? result : (result.data || []);
 
-const activityTable = document.getElementById('activityTable');
-const debugInfo = document.getElementById('debugInfo');
+                if (data.length === 0) {
+                    tableEl.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-500">Данные отсутствуют</td></tr>`;
+                    return;
+                }
 
-function formatDate(dateString) {
-  if (!dateString) return '-';
-  try {
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return '-';
-    return date.toLocaleString('ru-RU', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  } catch (e) {
-    console.error('Ошибка форматирования даты:', e);
-    return '-';
-  }
-}
+                tableEl.innerHTML = data.map(item => `
+                    <tr class="hover:bg-white/5 transition">
+                        <td class="p-4">
+                            <div class="font-medium">${item.email || 'Аноним'}</div>
+                            <div class="text-[10px] text-gray-500 font-mono">${item.user_id || 'no-id'}</div>
+                        </td>
+                        <td class="p-4 text-blue-400">${item.prank_name || '—'}</td>
+                        <td class="p-4 text-gray-400">
+                            ${item.opened_at ? new Date(item.opened_at).toLocaleString('ru-RU') : '—'}
+                        </td>
+                        <td class="p-4 font-mono">${item.duration || 0}s</td>
+                        <td class="p-4">
+                            ${item.city || ''} <span class="text-gray-600">${item.country || ''}</span>
+                        </td>
+                        <td class="p-4 font-mono text-[10px] text-purple-400">${item.ip_address || '—'}</td>
+                    </tr>
+                `).join('');
 
-function safeGet(obj, path, defaultValue = '-') {
-  if (!obj) return defaultValue;
-  return path.split('.').reduce((acc, part) => {
-    return acc && acc[part] !== undefined && acc[part] !== null ? acc[part] : defaultValue;
-  }, obj);
-}
+                updateDebug(`Успешно загружено ${data.length} записей`, 'text-green-400');
 
-// Функция загрузки активности
-async function loadActivity() {
-  // Проверим еще раз, на всякий случай (опционально)
-  const isAdmin = await checkAdminStatus();
-  if (!isAdmin) {
-    console.warn("Попытка загрузки активности не администратором");
-    return;
-  }
+            } catch (err) {
+                updateDebug(`Ошибка загрузки: ${err.message}`, 'text-red-400');
+                tableEl.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-400">Не удалось загрузить данные. Проверьте CORS или тип запроса в Edge Function.</td></tr>`;
+            }
+        }
 
-  activityTable.innerHTML = `<tr><td colspan="9" class="p-4 text-center text-gray-400">Загрузка активности...</td></tr>`;
+        async function handleLogout() {
+            await supabase.auth.signOut();
+            window.location.reload();
+        }
 
-  try {
-    const token = await getAuthToken();
-    if (!token) {
-        throw new Error('Токен аутентификации не найден.');
-    }
-
-    const res = await fetch(ACTIVITY_FUNCTION_URL, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      }
-    });
-
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(`Ошибка сервера: ${res.status} ${res.statusText}. Ответ: ${errorText}`);
-    }
-
-    const json = await res.json();
-    console.log('Активность:', json);
-
-    let activities = [];
-    if (json.data && Array.isArray(json.data)) {
-      activities = json.data;
-    } else if (Array.isArray(json)) {
-      activities = json;
-    }
-
-    if (activities.length === 0) {
-      activityTable.innerHTML = `<tr><td colspan="9" class="p-4 text-center text-gray-400">Нет данных об активности</td></tr>`;
-      return;
-    }
-
-    // Создаем строки таблицы
-    const rows = activities.map((activity) => {
-      const id = safeGet(activity, 'id') || '-';
-      const userId = safeGet(activity, 'user_id') || '-';
-      const email = safeGet(activity, 'email') || '-';
-      const prankName = safeGet(activity, 'prank_name') || '-';
-      const openedAt = formatDate(safeGet(activity, 'opened_at'));
-      const duration = safeGet(activity, 'duration') || '-';
-      const ipAddress = safeGet(activity, 'ip_address') || '-';
-      const city = safeGet(activity, 'city') || '-';
-      const country = safeGet(activity, 'country') || '-';
-
-      return `
-      <tr class="hover:bg-white/5 transition">
-        <td class="p-3 font-mono">${id}</td>
-        <td class="p-3 font-mono">${userId}</td>
-        <td class="p-3 break-all">${email}</td>
-        <td class="p-3">${prankName}</td>
-        <td class="p-3 text-blue-300">${openedAt}</td>
-        <td class="p-3 text-center">${duration}</td>
-        <td class="p-3 font-mono text-purple-300">${ipAddress}</td>
-        <td class="p-3">${city}</td>
-        <td class="p-3">${country}</td>
-      </tr>
-      `;
-    });
-
-    activityTable.innerHTML = rows.join('');
-
-  } catch (err) {
-    console.error('Ошибка при загрузке активности:', err);
-    activityTable.innerHTML = `
-      <tr>
-        <td colspan="9" class="p-4 text-center text-red-400">
-          Ошибка: ${err.message || 'Неизвестная ошибка при загрузке активности'}
-        </td>
-      </tr>
-    `;
-  }
-}
-
-// Загружаем данные при загрузке страницы
-document.addEventListener('DOMContentLoaded', checkAdminStatus);
-</script>
+        // Инициализация при загрузке
+        window.addEventListener('DOMContentLoaded', checkAuth);
+    </script>
 </body>
 </html>
