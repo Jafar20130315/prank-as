@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <title>Family Hub — Prank-as</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Telegram WebApp -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- Minimal UI -->
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0f172a;
+      color: #fff;
+      margin: 0;
+      padding: 16px;
+    }
+    .card {
+      background: #020617;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      background: #22c55e;
+      color: #000;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>👨‍👩‍👧‍👦 Family Hub</h2>
+
+  <div class="card">
+    <b>👤 Foydalanuvchi:</b>
+    <div id="user"></div>
+  </div>
+
+  <div class="card">
+    <b>🔗 Oilaga ulanish</b>
+    <input id="ownerId" placeholder="Oila egasi ID">
+    <button onclick="connect()">Ulanish</button>
+  </div>
+
+  <div class="card">
+    <b>💸 Xarajat qo‘shish</b>
+    <input id="cost" placeholder="Masalan: 5000 non">
+    <button onclick="addCost()">Qo‘shish</button>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    const user = tg.initDataUnsafe?.user;
+    const chatId = user?.id;
+
+    document.getElementById("user").innerText =
+      user ? `${user.first_name} (ID: ${chatId})` : "Telegram orqali kiring";
+
+    const API = "https://asik.windowsnoutbook.workers.dev/"; // ⚠️ Worker URL
+
+    async function connect() {
+      const ownerId = document.getElementById("ownerId").value;
+      if (!ownerId) return alert("ID kiriting");
+
+      const res = await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          webapp: true,
+          action: "connect",
+          chatId,
+          ownerId
+        })
+      });
+
+      alert(await res.text());
+    }
+
+    async function addCost() {
+      const text = document.getElementById("cost").value;
+      if (!text) return alert("Xarajat yozing");
+
+      const res = await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          webapp: true,
+          action: "cost",
+          chatId,
+          text
+        })
+      });
+
+      alert(await res.text());
+    }
+  </script>
+
+</body>
+</html>
