@@ -1,131 +1,154 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-  <meta charset="UTF-8" />
-  <title>Family Hub — Prank-as</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <!-- Telegram -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-  <!-- Tailwind -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            bg: "#020617",
-            card: "#020617",
-            accent: "#22c55e"
-          }
-        }
-      }
-    }
-  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Family Hub</title>
+<script src="https://cdn.tailwindcss.com"></script>
 </head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center p-4 font-sans">
 
-<body class="bg-slate-900 text-white min-h-screen p-4">
+<h1 class="text-3xl font-bold mb-4 text-center text-blue-700">👨‍👩‍👧‍👦 Family Hub</h1>
 
-  <h1 class="text-2xl font-bold mb-4">👨‍👩‍👧‍👦 Family Hub</h1>
+<div class="w-full max-w-md bg-white p-6 rounded-xl shadow-lg space-y-4">
 
-  <!-- USER -->
-  <div class="bg-slate-800 rounded-xl p-4 mb-4">
-    <div class="text-sm text-slate-400">Foydalanuvchi</div>
-    <div id="user" class="font-semibold"></div>
+  <!-- Xarajat qo'shish -->
+  <div class="border p-4 rounded-lg">
+    <h2 class="font-semibold mb-2">💸 Xarajat qo'shish</h2>
+    <input id="costName" type="text" placeholder="Nomi (non, sut...)" class="border w-full p-2 rounded mb-2"/>
+    <input id="costAmount" type="number" placeholder="Narxi" class="border w-full p-2 rounded mb-2"/>
+    <button onclick="addCost()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 w-full">Qo'shish</button>
   </div>
 
-  <!-- CONNECT -->
-  <div class="bg-slate-800 rounded-xl p-4 mb-4">
-    <h2 class="font-semibold mb-2">🔗 Oilaga ulanish</h2>
-    <input id="ownerId"
-      class="w-full p-2 rounded bg-slate-700 mb-2"
-      placeholder="Oila egasi ID" />
-    <button onclick="connect()"
-      class="w-full bg-accent text-black py-2 rounded font-semibold">
-      Ulanish
-    </button>
+  <!-- Oila ulash -->
+  <div class="border p-4 rounded-lg">
+    <h2 class="font-semibold mb-2">🔗 Oilaga ulash</h2>
+    <input id="connectId" type="text" placeholder="Oilaning egasi ID" class="border w-full p-2 rounded mb-2"/>
+    <button onclick="connectFamily()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 w-full">So‘rov yuborish</button>
   </div>
 
-  <!-- ADD COST -->
-  <div class="bg-slate-800 rounded-xl p-4 mb-4">
-    <h2 class="font-semibold mb-2">💸 Xarajat qo‘shish</h2>
-    <input id="cost"
-      class="w-full p-2 rounded bg-slate-700 mb-2"
-      placeholder="Masalan: 5000 non" />
-    <button onclick="addCost()"
-      class="w-full bg-accent text-black py-2 rounded font-semibold">
-      Qo‘shish
-    </button>
+  <!-- Oiladan chiqish -->
+  <div class="border p-4 rounded-lg">
+    <h2 class="font-semibold mb-2">❌ Oiladan chiqish</h2>
+    <button onclick="leaveFamily()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 w-full">Chiqish</button>
   </div>
 
-  <!-- MONTH TABLE -->
-  <div class="bg-slate-800 rounded-xl p-4">
-    <h2 class="font-semibold mb-2">📊 Oylik xarajatlar</h2>
-    <table class="w-full text-sm">
-      <thead class="text-slate-400">
-        <tr>
-          <th class="text-left">Nomi</th>
-          <th class="text-right">So‘m</th>
-        </tr>
-      </thead>
-      <tbody id="table"></tbody>
-    </table>
-    <div id="total" class="text-right font-bold mt-2"></div>
+  <!-- Xabar yuborish -->
+  <div class="border p-4 rounded-lg">
+    <h2 class="font-semibold mb-2">✉️ Oilaga xabar</h2>
+    <input id="messageText" type="text" placeholder="Xabar matni" class="border w-full p-2 rounded mb-2"/>
+    <button onclick="sendMessage()" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 w-full">Yuborish</button>
   </div>
+
+  <!-- Xarajatlar jadvali -->
+  <div class="border p-4 rounded-lg">
+    <h2 class="font-semibold mb-2">📊 Shaxsiy xarajatlar</h2>
+    <pre id="myCosts" class="bg-gray-50 p-2 rounded text-sm overflow-auto h-32"></pre>
+    <button onclick="loadCosts()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 w-full mt-2">Yangilash</button>
+  </div>
+
+  <!-- Umumiy oila xarajatlari -->
+  <div class="border p-4 rounded-lg">
+    <h2 class="font-semibold mb-2">👨‍👩‍👧‍👦 Umumiy oylik xarajatlar</h2>
+    <pre id="familyCosts" class="bg-gray-50 p-2 rounded text-sm overflow-auto h-32"></pre>
+    <button onclick="loadFamilyCosts()" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 w-full mt-2">Yangilash</button>
+  </div>
+
+  <div id="result" class="text-center text-red-500 font-semibold"></div>
+</div>
 
 <script>
-const tg = window.Telegram.WebApp;
-tg.expand();
+  const API = "https://asikweb.windowsnoutbook.workers.dev/"; // bu yerga Worker2 URL qo'ying
+  let chatId = "test-user";
 
-const user = tg.initDataUnsafe?.user;
-const chatId = user?.id;
-document.getElementById("user").innerText =
-  user ? `${user.first_name} (ID: ${chatId})` : "Telegram orqali kiring";
+  if (window.Telegram && Telegram.WebApp) {
+    Telegram.WebApp.ready();
+    chatId = Telegram.WebApp.initDataUnsafe?.user?.id || "tg-test";
+  }
 
-const API = "https://asik.windowsnoutbook.workers.dev";
+  async function addCost() {
+    const name = document.getElementById("costName").value;
+    const price = document.getElementById("costAmount").value;
 
-async function connect() {
-  const ownerId = ownerIdInput.value;
-  const res = await fetch(API, {
-    method: "POST",
-    body: JSON.stringify({ webapp: true, action: "connect", chatId, ownerId })
-  });
-  alert(await res.text());
-}
+    try {
+      const res = await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chatId, action: "cost", text: `${price} ${name}` })
+      });
+      const data = await res.json();
+      document.getElementById("result").textContent = data.message || JSON.stringify(data);
+      loadCosts();
+      loadFamilyCosts();
+    } catch(e) { document.getElementById("result").textContent = e.message; }
+  }
 
-async function addCost() {
-  const text = cost.value;
-  const res = await fetch(API, {
-    method: "POST",
-    body: JSON.stringify({ webapp: true, action: "cost", chatId, text })
-  });
-  alert(await res.text());
-  loadMonth();
-}
+  async function connectFamily() {
+    const ownerId = document.getElementById("connectId").value;
+    try {
+      const res = await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chatId, action: "connect", ownerId })
+      });
+      const data = await res.json();
+      document.getElementById("result").textContent = data.message || JSON.stringify(data);
+    } catch(e) { document.getElementById("result").textContent = e.message; }
+  }
 
-async function loadMonth() {
-  const res = await fetch(API, {
-    method: "POST",
-    body: JSON.stringify({ webapp: true, action: "month", chatId })
-  });
-  const data = await res.json();
+  async function leaveFamily() {
+    try {
+      const res = await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chatId, action: "unc" })
+      });
+      const data = await res.json();
+      document.getElementById("result").textContent = data.message || JSON.stringify(data);
+    } catch(e) { document.getElementById("result").textContent = e.message; }
+  }
 
-  table.innerHTML = "";
-  let sum = 0;
-  data.forEach(i => {
-    sum += i.amount;
-    table.innerHTML += `
-      <tr>
-        <td>${i.cat}</td>
-        <td class="text-right">${i.amount}</td>
-      </tr>`;
-  });
-  total.innerText = "Jami: " + sum;
-}
+  async function sendMessage() {
+    const text = document.getElementById("messageText").value;
+    try {
+      const res = await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chatId, action: "send", text })
+      });
+      const data = await res.json();
+      document.getElementById("result").textContent = data.message || JSON.stringify(data);
+    } catch(e) { document.getElementById("result").textContent = e.message; }
+  }
 
-loadMonth();
+  async function loadCosts() {
+    try {
+      const res = await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chatId, action: "list" })
+      });
+      const data = await res.json();
+      document.getElementById("myCosts").textContent = JSON.stringify(data, null, 2);
+    } catch(e) { document.getElementById("myCosts").textContent = e.message; }
+  }
+
+  async function loadFamilyCosts() {
+    try {
+      const res = await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chatId, action: "month" })
+      });
+      const data = await res.json();
+      document.getElementById("familyCosts").textContent = JSON.stringify(data, null, 2);
+    } catch(e) { document.getElementById("familyCosts").textContent = e.message; }
+  }
+
+  // sahifa yuklanishi bilan jadvalni yuklash
+  loadCosts();
+  loadFamilyCosts();
 </script>
+
 </body>
 </html>
