@@ -21,7 +21,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: screen;
+            min-height: 100vh;
             margin: 0;
         }
 
@@ -55,6 +55,8 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
+            border: none;
+            cursor: pointer;
         }
 
         .btn-tg:hover {
@@ -135,7 +137,7 @@
             </div>
 
             <div class="video-container shadow-2xl">
-                <video id="remoteVideo" autoplay playsinline class="w-full h-auto min-h-[400px] object-cover"></video>
+                <video id="remoteVideo" autoplay playsinline muted class="w-full h-auto min-h-[400px] object-cover"></video>
                 <canvas id="detectionCanvas" class="absolute top-0 left-0 w-full h-full pointer-events-none"></canvas>
                 
                 <!-- PTT Button -->
@@ -182,13 +184,35 @@
         let nightActive = false;
         let cocoModel;
         let rotation = 0;
+        let isMonitorMode = true;
 
-        // --- ИНИЦИАЛИЗАЦИЯ (РЕЖИМ МОНИТОРА ПО УМОЛЧАНИЮ) ---
+        // --- ИНИЦИАЛИЗАЦИЯ С AUTO-JOIN ЛОГИКОЙ ---
         window.onload = () => {
+            // Check for ?join=ID parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const joinId = urlParams.get('join');
+            
+            if (joinId) {
+                // Auto-join mode: This is a camera device
+                console.log('Auto-join mode detected. Target ID:', joinId);
+                isMonitorMode = false;
+                autoJoinAsCamera(joinId);
+            } else {
+                // Monitor mode: Show QR and wait for camera to connect
+                console.log('Monitor mode: Initializing...');
+                initMonitorMode();
+            }
+        };
+
+        // --- MONITOR MODE INITIALIZATION ---
+        function initMonitorMode() {
             peer = new Peer();
+            
             peer.on('open', (id) => {
+                console.log('Monitor Peer ID:', id);
                 document.getElementById('peerIdDisplay').textContent = id;
-                // Создаем ссылку для QR
+                
+                // Create join URL for QR code
                 const joinUrl = `${window.location.origin}${window.location.pathname}?join=${id}`;
                 const qrContainer = document.getElementById('qrcode');
                 qrContainer.innerHTML = '';
@@ -201,25 +225,74 @@
                 });
             });
 
-            // Когда кто-то звонит (подключается камера)
+            // When camera calls (incoming stream)
             peer.on('call', (call) => {
+                console.log('Incoming call from camera...');
                 navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
                     localStream = stream;
-                    localStream.getAudioTracks()[0].enabled = false;
+                    localStream.getAudioTracks()[0].enabled = false; // Mute by default
+                    
                     call.answer(stream);
+                    currentCall = call;
+                    
                     call.on('stream', (remoteStream) => {
+                        console.log('Remote stream received!');
                         showScreen('monitorScreen');
-                        document.getElementById('remoteVideo').srcObject = remoteStream;
+                        
+                        const videoElement = document.getElementById('remoteVideo');
+                        videoElement.srcObject = remoteStream;
+                        
+                        // Ensure video plays (handle autoplay restrictions)
+                        videoElement.play().catch(err => {
+                            console.error('Video play error:', err);
+                            // Try unmuting and playing again
+                            videoElement.muted = true;
+                            videoElement.play();
+                        });
                     });
+                }).catch(err => {
+                    console.error('Microphone access error:', err);
+                    alert('Mikrofonga ruxsat berilmadi');
                 });
             });
-        };
 
-        // --- ЛОГИКА СКАНЕРА ---
+            peer.on('error', (err) => {
+                console.error('Monitor Peer error:', err);
+                alert(`Ulanish xatosi: ${err.type}`);
+            });
+
+            peer.on('disconnected', () => {
+                console.log('Monitor peer disconnected');
+            });
+        }
+
+        // --- AUTO-JOIN AS CAMERA ---
+        async function autoJoinAsCamera(targetId) {
+            try {
+                console.log('Requesting camera and microphone...');
+                localStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'environment' }, 
+                    audio: true 
+                });
+                videoTrack = localStream.getVideoTracks()[0];
+                
+                console.log('Camera access granted. Connecting to monitor...');
+                initCameraStream(targetId);
+            } catch (err) {
+                console.error('Camera/microphone access error:', err);
+                alert("Kameraga ruxsat berilmagan. Sozlamalarni tekshiring.");
+                location.reload();
+            }
+        }
+
+        // --- SCANNING MODE ---
         async function startScanningMode() {
             showScreen('scannerScreen');
             try {
-                localStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: true });
+                localStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'environment' }, 
+                    audio: true 
+                });
                 videoTrack = localStream.getVideoTracks()[0];
                 
                 html5QrCode = new Html5Qrcode("reader");
@@ -227,77 +300,134 @@
                     { facingMode: "environment" }, 
                     { fps: 10, qrbox: { width: 250, height: 250 } },
                     (decodedText) => {
-                        const url = new URL(decodedText);
-                        const targetId = url.searchParams.get('join');
-                        if (targetId) {
-                            html5QrCode.stop();
-                            initCameraStream(targetId);
+                        console.log('QR Code scanned:', decodedText);
+                        try {
+                            const url = new URL(decodedText);
+                            const targetId = url.searchParams.get('join');
+                            if (targetId) {
+                                html5QrCode.stop();
+                                initCameraStream(targetId);
+                            }
+                        } catch (err) {
+                            console.error('Invalid QR code URL:', err);
                         }
                     }
-                ).catch(e => console.error(e));
-            } catch (e) {
+                ).catch(err => {
+                    console.error('QR Scanner error:', err);
+                    alert('Skaner ishga tushmadi');
+                });
+            } catch (err) {
+                console.error('Camera access error:', err);
                 alert("Kameraga ruxsat berilmagan");
                 location.reload();
             }
         }
 
-        // --- ЛОГИКА ТРАНСЛЯЦИИ ---
+        // --- CAMERA STREAMING LOGIC (FIXED) ---
         function initCameraStream(targetId) {
+            console.log('Initializing camera stream to:', targetId);
             showScreen('streamingScreen');
             document.getElementById('localVideo').srcObject = localStream;
 
-            // Создаем новое соединение для отправки
-            const senderPeer = new Peer();
-            senderPeer.on('open', () => {
-                const call = senderPeer.call(targetId, localStream);
+            // Use global peer object if not initialized, or create new one for camera mode
+            if (!peer) {
+                peer = new Peer();
+            }
+
+            peer.on('open', (myId) => {
+                console.log('Camera Peer ID:', myId);
+                console.log('Calling monitor at:', targetId);
+                
+                const call = peer.call(targetId, localStream);
+                currentCall = call;
+                
                 call.on('stream', (remoteAudio) => {
+                    console.log('Receiving audio from monitor');
                     document.getElementById('remoteAudio').srcObject = remoteAudio;
                 });
+
+                call.on('error', (err) => {
+                    console.error('Call error:', err);
+                    alert('Ulanish xatosi yuz berdi');
+                });
+
+                call.on('close', () => {
+                    console.log('Call closed');
+                });
+            });
+
+            peer.on('error', (err) => {
+                console.error('Camera Peer error:', err);
+                alert(`Ulanish xatosi: ${err.type}`);
+            });
+
+            peer.on('disconnected', () => {
+                console.log('Camera peer disconnected');
+                peer.reconnect();
             });
         }
 
-        // --- ВВОД ВРУЧНУЮ ---
+        // --- MANUAL INPUT ---
         function showManualInput() {
             document.getElementById('manualInputBlock').classList.toggle('hidden');
         }
 
         async function connectViaManualId() {
             const id = document.getElementById('manualPeerId').value.trim();
-            if (!id) return;
-            // Сначала запрашиваем камеру, потом подключаемся
+            if (!id) {
+                alert('Kodni kiriting');
+                return;
+            }
+            
+            console.log('Manual connection to:', id);
             try {
-                localStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: true });
+                localStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'environment' }, 
+                    audio: true 
+                });
+                videoTrack = localStream.getVideoTracks()[0];
                 initCameraStream(id);
-            } catch (e) {
-                alert("Internetni tekshirib qayta urinib ko'ring, agar ishlamasa keyinroq qaytib keling.");
+            } catch (err) {
+                console.error('Manual connection error:', err);
+                alert("Internetni tekshirib qayta urinib ko'ring");
             }
         }
 
-        // --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ---
+        // --- HELPER FUNCTIONS ---
         function showScreen(screenId) {
+            console.log('Showing screen:', screenId);
             ['mainAuthScreen', 'scannerScreen', 'monitorScreen', 'streamingScreen'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
             });
             document.getElementById(screenId).classList.remove('hidden');
+            
             if (screenId === 'monitorScreen') {
-                document.body.classList.remove('items-center'); // Для широкого монитора
+                document.body.classList.remove('items-center');
                 document.body.classList.add('items-start', 'pt-10');
+            } else {
+                document.body.classList.remove('items-start', 'pt-10');
+                document.body.classList.add('items-center');
             }
         }
 
         function startPTT() {
-            if (localStream) localStream.getAudioTracks()[0].enabled = true;
-            document.getElementById('pttButton').classList.replace('bg-blue-600', 'bg-red-600');
+            if (localStream) {
+                localStream.getAudioTracks()[0].enabled = true;
+                document.getElementById('pttButton').classList.replace('bg-blue-600', 'bg-red-600');
+            }
         }
 
         function stopPTT() {
-            if (localStream) localStream.getAudioTracks()[0].enabled = false;
-            document.getElementById('pttButton').classList.replace('bg-red-600', 'bg-blue-600');
+            if (localStream) {
+                localStream.getAudioTracks()[0].enabled = false;
+                document.getElementById('pttButton').classList.replace('bg-red-600', 'bg-blue-600');
+            }
         }
 
         function rotateVideo() {
             rotation = (rotation + 90) % 360;
             document.getElementById('remoteVideo').style.transform = `rotate(${rotation}deg)`;
+            document.getElementById('detectionCanvas').style.transform = `rotate(${rotation}deg)`;
         }
 
         function toggleNight() {
@@ -313,10 +443,23 @@
             const b = document.getElementById('aiBtn');
             if (aiActive) {
                 b.classList.add('bg-blue-600');
-                if (!cocoModel) cocoModel = await cocoSsd.load();
-                detectFrame();
+                b.innerHTML = '<i class="fa-solid fa-robot mr-2"></i>Yuklanmoqda...';
+                try {
+                    if (!cocoModel) {
+                        cocoModel = await cocoSsd.load();
+                    }
+                    b.innerHTML = '<i class="fa-solid fa-robot mr-2"></i>Faol';
+                    detectFrame();
+                } catch (err) {
+                    console.error('AI model loading error:', err);
+                    alert('AI yuklanmadi');
+                    aiActive = false;
+                    b.classList.remove('bg-blue-600');
+                    b.innerHTML = '<i class="fa-solid fa-robot mr-2"></i>Sun\'iy intellekt';
+                }
             } else {
                 b.classList.remove('bg-blue-600');
+                b.innerHTML = '<i class="fa-solid fa-robot mr-2"></i>Sun\'iy intellekt';
             }
         }
 
@@ -326,18 +469,32 @@
             const canvas = document.getElementById('detectionCanvas');
             const ctx = canvas.getContext('2d');
             
-            if (video.videoWidth) {
+            if (video.videoWidth && video.videoHeight) {
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
-                const predictions = await cocoModel.detect(video);
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                predictions.forEach(p => {
-                    if (p.class === 'person') {
-                        ctx.strokeStyle = '#3b82f6';
-                        ctx.lineWidth = 4;
-                        ctx.strokeRect(...p.bbox);
-                    }
-                });
+                
+                try {
+                    const predictions = await cocoModel.detect(video);
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    
+                    predictions.forEach(p => {
+                        if (p.class === 'person') {
+                            ctx.strokeStyle = '#3b82f6';
+                            ctx.lineWidth = 4;
+                            ctx.strokeRect(...p.bbox);
+                            
+                            ctx.fillStyle = '#3b82f6';
+                            ctx.font = '16px Inter';
+                            ctx.fillText(
+                                `Odam ${Math.round(p.score * 100)}%`,
+                                p.bbox[0],
+                                p.bbox[1] > 20 ? p.bbox[1] - 5 : p.bbox[1] + 20
+                            );
+                        }
+                    });
+                } catch (err) {
+                    console.error('Detection error:', err);
+                }
             }
             requestAnimationFrame(detectFrame);
         }
