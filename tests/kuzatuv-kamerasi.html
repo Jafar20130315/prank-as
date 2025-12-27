@@ -80,8 +80,8 @@
         
         <!-- ГЛАВНОЕ ОКНО (СТИЛЬ TELEGRAM) -->
         <div id="mainAuthScreen" class="tg-card space-y-6 animate-in fade-in zoom-in duration-500">
-            <h1 class="text-2xl font-bold tracking-tight">Вход в VisionLink</h1>
-            <p class="text-slate-400 text-sm">Используйте камеру телефона для сканирования или подключитесь как монитор</p>
+            <h1 class="text-2xl font-bold tracking-tight">Telefonni kamera sifatida ishlatish</h1>
+            <p class="text-slate-400 text-sm">Ushbu QR-kodni telefondan skan qiling</p>
 
             <!-- 1. QR-КОД и ID -->
             <div class="qr-wrapper shadow-xl">
@@ -89,26 +89,26 @@
             </div>
             
             <div class="space-y-1">
-                <p class="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-bold">Ваш ID подключения</p>
-                <p id="peerIdDisplay" class="text-xl font-mono font-bold text-blue-400">Генерация...</p>
+                <p class="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-bold">Sining ulanish uchun kodingiz</p>
+                <p id="peerIdDisplay" class="text-xl font-mono font-bold text-blue-400">...</p>
             </div>
 
             <div class="space-y-3 pt-4">
                 <!-- 2. КНОПКА СКАНЕРА (ДЛЯ ТЕЛЕФОНА) -->
                 <button onclick="startScanningMode()" class="btn-tg">
-                    <i class="fa-solid fa-qrcode"></i> Сканировать QR-код
+                    <i class="fa-solid fa-qrcode"></i> QR-kodni skan qilish
                 </button>
 
                 <!-- 3. ВВОД ВРУЧНУЮ -->
                 <button onclick="showManualInput()" class="text-blue-400 text-sm font-medium hover:underline">
-                    Ввести код вручную
+                    Kodni o'zim kiritaman
                 </button>
             </div>
 
             <!-- Скрытое поле ввода -->
             <div id="manualInputBlock" class="hidden space-y-3 animate-in slide-in-from-top-2">
                 <div class="flex gap-2">
-                    <input type="text" id="manualPeerId" placeholder="Введите ID..." 
+                    <input type="text" id="manualPeerId" placeholder="Kodni kiriting..." 
                         class="flex-1 bg-slate-900 border border-slate-700 p-3 rounded-xl outline-none focus:border-blue-500 text-sm font-mono">
                     <button onclick="connectViaManualId()" class="bg-slate-700 px-4 rounded-xl hover:bg-slate-600 transition">
                         <i class="fa-solid fa-arrow-right"></i>
@@ -121,7 +121,7 @@
         <div id="scannerScreen" class="hidden tg-card space-y-6">
             <h2 class="text-xl font-bold">QR-kodga qarating</h2>
             <div id="reader" class="w-full aspect-square bg-black rounded-2xl overflow-hidden"></div>
-            <button onclick="location.reload()" class="text-slate-400 text-sm hover:text-white">Отмена</button>
+            <button onclick="location.reload()" class="text-slate-400 text-sm hover:text-white">Bekor qilish</button>
         </div>
 
         <!-- ОКНО МОНИТОРА (КОНТРОЛЛЕР) -->
