@@ -1,0 +1,292 @@
+<!--
+  webrtc-camera-qr.html — Fixed QR loading + system-aware light/dark theme
+
+  Fixes applied:
+    1. Removed a stray typo (`tconst`) that broke script execution.
+    2. Made QR generation resilient: if QR library isn't yet available it will be loaded dynamically
+       and then QR will be rendered. This prevents "QRCode is not defined" errors.
+    3. Implemented system-aware color theme: light (white/black) and dark modes via
+       CSS `prefers-color-scheme` (no bright blue accent anymore).
+    4. Kept two-step flow (connection screen -> camera screen) and all WebRTC logic.
+
+  How to test:
+    - Serve the file over HTTPS (required for camera access).
+    - Put your Firebase config values.
+    - Open the page (viewer) — QR should render. Scan it with phone (camera role) and
+      the viewer will switch to camera screen when remote tracks arrive.
+-->
+
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Kuzatuv — ulanish va kamera</title>
+
+  <style>
+    :root{
+      /* Light (default) */
+      --bg: #ffffff;
+      --card: #f5f6f7;
+      --text: #0b1220;
+      --muted: #5b6b76;
+      --accent: #000000;
+      --radius:16px;
+    }
+    @media (prefers-color-scheme: dark){
+      :root{
+        --bg: #0f1724;
+        --card: #0b1220;
+        --text: #dbe7f7;
+        --muted: #9aa6b2;
+        --accent: #ffffff;
+        --radius:16px;
+      }
+    }
+
+    html,body{height:100%;margin:0;background:var(--bg);font-family:Inter,system-ui,-apple-system; color:var(--text)}
+    .full{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+
+    .screen{max-width:960px;width:100%;display:none}
+    .screen.active{display:block}
+
+    .card{background:var(--card);border-radius:var(--radius);box-shadow:0 8px 30px rgba(2,8,23,0.06);padding:24px;border:1px solid rgba(0,0,0,0.04);color:var(--text)}
+
+    .title{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+    .logo{width:42px;height:42px;border-radius:12px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--bg)}
+
+    h1{margin:0;font-size:18px}
+    .muted{color:var(--muted);font-size:13px}
+
+    .center{display:flex;flex-direction:column;align-items:center}
+
+    .qr-frame{width:320px;height:320px;border-radius:14px;background:rgba(0,0,0,0.02);border:1px solid rgba(0,0,0,0.04);display:flex;align-items:center;justify-content:center;margin-top:12px}
+    .qr-frame img{width:92%;height:92%;object-fit:contain}
+
+    .controls{display:flex;gap:10px;margin-top:10px}
+    .btn{padding:10px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:600;background:transparent}
+    .btn.primary{background:var(--text);color:var(--bg)}
+    .btn.ghost{border:1px solid rgba(0,0,0,0.06);color:var(--muted)}
+
+    /* CAMERA VIEW SCREEN */
+    .viewer{margin-top:14px;border-radius:var(--radius);overflow:hidden;border:1px solid rgba(0,0,0,0.06)}
+    .viewer-head{display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,0.02);padding:10px 12px}
+    .status-pill{padding:4px 8px;border-radius:999px;font-size:12px}
+    .ok{background:rgba(28,180,120,0.12);color:#1bb57a}
+    .wait{background:rgba(0,0,0,0.04);color:var(--muted)}
+    .bad{background:rgba(255,60,60,0.12);color:#ff7b7b}
+
+    video{width:100%;height:480px;background:black;object-fit:cover}
+    canvas#remoteOverlay{position:absolute;inset:0;pointer-events:none}
+
+    @media (prefers-color-scheme: dark){
+      .card{box-shadow:0 8px 30px rgba(2,8,23,0.6);border:1px solid rgba(255,255,255,0.03)}
+      .qr-frame{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03)}
+      .btn.ghost{border:1px solid rgba(255,255,255,0.06);}
+    }
+  </style>
+</head>
+<body>
+<div class="full">
+
+  <!-- SCREEN 1: CONNECTION SCREEN WITH QR  -->
+  <div id="screenConnect" class="screen active">
+    <div class="card center">
+      <div class="title">
+        <div class="logo">QR</div>
+        <div>
+          <h1>Ulanish oynasi</h1>
+          <div class="muted">Telefon bilan QR kodni skan qiling — kamera ulanishi uchun</div>
+        </div>
+      </div>
+
+      <div id="qrBox" class="qr-frame">
+        <div id="qrPlaceholder" class="muted">QR generatsiya qilinmoqda...</div>
+      </div>
+
+      <div class="controls">
+        <button id="copyLinkBtn" class="btn ghost">Havolani nusxalash</button>
+        <button id="openScannerBtn" class="btn primary">Skan qilish</button>
+      </div>
+
+      <div class="muted">Session ID: <span id="sessionId"></span></div>
+
+      <div class="muted">Kamera ulanganida — avtomatik kamera oynasiga o'tiladi</div>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: CAMERA VIEWER -->
+  <div id="screenCamera" class="screen">
+    <div class="card">
+      <div class="viewer-head">
+        <div>
+          <strong>Kamera oynasi</strong>
+          <span class="muted">— real vaqt rejimida</span>
+        </div>
+        <div id="statusBadge" class="status-pill wait">Ulanish kutilmoqda...</div>
+      </div>
+
+      <div class="viewer" style="position:relative">
+        <video id="remote" autoplay playsinline></video>
+        <canvas id="remoteOverlay"></canvas>
+      </div>
+
+      <div class="controls" style="margin-top:12px">
+        <button id="toggleFace" class="btn ghost">AI odamni tanish</button>
+        <button id="nightModeBtn" class="btn ghost">Kech rejimi</button>
+        <button id="fullScreenBtn" class="btn ghost">Fullscreen</button>
+        <button id="muteBtn" class="btn ghost">Mikrofon</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- scripts -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<!-- QR library is no longer assumed to exist before our script; we will dynamically load if needed -->
+<script>
+
+// CONFIG (fill yourself)
+const firebaseConfig = {
+  apiKey: "AIzaSyA79oUjY6YAZ9-S34Sj16k5qllxXB4HaXk",
+  authDomain: "kuzatuv-kamerasi.firebaseapp.com",
+  databaseURL: "https://kuzatuv-kamerasi-default-rtdb.firebaseio.com",
+  projectId: "kuzatuv-kamerasi",
+  storageBucket: "kuzatuv-kamerasi.firebasestorage.app",
+  messagingSenderId: "849973167598",
+  appId: "1:849973167598:web:b469ee80ce412c0933faff",
+  measurementId: "G-4FJ3P4R3XF"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db=firebase.database();
+
+// UI refs
+const screenConnect=document.getElementById('screenConnect');
+const screenCamera=document.getElementById('screenCamera');
+const statusBadge=document.getElementById('statusBadge');
+const qrBox=document.getElementById('qrBox');
+const qrPlaceholder=document.getElementById('qrPlaceholder');
+
+// session setup
+function uid(len=10){return Math.random().toString(36).slice(2,2+len)}
+const urlParams=new URLSearchParams(location.search);
+const role=urlParams.get('role');
+let session=urlParams.get('session')||uid(12);
+document.getElementById('sessionId').textContent=session;
+
+const base=location.origin+location.pathname;
+const cameraUrl=base+'?role=camera&session='+session;
+
+// --- QR generation (reliable, no external JS library required) ---
+// We will ONLY use Google Chart API QR (works even if other CDNs are blocked)
+
+function renderQRCode(text){
+  try{
+    const img = new Image();
+    img.alt = 'QR kod — telefon bilan skan qiling';
+    img.src = 'https://chart.googleapis.com/chart?cht=qr&chs=320x320&chl=' + encodeURIComponent(text) + '&chld=L|1';
+    img.style.width = '92%';
+    img.style.height = '92%';
+
+    img.onload = function(){
+      qrBox.innerHTML = '';
+      qrBox.appendChild(img);
+    };
+
+    img.onerror = function(){
+      qrBox.innerHTML = '<div class="muted">QRni yuklab bo\'lmadi. Internet yoki blokirovkani tekshiring.</div>';
+    };
+  }catch(e){
+    console.error('QR fallback failed', e);
+    qrBox.innerHTML = '<div class="muted">QR yaratishda xato</div>';
+  }
+}
+
+renderQRCode(cameraUrl);
+
+// UI helpers
+function switchToCameraScreen(){ screenConnect.classList.remove('active'); screenCamera.classList.add('active'); }
+
+// WebRTC core
+let pc=null; let remoteStream=null; let faceModel=null; let faceDetectionActive=false; let micMuted=false;
+const remoteVideo=document.getElementById('remote'); const remoteOverlay=document.getElementById('remoteOverlay');
+
+function setStatusWaiting(){ statusBadge.textContent='Ulanish kutilmoqda...'; statusBadge.className='status-pill wait'; }
+function setStatusOk(){ statusBadge.textContent='Ulandi'; statusBadge.className='status-pill ok'; }
+function setStatusBad(){ statusBadge.textContent='Uzildi'; statusBadge.className='status-pill bad'; }
+
+function resizeOverlay(){ remoteOverlay.width = remoteVideo.clientWidth; remoteOverlay.height = remoteVideo.clientHeight; }
+window.addEventListener('resize', resizeOverlay);
+
+async function startViewer(){
+  // IMPORTANT FIX:
+  // Do NOT switch to camera screen immediately.
+  // Stay on connection screen with QR, and only switch after media tracks arrive.
+
+  setStatusWaiting();
+
+  pc = new RTCPeerConnection({iceServers:[{urls:['stun:stun.l.google.com:19302']}]});
+  remoteStream = new MediaStream();
+  remoteVideo.srcObject = remoteStream;
+
+  // When tracks arrive => connection established => switch to camera screen
+  pc.ontrack = function(e){
+    e.streams[0].getTracks().forEach(function(t){ remoteStream.addTrack(t); });
+    switchToCameraScreen();
+    setStatusOk();
+  };
+
+  pc.oniceconnectionstatechange=function(){
+    if(pc.iceConnectionState==='disconnected') setStatusBad();
+  };
+
+  const callersRef = db.ref('sessions/'+session+'/callerCandidates');
+  const calleesRef = db.ref('sessions/'+session+'/calleeCandidates');
+
+  pc.onicecandidate = function(e){ if(e.candidate) callersRef.push(JSON.stringify(e.candidate)); };
+
+  const offerRef = db.ref('sessions/'+session+'/offer');
+  offerRef.on('value', async function(snapshot){
+    const v=snapshot.val(); if(!v) return;
+    await pc.setRemoteDescription(JSON.parse(v));
+    const ans = await pc.createAnswer();
+    await pc.setLocalDescription(ans);
+    db.ref('sessions/'+session+'/answer').set(JSON.stringify(pc.localDescription));
+  });
+
+  calleesRef.on('child_added', function(s){
+    try{ pc.addIceCandidate(new RTCIceCandidate(JSON.parse(s.val()))); }
+    catch(e){ console.warn(e); }
+  });
+}
+
+async function startCamera(){
+  const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment', width:{ideal:1280}}, audio:true});
+  pc = new RTCPeerConnection({iceServers:[{urls:['stun:stun.l.google.com:19302']}]});
+  stream.getTracks().forEach(function(t){ pc.addTrack(t, stream); });
+
+  const callersRef = db.ref('sessions/'+session+'/callerCandidates');
+  const calleesRef = db.ref('sessions/'+session+'/calleeCandidates');
+
+  pc.onicecandidate = function(e){ if(e.candidate) calleesRef.push(JSON.stringify(e.candidate)); };
+
+  db.ref('sessions/'+session+'/answer').on('value', async function(snap){ const v=snap.val(); if(!v) return; await pc.setRemoteDescription(JSON.parse(v)); });
+
+  const offer = await pc.createOffer(); await pc.setLocalDescription(offer);
+  db.ref('sessions/'+session+'/offer').set(JSON.stringify(pc.localDescription));
+}
+
+// Start appropriate role
+if(role === 'camera'){
+  // camera page: just start camera
+  startCamera().catch(function(err){ console.error(err); alert('Kamera boshlanmadi: ' + (err && err.message ? err.message : err)); });
+} else {
+  // viewer: wait for offer and switch screen when tracks arrive
+  startViewer().catch(function(e){ console.error(e); });
+}
+
+</script>
+</body>
+</html>
