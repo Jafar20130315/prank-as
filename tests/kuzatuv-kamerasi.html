@@ -206,7 +206,23 @@
 
         // --- MONITOR MODE INITIALIZATION ---
         function initMonitorMode() {
-            peer = new Peer();
+            // Create peer with custom server configuration
+            // Using public PeerJS servers with fallback
+            peer = new Peer(undefined, {
+                debug: 1,
+                host: '0.peerjs.com',
+                port: 443,
+                path: '/',
+                secure: true,
+                config: {
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:stun1.l.google.com:19302' },
+                        { urls: 'stun:stun2.l.google.com:19302' },
+                        { urls: 'stun:global.stun.twilio.com:3478' }
+                    ]
+                }
+            });
             
             peer.on('open', (id) => {
                 console.log('Monitor Peer ID:', id);
@@ -258,11 +274,37 @@
 
             peer.on('error', (err) => {
                 console.error('Monitor Peer error:', err);
-                alert(`Ulanish xatosi: ${err.type}`);
+                console.error('Error type:', err.type);
+                console.error('Error message:', err.message || err);
+                
+                // Handle specific error types
+                if (err.type === 'unavailable-id') {
+                    alert('Bu ID band. Sahifani yangilang.');
+                    setTimeout(() => location.reload(), 2000);
+                } else if (err.type === 'network') {
+                    alert('Internet bilan aloqa yo\'q. Internetni tekshiring.');
+                } else if (err.type === 'server-error') {
+                    alert('PeerJS serveriga ulanib bo\'lmadi.\n\nQuyidagilarni tekshiring:\n1. Internet aloqangiz\n2. Firewall/VPN sozlamalaringiz\n3. Brauzerni yangilang\n\nSahifa 3 sekunddan keyin qayta yuklanadi.');
+                    setTimeout(() => location.reload(), 3000);
+                } else if (err.type === 'ssl-unavailable') {
+                    alert('HTTPS talab qilinadi. Sahifani HTTPS orqali oching.');
+                } else {
+                    alert(`Ulanish xatosi: ${err.type || 'Noma\'lum xato'}\n\nInternet aloqangizni tekshiring va qayta urinib ko'ring.`);
+                    setTimeout(() => location.reload(), 3000);
+                }
             });
 
             peer.on('disconnected', () => {
-                console.log('Monitor peer disconnected');
+                console.log('Monitor peer disconnected. Attempting reconnect...');
+                setTimeout(() => {
+                    if (!peer.destroyed) {
+                        peer.reconnect();
+                    }
+                }, 1000);
+            });
+
+            peer.on('close', () => {
+                console.log('Monitor peer connection closed');
             });
         }
 
@@ -329,15 +371,83 @@
             showScreen('streamingScreen');
             document.getElementById('localVideo').srcObject = localStream;
 
-            // Use global peer object if not initialized, or create new one for camera mode
+            // Create peer with custom server configuration for camera
             if (!peer) {
-                peer = new Peer();
-            }
+                peer = new Peer(undefined, {
+                    debug: 1,
+                    host: '0.peerjs.com',
+                    port: 443,
+                    path: '/',
+                    secure: true,
+                    config: {
+                        iceServers: [
+                            { urls: 'stun:stun.l.google.com:19302' },
+                            { urls: 'stun:stun1.l.google.com:19302' },
+                            { urls: 'stun:stun2.l.google.com:19302' },
+                            { urls: 'stun:global.stun.twilio.com:3478' }
+                        ]
+                    }
+                });
 
-            peer.on('open', (myId) => {
-                console.log('Camera Peer ID:', myId);
-                console.log('Calling monitor at:', targetId);
-                
+                peer.on('open', (myId) => {
+                    console.log('Camera Peer ID:', myId);
+                    console.log('Calling monitor at:', targetId);
+                    
+                    // Wait a moment before calling to ensure connection is stable
+                    setTimeout(() => {
+                        const call = peer.call(targetId, localStream);
+                        currentCall = call;
+                        
+                        call.on('stream', (remoteAudio) => {
+                            console.log('Receiving audio from monitor');
+                            document.getElementById('remoteAudio').srcObject = remoteAudio;
+                        });
+
+                        call.on('error', (err) => {
+                            console.error('Call error:', err);
+                            alert('Ulanish xatosi yuz berdi');
+                        });
+
+                        call.on('close', () => {
+                            console.log('Call closed');
+                        });
+                    }, 500);
+                });
+
+                peer.on('error', (err) => {
+                    console.error('Camera Peer error:', err);
+                    console.error('Error type:', err.type);
+                    console.error('Error message:', err.message || err);
+                    
+                    if (err.type === 'peer-unavailable') {
+                        alert('Monitor topilmadi. Kodni tekshiring.');
+                    } else if (err.type === 'network') {
+                        alert('Internet bilan aloqa yo\'q. Internetni tekshiring.');
+                    } else if (err.type === 'server-error') {
+                        alert('PeerJS serveriga ulanib bo\'lmadi.\n\nInternet aloqangizni tekshiring.\n\nSahifa 3 sekunddan keyin qayta yuklanadi.');
+                        setTimeout(() => location.reload(), 3000);
+                    } else if (err.type === 'ssl-unavailable') {
+                        alert('HTTPS talab qilinadi. Sahifani HTTPS orqali oching.');
+                    } else {
+                        alert(`Ulanish xatosi: ${err.type || 'Noma\'lum xato'}\n\nInternet aloqangizni tekshiring.`);
+                    }
+                });
+
+                peer.on('disconnected', () => {
+                    console.log('Camera peer disconnected. Attempting reconnect...');
+                    setTimeout(() => {
+                        if (!peer.destroyed) {
+                            peer.reconnect();
+                        }
+                    }, 1000);
+                });
+
+                peer.on('close', () => {
+                    console.log('Camera peer connection closed');
+                });
+            } else {
+                // Peer already exists, just make the call
+                console.log('Using existing peer. Calling monitor at:', targetId);
                 const call = peer.call(targetId, localStream);
                 currentCall = call;
                 
@@ -350,21 +460,7 @@
                     console.error('Call error:', err);
                     alert('Ulanish xatosi yuz berdi');
                 });
-
-                call.on('close', () => {
-                    console.log('Call closed');
-                });
-            });
-
-            peer.on('error', (err) => {
-                console.error('Camera Peer error:', err);
-                alert(`Ulanish xatosi: ${err.type}`);
-            });
-
-            peer.on('disconnected', () => {
-                console.log('Camera peer disconnected');
-                peer.reconnect();
-            });
+            }
         }
 
         // --- MANUAL INPUT ---
