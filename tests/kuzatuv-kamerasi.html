@@ -1,271 +1,345 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Remote Camera System</title>
+    <title>Kuzatuv kamerasi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.2/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #0f172a; 
+            color: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: screen;
+            margin: 0;
+        }
+
+        .tg-card {
+            background: #1e293b;
+            border-radius: 28px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 420px;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .qr-wrapper {
+            background: white;
+            padding: 16px;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 20px 0;
+        }
+
+        .btn-tg {
+            background: #3b82f6;
+            color: white;
+            padding: 14px;
+            border-radius: 14px;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-tg:hover {
+            background: #2563eb;
+            transform: scale(1.02);
+        }
+
+        .video-container {
+            border-radius: 24px;
+            overflow: hidden;
+            background: #000;
+            position: relative;
+        }
+
+        #reader video {
+            border-radius: 20px;
+        }
+    </style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen">
-    <div id="app" class="container mx-auto p-4">
-        <!-- Role Selection Screen -->
-        <div id="roleSelection" class="flex flex-col items-center justify-center min-h-screen space-y-6">
-            <h1 class="text-4xl font-bold mb-8">Remote Camera System</h1>
-            <button onclick="selectRole('controller')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-lg text-xl transition">
-                📱 Controller (Device A)
-            </button>
-            <button onclick="selectRole('camera')" class="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-lg text-xl transition">
-                📷 Camera (Device B)
-            </button>
-        </div>
+<body class="p-4">
 
-        <!-- Controller Screen -->
-        <div id="controllerScreen" class="hidden">
-            <h2 class="text-3xl font-bold mb-4">Controller Mode</h2>
-            <div id="waitingConnection" class="flex flex-col items-center space-y-4">
-                <p class="text-xl mb-4">Scan this QR code or enter the code on the Camera device:</p>
-                <div id="qrcode" class="bg-white p-4 rounded-lg"></div>
-                <p class="text-2xl font-mono bg-gray-800 px-6 py-3 rounded-lg" id="peerIdDisplay"></p>
-            </div>
-            <div id="activeConnection" class="hidden">
-                <div class="mb-4 flex flex-wrap gap-4">
-                    <button id="aiToggle" onclick="toggleAI()" class="bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded-lg font-semibold transition">
-                        AI Detection: OFF
-                    </button>
-                    <button id="nightModeToggle" onclick="toggleNightMode()" class="bg-yellow-600 hover:bg-yellow-700 px-6 py-2 rounded-lg font-semibold transition">
-                        Night Mode: OFF
-                    </button>
-                    <button id="pttButton" onmousedown="startPTT()" onmouseup="stopPTT()" ontouchstart="startPTT()" ontouchend="stopPTT()" class="bg-red-600 hover:bg-red-700 px-6 py-2 rounded-lg font-semibold transition">
-                        🎤 Push to Talk
-                    </button>
-                </div>
-                <div class="relative">
-                    <video id="remoteVideo" autoplay playsinline class="w-full rounded-lg shadow-lg"></video>
-                    <canvas id="detectionCanvas" class="absolute top-0 left-0 w-full h-full pointer-events-none"></canvas>
-                </div>
-            </div>
-        </div>
+    <div id="app" class="w-full flex justify-center">
+        
+        <!-- ГЛАВНОЕ ОКНО (СТИЛЬ TELEGRAM) -->
+        <div id="mainAuthScreen" class="tg-card space-y-6 animate-in fade-in zoom-in duration-500">
+            <h1 class="text-2xl font-bold tracking-tight">Вход в VisionLink</h1>
+            <p class="text-slate-400 text-sm">Используйте камеру телефона для сканирования или подключитесь как монитор</p>
 
-        <!-- Camera Screen -->
-        <div id="cameraScreen" class="hidden">
-            <h2 class="text-3xl font-bold mb-4">Camera Mode</h2>
-            <div id="cameraInput" class="space-y-4">
-                <p class="text-xl">Enter the Controller's code:</p>
-                <input type="text" id="peerIdInput" placeholder="Enter Peer ID" class="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-600 focus:outline-none focus:border-blue-500">
-                <button onclick="connectToController()" class="bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg font-semibold transition w-full">
-                    Connect
+            <!-- 1. QR-КОД и ID -->
+            <div class="qr-wrapper shadow-xl">
+                <div id="qrcode"></div>
+            </div>
+            
+            <div class="space-y-1">
+                <p class="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-bold">Ваш ID подключения</p>
+                <p id="peerIdDisplay" class="text-xl font-mono font-bold text-blue-400">Генерация...</p>
+            </div>
+
+            <div class="space-y-3 pt-4">
+                <!-- 2. КНОПКА СКАНЕРА (ДЛЯ ТЕЛЕФОНА) -->
+                <button onclick="startScanningMode()" class="btn-tg">
+                    <i class="fa-solid fa-qrcode"></i> Сканировать QR-код
+                </button>
+
+                <!-- 3. ВВОД ВРУЧНУЮ -->
+                <button onclick="showManualInput()" class="text-blue-400 text-sm font-medium hover:underline">
+                    Ввести код вручную
                 </button>
             </div>
-            <div id="cameraActive" class="hidden mt-4">
-                <p class="text-xl mb-4 text-green-500">✓ Connected to Controller</p>
-                <video id="localVideo" autoplay playsinline muted class="w-full rounded-lg shadow-lg"></video>
-                <audio id="remoteAudio" autoplay></audio>
+
+            <!-- Скрытое поле ввода -->
+            <div id="manualInputBlock" class="hidden space-y-3 animate-in slide-in-from-top-2">
+                <div class="flex gap-2">
+                    <input type="text" id="manualPeerId" placeholder="Введите ID..." 
+                        class="flex-1 bg-slate-900 border border-slate-700 p-3 rounded-xl outline-none focus:border-blue-500 text-sm font-mono">
+                    <button onclick="connectViaManualId()" class="bg-slate-700 px-4 rounded-xl hover:bg-slate-600 transition">
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
             </div>
         </div>
+
+        <!-- ОКНО СКАНЕРА (КАМЕРА) -->
+        <div id="scannerScreen" class="hidden tg-card space-y-6">
+            <h2 class="text-xl font-bold">QR-kodga qarating</h2>
+            <div id="reader" class="w-full aspect-square bg-black rounded-2xl overflow-hidden"></div>
+            <button onclick="location.reload()" class="text-slate-400 text-sm hover:text-white">Отмена</button>
+        </div>
+
+        <!-- ОКНО МОНИТОРА (КОНТРОЛЛЕР) -->
+        <div id="monitorScreen" class="hidden w-full max-w-4xl space-y-4">
+            <div class="flex justify-between items-center bg-slate-800 p-4 rounded-2xl">
+                <div class="flex items-center gap-3">
+                    <div class="w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]"></div>
+                    <span class="text-xs font-bold uppercase tracking-widest text-slate-300">Ulangan</span>
+                </div>
+                <button onclick="location.reload()" class="text-xs font-bold text-red-400">Uzish</button>
+            </div>
+
+            <div class="video-container shadow-2xl">
+                <video id="remoteVideo" autoplay playsinline class="w-full h-auto min-h-[400px] object-cover"></video>
+                <canvas id="detectionCanvas" class="absolute top-0 left-0 w-full h-full pointer-events-none"></canvas>
+                
+                <!-- PTT Button -->
+                <div class="absolute inset-x-4 bottom-6">
+                    <button id="pttButton" 
+                        onmousedown="startPTT()" onmouseup="stopPTT()" 
+                        ontouchstart="startPTT()" ontouchend="stopPTT()"
+                        class="w-full bg-blue-600 py-5 rounded-2xl font-bold shadow-2xl flex items-center justify-center gap-3 active:scale-95 transition-transform">
+                        <i class="fa-solid fa-microphone"></i> Mikrofon
+                    </button>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex flex-wrap gap-2 justify-center">
+                <button onclick="toggleAI()" id="aiBtn" class="bg-slate-800 px-6 py-3 rounded-xl text-xs font-bold"><i class="fa-solid fa-robot mr-2"></i>Sun'iy intellekt</button>
+                <button onclick="rotateVideo()" class="bg-slate-800 px-6 py-3 rounded-xl text-xs font-bold"><i class="fa-solid fa-rotate mr-2"></i>Burish</button>
+                <button onclick="toggleNight()" id="nightBtn" class="bg-slate-800 px-6 py-3 rounded-xl text-xs font-bold"><i class="fa-solid fa-moon mr-2"></i>Qoron'g'i rejim</button>
+            </div>
+        </div>
+
+        <!-- ОКНО ТРАНСЛЯЦИИ (ТЕЛЕФОН) -->
+        <div id="streamingScreen" class="hidden tg-card space-y-6">
+            <div class="video-container aspect-[3/4]">
+                <video id="localVideo" autoplay playsinline muted class="w-full h-full object-cover"></video>
+                <div class="absolute top-4 left-4 bg-red-600 px-3 py-1 rounded-full text-[10px] font-black">LIVE</div>
+            </div>
+            <div class="text-center">
+                <p class="font-bold">Ulangan</p>
+                <p class="text-xs text-slate-500">Tasvirlar uzatilmoqda</p>
+            </div>
+            <audio id="remoteAudio" autoplay></audio>
+        </div>
+
     </div>
 
     <script>
         let peer;
         let localStream;
-        let remoteStream;
+        let videoTrack;
         let currentCall;
-        let aiEnabled = false;
-        let nightModeEnabled = false;
+        let html5QrCode;
+        let aiActive = false;
+        let nightActive = false;
         let cocoModel;
-        let detectionInterval;
+        let rotation = 0;
 
-        function selectRole(role) {
-            document.getElementById('roleSelection').classList.add('hidden');
-            if (role === 'controller') {
-                document.getElementById('controllerScreen').classList.remove('hidden');
-                initController();
-            } else {
-                document.getElementById('cameraScreen').classList.remove('hidden');
-                initCamera();
-            }
-        }
-
-        function initController() {
+        // --- ИНИЦИАЛИЗАЦИЯ (РЕЖИМ МОНИТОРА ПО УМОЛЧАНИЮ) ---
+        window.onload = () => {
             peer = new Peer();
-            
             peer.on('open', (id) => {
                 document.getElementById('peerIdDisplay').textContent = id;
-                new QRCode(document.getElementById('qrcode'), {
-                    text: id,
-                    width: 256,
-                    height: 256
+                // Создаем ссылку для QR
+                const joinUrl = `${window.location.origin}${window.location.pathname}?join=${id}`;
+                const qrContainer = document.getElementById('qrcode');
+                qrContainer.innerHTML = '';
+                new QRCode(qrContainer, {
+                    text: joinUrl,
+                    width: 200,
+                    height: 200,
+                    colorDark: "#0f172a",
+                    colorLight: "#ffffff"
                 });
             });
 
+            // Когда кто-то звонит (подключается камера)
             peer.on('call', (call) => {
-                navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+                navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
                     localStream = stream;
-                    localStream.getAudioTracks()[0].enabled = false; // Mute by default
+                    localStream.getAudioTracks()[0].enabled = false;
                     call.answer(stream);
-                    
-                    call.on('stream', (remoteStreamData) => {
-                        remoteStream = remoteStreamData;
-                        const video = document.getElementById('remoteVideo');
-                        video.srcObject = remoteStream;
-                        document.getElementById('waitingConnection').classList.add('hidden');
-                        document.getElementById('activeConnection').classList.remove('hidden');
-                        currentCall = call;
+                    call.on('stream', (remoteStream) => {
+                        showScreen('monitorScreen');
+                        document.getElementById('remoteVideo').srcObject = remoteStream;
                     });
                 });
             });
-        }
+        };
 
-        async function initCamera() {
+        // --- ЛОГИКА СКАНЕРА ---
+        async function startScanningMode() {
+            showScreen('scannerScreen');
             try {
-                localStream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: 'environment' }, 
-                    audio: true 
-                });
-                const video = document.getElementById('localVideo');
-                video.srcObject = localStream;
-            } catch (err) {
-                alert('Camera/Microphone access denied: ' + err.message);
+                localStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: true });
+                videoTrack = localStream.getVideoTracks()[0];
+                
+                html5QrCode = new Html5Qrcode("reader");
+                html5QrCode.start(
+                    { facingMode: "environment" }, 
+                    { fps: 10, qrbox: { width: 250, height: 250 } },
+                    (decodedText) => {
+                        const url = new URL(decodedText);
+                        const targetId = url.searchParams.get('join');
+                        if (targetId) {
+                            html5QrCode.stop();
+                            initCameraStream(targetId);
+                        }
+                    }
+                ).catch(e => console.error(e));
+            } catch (e) {
+                alert("Kameraga ruxsat berilmagan");
+                location.reload();
             }
         }
 
-        function connectToController() {
-            const peerId = document.getElementById('peerIdInput').value.trim();
-            if (!peerId) {
-                alert('Please enter a valid Peer ID');
-                return;
-            }
+        // --- ЛОГИКА ТРАНСЛЯЦИИ ---
+        function initCameraStream(targetId) {
+            showScreen('streamingScreen');
+            document.getElementById('localVideo').srcObject = localStream;
 
-            peer = new Peer();
-            
-            peer.on('open', () => {
-                const call = peer.call(peerId, localStream);
-                
-                call.on('stream', (remoteStreamData) => {
-                    const audio = document.getElementById('remoteAudio');
-                    audio.srcObject = remoteStreamData;
-                    document.getElementById('cameraInput').classList.add('hidden');
-                    document.getElementById('cameraActive').classList.remove('hidden');
-                });
-
-                call.on('error', (err) => {
-                    alert('Connection error: ' + err);
+            // Создаем новое соединение для отправки
+            const senderPeer = new Peer();
+            senderPeer.on('open', () => {
+                const call = senderPeer.call(targetId, localStream);
+                call.on('stream', (remoteAudio) => {
+                    document.getElementById('remoteAudio').srcObject = remoteAudio;
                 });
             });
         }
 
-        function startPTT() {
-            if (localStream) {
-                localStream.getAudioTracks()[0].enabled = true;
-                document.getElementById('pttButton').classList.add('bg-red-800');
+        // --- ВВОД ВРУЧНУЮ ---
+        function showManualInput() {
+            document.getElementById('manualInputBlock').classList.toggle('hidden');
+        }
+
+        async function connectViaManualId() {
+            const id = document.getElementById('manualPeerId').value.trim();
+            if (!id) return;
+            // Сначала запрашиваем камеру, потом подключаемся
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: true });
+                initCameraStream(id);
+            } catch (e) {
+                alert("Internetni tekshirib qayta urinib ko'ring, agar ishlamasa keyinroq qaytib keling.");
             }
+        }
+
+        // --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ---
+        function showScreen(screenId) {
+            ['mainAuthScreen', 'scannerScreen', 'monitorScreen', 'streamingScreen'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+            if (screenId === 'monitorScreen') {
+                document.body.classList.remove('items-center'); // Для широкого монитора
+                document.body.classList.add('items-start', 'pt-10');
+            }
+        }
+
+        function startPTT() {
+            if (localStream) localStream.getAudioTracks()[0].enabled = true;
+            document.getElementById('pttButton').classList.replace('bg-blue-600', 'bg-red-600');
         }
 
         function stopPTT() {
-            if (localStream) {
-                localStream.getAudioTracks()[0].enabled = false;
-                document.getElementById('pttButton').classList.remove('bg-red-800');
-            }
+            if (localStream) localStream.getAudioTracks()[0].enabled = false;
+            document.getElementById('pttButton').classList.replace('bg-red-600', 'bg-blue-600');
+        }
+
+        function rotateVideo() {
+            rotation = (rotation + 90) % 360;
+            document.getElementById('remoteVideo').style.transform = `rotate(${rotation}deg)`;
+        }
+
+        function toggleNight() {
+            nightActive = !nightActive;
+            const v = document.getElementById('remoteVideo');
+            const b = document.getElementById('nightBtn');
+            v.style.filter = nightActive ? 'brightness(1.5) contrast(1.2) sepia(0.5)' : 'none';
+            b.classList.toggle('bg-blue-600', nightActive);
         }
 
         async function toggleAI() {
-            aiEnabled = !aiEnabled;
-            const btn = document.getElementById('aiToggle');
-            
-            if (aiEnabled) {
-                btn.textContent = 'AI Detection: ON';
-                btn.classList.remove('bg-purple-600', 'hover:bg-purple-700');
-                btn.classList.add('bg-purple-800', 'hover:bg-purple-900');
-                
-                if (!cocoModel) {
-                    btn.textContent = 'AI Detection: Loading...';
-                    try {
-                        cocoModel = await cocoSsd.load();
-                    } catch (err) {
-                        alert('Failed to load AI model: ' + err.message);
-                        aiEnabled = false;
-                        btn.textContent = 'AI Detection: OFF';
-                        btn.classList.add('bg-purple-600', 'hover:bg-purple-700');
-                        btn.classList.remove('bg-purple-800', 'hover:bg-purple-900');
-                        return;
-                    }
-                    btn.textContent = 'AI Detection: ON';
-                }
-                
-                startDetection();
+            aiActive = !aiActive;
+            const b = document.getElementById('aiBtn');
+            if (aiActive) {
+                b.classList.add('bg-blue-600');
+                if (!cocoModel) cocoModel = await cocoSsd.load();
+                detectFrame();
             } else {
-                btn.textContent = 'AI Detection: OFF';
-                btn.classList.add('bg-purple-600', 'hover:bg-purple-700');
-                btn.classList.remove('bg-purple-800', 'hover:bg-purple-900');
-                stopDetection();
+                b.classList.remove('bg-blue-600');
             }
         }
 
-        async function startDetection() {
+        async function detectFrame() {
+            if (!aiActive) return;
             const video = document.getElementById('remoteVideo');
             const canvas = document.getElementById('detectionCanvas');
             const ctx = canvas.getContext('2d');
-
-            async function detect() {
-                if (!aiEnabled || !video.videoWidth) return;
-
+            
+            if (video.videoWidth) {
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
-
                 const predictions = await cocoModel.detect(video);
-                
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                predictions.forEach(prediction => {
-                    if (prediction.class === 'person') {
-                        const [x, y, width, height] = prediction.bbox;
-                        ctx.strokeStyle = '#FF0000';
-                        ctx.lineWidth = 3;
-                        ctx.strokeRect(x, y, width, height);
-                        
-                        ctx.fillStyle = '#FF0000';
-                        ctx.font = '18px Arial';
-                        ctx.fillText(
-                            `Person ${Math.round(prediction.score * 100)}%`,
-                            x,
-                            y > 20 ? y - 5 : y + 20
-                        );
+                predictions.forEach(p => {
+                    if (p.class === 'person') {
+                        ctx.strokeStyle = '#3b82f6';
+                        ctx.lineWidth = 4;
+                        ctx.strokeRect(...p.bbox);
                     }
                 });
             }
-
-            detectionInterval = setInterval(detect, 200);
-        }
-
-        function stopDetection() {
-            if (detectionInterval) {
-                clearInterval(detectionInterval);
-                detectionInterval = null;
-            }
-            const canvas = document.getElementById('detectionCanvas');
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
-
-        function toggleNightMode() {
-            nightModeEnabled = !nightModeEnabled;
-            const video = document.getElementById('remoteVideo');
-            const btn = document.getElementById('nightModeToggle');
-            
-            if (nightModeEnabled) {
-                video.style.filter = 'brightness(1.5) contrast(1.2) sepia(0.5)';
-                btn.textContent = 'Night Mode: ON';
-                btn.classList.remove('bg-yellow-600', 'hover:bg-yellow-700');
-                btn.classList.add('bg-yellow-800', 'hover:bg-yellow-900');
-            } else {
-                video.style.filter = 'none';
-                btn.textContent = 'Night Mode: OFF';
-                btn.classList.add('bg-yellow-600', 'hover:bg-yellow-700');
-                btn.classList.remove('bg-yellow-800', 'hover:bg-yellow-900');
-            }
+            requestAnimationFrame(detectFrame);
         }
     </script>
 </body>
