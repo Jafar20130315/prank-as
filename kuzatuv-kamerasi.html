@@ -84,7 +84,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
         import { getFirestore, doc, setDoc, onSnapshot, collection, addDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
         const firebaseConfig = JSON.parse(__firebase_config);
         const app = initializeApp(firebaseConfig);
@@ -103,13 +103,20 @@
         let localStream = null;
         let remoteStream = null;
         let currentRole = null;
+        let user = null;
+
+        onAuthStateChanged(auth, (u) => {
+            user = u;
+        });
 
         const initAuth = async () => {
+            if (user) return user;
             if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                 await signInWithCustomToken(auth, __initial_auth_token);
             } else {
                 await signInAnonymously(auth);
             }
+            return auth.currentUser;
         };
 
         window.startRole = async (role) => {
@@ -125,6 +132,7 @@
                     document.getElementById('camera-setup').classList.remove('hidden');
                 }
             } catch (e) {
+                console.error(e);
                 alert("Tizimga ulanishda xatolik yuz berdi.");
             }
         };
@@ -134,12 +142,16 @@
             document.getElementById('display-id').innerText = sessionId;
             new QRCode(document.getElementById('qrcode'), { text: sessionId, width: 160, height: 160 });
 
-            const callDoc = doc(db, 'artifacts', appId, 'public', 'data', sessionId);
+            // ИСПРАВЛЕННЫЙ ПУТЬ: Добавлен сегмент 'sessions' для соблюдения четности (6 сегментов)
+            // artifacts (1) -> appId (2) -> public (3) -> data (4) -> sessions (5) -> sessionId (6)
+            const callDoc = doc(db, 'artifacts', appId, 'public', 'data', 'sessions', sessionId);
             const offerCandidates = collection(callDoc, 'offerCandidates');
             const answerCandidates = collection(callDoc, 'answerCandidates');
 
             pc.onicecandidate = (event) => {
-                if (event.candidate) addDoc(offerCandidates, event.candidate.toJSON());
+                if (event.candidate && auth.currentUser) {
+                    addDoc(offerCandidates, event.candidate.toJSON());
+                }
             };
 
             try {
@@ -167,25 +179,30 @@
                     pc.setRemoteDescription(new RTCSessionDescription(data.answer));
                     startCallUI('Monitor');
                 }
-            });
+            }, (err) => console.error("Snapshot error:", err));
 
             onSnapshot(answerCandidates, (snapshot) => {
                 snapshot.docChanges().forEach((change) => {
                     if (change.type === 'added') pc.addIceCandidate(new RTCIceCandidate(change.doc.data()));
                 });
-            });
+            }, (err) => console.error("Candidates error:", err));
         }
 
         window.joinSession = async () => {
             const sessionId = document.getElementById('join-id').value;
             if (!sessionId) return alert("Kodni kiriting");
 
-            const callDoc = doc(db, 'artifacts', appId, 'public', 'data', sessionId);
+            await initAuth();
+
+            // ИСПРАВЛЕННЫЙ ПУТЬ ЗДЕСЬ ТОЖЕ
+            const callDoc = doc(db, 'artifacts', appId, 'public', 'data', 'sessions', sessionId);
             const answerCandidates = collection(callDoc, 'answerCandidates');
             const offerCandidates = collection(callDoc, 'offerCandidates');
 
             pc.onicecandidate = (event) => {
-                if (event.candidate) addDoc(answerCandidates, event.candidate.toJSON());
+                if (event.candidate && auth.currentUser) {
+                    addDoc(answerCandidates, event.candidate.toJSON());
+                }
             };
 
             const callSnapshot = await getDoc(callDoc);
@@ -219,7 +236,7 @@
                 snapshot.docChanges().forEach((change) => {
                     if (change.type === 'added') pc.addIceCandidate(new RTCIceCandidate(change.doc.data()));
                 });
-            });
+            }, (err) => console.error("Offer candidates error:", err));
 
             startCallUI('Kamera');
         };
