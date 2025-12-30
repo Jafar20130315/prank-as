@@ -3,54 +3,67 @@
 <head>
   <meta charset="UTF-8">
   <title>Prank-as — Google Login</title>
+  <link rel="icon" type="image/x-icon" href="favicon.png"/>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- reCAPTCHA v2 -->
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
-  <!-- reCAPTCHA v3 -->
-  <script src="https://www.google.com/recaptcha/api.js?render=6LdfHDssAAAAAHlwdbWRhiJW5fnGwh1r32335fzZ"></script>
-
   <style>
     body {
-      font-family: sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       background: radial-gradient(circle at top left, #1e293b 0%, #0f172a 100%);
-      color: white;
+      overflow: hidden;
     }
-    .btn-disabled{
-      opacity: .5;
-      cursor: not-allowed;
+    .glass-card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .btn-google {
+      background: #ffffff;
+      color: #1e293b;
+    }
+    .disabled-like{
+      opacity: 0.5;
+      pointer-events:none;
+      cursor:not-allowed;
     }
   </style>
 </head>
+<body class="min-h-screen flex items-center justify-center relative text-white px-4">
 
-<body class="min-h-screen flex items-center justify-center">
+<!-- dizayn o‘sha-o‘sha, o‘zgarmadi -->
 
 <div class="glass-card rounded-3xl p-10 w-full max-w-md text-center">
 
-  <h1 class="text-3xl font-bold mb-5">Prank-as</h1>
+  <h1 class="text-4xl font-extrabold mb-4">Prank-as</h1>
 
-  <p id="status" class="mb-5 text-slate-300">
+  <p id="status" class="text-slate-400 mb-6">
     Google orqali tizimga kiring
   </p>
 
-  <!-- reCAPTCHA v2 — faqat birinchi marta -->
-  <div id="captcha-box" class="g-recaptcha mb-4"
-       data-sitekey="6LeOGjssAAAAAHnJBytIycrKEvDJHjMIcnjF7XN2"
-       data-callback="recaptchaV2Done">
+  <!-- reCAPTCHA (faqat kerak bo'lganda ko'rsatiladi) -->
+  <div id="recaptcha-wrapper" class="mb-4">
+    <div id="recaptcha"
+         class="g-recaptcha"
+         data-sitekey="6LeOGjssAAAAAHnJBytIycrKEvDJHjMIcnjF7XN2"
+         data-callback="captchaSolved">
+    </div>
   </div>
 
   <button id="google-login"
           disabled
-          class="w-full py-3 rounded-xl bg-white text-black font-bold btn-disabled">
-      Google bilan kirish
+          class="btn-google disabled-like w-full py-4 rounded-2xl font-bold">
+    Google bilan kirish
   </button>
 
   <button id="logout"
-          class="hidden mt-3 w-full py-3 rounded-xl bg-white/10 border border-white/20">
-      Chiqish
+          class="hidden mt-3 w-full py-3 rounded-2xl bg-white/10">
+    Chiqish
   </button>
 </div>
 
@@ -64,85 +77,74 @@ const supabase = createClient(
 
 const loginBtn = document.getElementById("google-login")
 const logoutBtn = document.getElementById("logout")
-const captchaBox = document.getElementById("captcha-box")
 const status = document.getElementById("status")
+const recaptchaBlock = document.getElementById("recaptcha-wrapper")
 
-// holatlarni saqlash
-let registered = localStorage.getItem("user_registered") === "true"
-let attempts = Number(localStorage.getItem("login_attempts") || 0)
+// holatlarni saqlaymiz
+let registered = localStorage.getItem("registered") === "true"
+let needChallenge = localStorage.getItem("need_challenge") === "true"
 
-let v2ok = false
-let v3ok = false
+let captchaOK = false
 
-// v2 bajarilganda
-window.recaptchaV2Done = () => {
-  v2ok = true
-  enableLogin()
-}
-
-// v3 ishga tushirish
-function runV3() {
-  grecaptcha.ready(() => {
-    grecaptcha.execute("6LdfHDssAAAAAHlwdbWRhiJW5fnGwh1r32335fzZ", {action: "login"})
-      .then(token => {
-        // token bor — ok
-        v3ok = Boolean(token)
-        enableLogin()
-      })
-  })
-}
-
-// tugma holatini boshqarish
-function enableLogin() {
-  // hali registratsiya bo'lmagan — v2 majburiy
-  if (!registered && !v2ok) {
-    loginBtn.disabled = true
-    loginBtn.classList.add("btn-disabled")
-    return
-  }
-
-  // ko‘p urinilgan — v3 majburiy
-  if (registered && attempts >= 3 && !v3ok) {
-    loginBtn.disabled = true
-    loginBtn.classList.add("btn-disabled")
-    return
-  }
-
-  // ruxsat beriladi
+// captcha tugallanganda Google chaqiradi
+window.captchaSolved = () => {
+  captchaOK = true
   loginBtn.disabled = false
-  loginBtn.classList.remove("btn-disabled")
+  loginBtn.classList.remove("disabled-like")
 }
 
-// UI sozlash
-if (registered) {
-  captchaBox.style.display = "none"
-  enableLogin()
-  if (attempts >= 3) runV3()
+// UI mantiqi
+function updateCaptchaVisibility() {
+
+  // 1-marta login qilish → captcha kerak
+  if (!registered) {
+    recaptchaBlock.style.display = "block"
+    loginBtn.disabled = true
+    loginBtn.classList.add("disabled-like")
+    return
+  }
+
+  // qayta kirib chiqsa → challenge yoqiladi
+  if (needChallenge) {
+    recaptchaBlock.style.display = "block"
+    loginBtn.disabled = true
+    loginBtn.classList.add("disabled-like")
+    return
+  }
+
+  // oddiy kirishda captcha kerak emas
+  recaptchaBlock.style.display = "none"
+  loginBtn.disabled = false
+  loginBtn.classList.remove("disabled-like")
 }
 
-// sessiya tekshirish
-const { data: { session } } = await supabase.auth.getSession()
-if (session?.user) {
-  status.textContent = `Salom, ${session.user.user_metadata.full_name || "foydalanuvchi"}`
-  loginBtn.classList.add("hidden")
-  logoutBtn.classList.remove("hidden")
-}
+// dastlab ishga tushirish
+updateCaptchaVisibility()
 
 // login
 loginBtn.onclick = async () => {
-  await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: { redirectTo: "https://prank-as.site" }
-  })
 
-  localStorage.setItem("user_registered", "true")
+  // agar challenge kerak bo‘lsa va hal qilinmagan bo‘lsa → ishlamasin
+  if ((needChallenge || !registered) && !captchaOK) {
+    return
+  }
+
+  localStorage.setItem("registered","true")
+  localStorage.setItem("need_challenge","false")
+
+  await supabase.auth.signInWithOAuth({
+    provider:"google",
+    options:{ redirectTo:"https://prank-as.site" }
+  })
 }
 
 // logout
 logoutBtn.onclick = async () => {
   await supabase.auth.signOut()
-  attempts++
-  localStorage.setItem("login_attempts", attempts)
+
+  // endi challenge majburiy bo'ladi
+  localStorage.setItem("need_challenge","true")
+
   location.reload()
 }
 </script>
