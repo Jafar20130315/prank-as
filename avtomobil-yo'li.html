@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Avtomobil yo'li</title>
+    <scrip src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #1a1a1a;
+            touch-action: none;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        /* Интерфейс */
+        #ui-layer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .controls-area {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 35%;
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Руль */
+        .steering-wheel-zone {
+            width: 180px;
+            height: 180px;
+            pointer-events: auto;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .steering-wheel {
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cfilter id='shadow'%3E%3CfeDropShadow dx='0' dy='2' stdDeviation='3' flood-opacity='0.5'/%3E%3C/filter%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='46' fill='none' stroke='%23222' stroke-width='8' filter='url(%23shadow)'/%3E%3Ccircle cx='50' cy='50' r='46' fill='none' stroke='%23444' stroke-width='2' stroke-dasharray='2 4'/%3E%3Cpath d='M50 50 L10 50 M50 50 L90 50 M50 50 L50 94' stroke='%23222' stroke-width='10' stroke-linecap='round'/%3E%3Ccircle cx='50' cy='50' r='14' fill='%23111' stroke='%23555' stroke-width='2'/%3E%3Cpath d='M48 10 L52 10 L52 16 L48 16 Z' fill='%23c00'/%3E%3C/svg%3E");
+            background-size: contain;
+            background-repeat: no-repeat;
+            will-change: transform;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+        }
+
+        /* Педали */
+        .pedals-zone {
+            display: flex;
+            gap: 15px;
+            pointer-events: auto;
+            padding-bottom: 10px;
+        }
+
+        .pedal {
+            width: 80px;
+            height: 150px;
+            border-radius: 12px;
+            background: linear-gradient(180deg, #333 0%, #222 100%);
+            border: 2px solid #444;
+            position: relative;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            transition: transform 0.1s;
+        }
+        
+        .pedal::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .pedal.gas::after { background-color: #4ade80; box-shadow: 0 0 10px #4ade80; }
+        .pedal.brake::after { background-color: #f87171; box-shadow: 0 0 10px #f87171; }
+        
+        .pedal:active, .pedal.active {
+            transform: scale(0.95) translateY(5px);
+            background: #111;
+        }
+
+        .pedal-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            color: rgba(255,255,255,0.3);
+            font-weight: 900;
+        }
+
+        /* Место для машинки */
+        #car-placeholder {
+            position: absolute;
+            top: 45%; 
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px; 
+            height: 160px;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+            text-align: center;
+            background: rgba(0,0,0,0.1);
+            animation: pulse-border 2s infinite;
+        }
+        
+        @keyframes pulse-border {
+            0% { border-color: rgba(255,255,255,0.1); }
+            50% { border-color: rgba(255,255,255,0.4); }
+            100% { border-color: rgba(255,255,255,0.1); }
+        }
+
+        /* Статистика и настройки */
+        .hud-top {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            z-index: 20;
+        }
+
+        .hud-right-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .icon-btn {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px;
+            border-radius: 12px;
+            font-size: 18px;
+            pointer-events: auto;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .icon-btn:active { background: rgba(255,255,255,0.1); transform: scale(0.9); }
+
+        .engine-btn {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            pointer-events: auto;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .engine-btn:active { background: rgba(255,255,255,0.1); }
+
+        .speed-box {
+            text-align: right;
+            color: white;
+            font-family: 'Courier New', monospace;
+        }
+        .speed-val { font-size: 32px; font-weight: bold; color: #fff; text-shadow: 0 2px 4px #000; }
+        .label { font-size: 14px; color: #aaa; }
+
+        /* Оверлей старта */
+        #start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .btn-start {
+            margin-top: 30px;
+            background: #eab308;
+            color: #000;
+            font-size: 20px;
+            font-weight: bold;
+            padding: 15px 40px;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(234, 179, 8, 0.4);
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-10px);}
+            60% {transform: translateY(-5px);}
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <canvas id="road-canvas"></canvas>
+        <div id="car-placeholder">
+            <div>Mashina<br>uchun<br>joy</div>
+        </div>
+
+        <div id="ui-layer">
+            <div class="hud-top">
+                <button class="engine-btn" id="engine-select-btn">🔊 Sport</button>
+                
+                <div class="hud-right-group">
+                    <button class="icon-btn" id="fs-btn" title="Полный экран">
+                        <svg id="fs-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                        </svg>
+                    </button>
+                    <div class="speed-box">
+                        <div class="speed-val" id="speed-display">0</div>
+                        <div class="label">KM/S</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls-area">
+                <div class="steering-wheel-zone" id="wheel-zone">
+                    <div class="steering-wheel" id="wheel"></div>
+                </div>
+
+                <div class="pedals-zone">
+                    <div class="pedal brake" id="btn-brake">
+                        <span class="pedal-icon">🛑</span>
+                    </div>
+                    <div class="pedal gas" id="btn-gas">
+                        <span class="pedal-icon">🚀</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="start-screen">
+            <h1 class="text-3xl font-bold text-yellow-400 mb-2">Stol ustidagi o'yin</h1>
+            <p class="text-gray-400 text-sm max-w-xs">
+               O'yincho mashinani ekranning ramka o'rtasiga qo'y, gaz, tormoz va rul bilan mashinangni boshqar.
+            </p>
+            <button class="btn-start" id="start-btn">Boshladik!</button>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * АУДИО ДВИЖОК
+         */
+        const AudioEngine = {
+            ctx: null,
+            masterGain: null,
+            engineOsc: null,
+            engineOsc2: null, 
+            engineGain: null,
+            noiseNode: null,
+            noiseGain: null,
+            brakeOsc: null,     
+            brakeGain: null,
+            currentType: 0,
+            
+            types: [
+                { name: "Спорт", type1: 'sawtooth', type2: 'square', baseFreq: 60, mult: 2.0, detune: 5 },
+                { name: "Маслкар V8", type1: 'sawtooth', type2: 'sawtooth', baseFreq: 40, mult: 1.2, detune: 15 },
+                { name: "Формула 1", type1: 'sawtooth', type2: 'triangle', baseFreq: 100, mult: 4.0, detune: 3 },
+                { name: "Электро", type1: 'sine', type2: 'triangle', baseFreq: 150, mult: 3.0, detune: 0 }
+            ],
+
+            init() {
+                if (this.ctx) return;
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                this.ctx = new AudioContext();
+                
+                this.masterGain = this.ctx.createGain();
+                this.masterGain.gain.value = 0.4;
+                this.masterGain.connect(this.ctx.destination);
+
+                this.engineGain = this.ctx.createGain();
+                this.engineGain.connect(this.masterGain);
+
+                this.setupOscillators();
+
+                const bufferSize = this.ctx.sampleRate * 2;
+                const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+
+                this.noiseNode = this.ctx.createBufferSource();
+                this.noiseNode.buffer = buffer;
+                this.noiseNode.loop = true;
+
+                const noiseFilter = this.ctx.createBiquadFilter();
+                noiseFilter.type = 'bandpass';
+                noiseFilter.frequency.value = 800;
+                
+                this.noiseGain = this.ctx.createGain();
+                this.noiseGain.gain.value = 0;
+
+                this.noiseNode.connect(noiseFilter);
+                noiseFilter.connect(this.noiseGain);
+                this.noiseGain.connect(this.masterGain);
+                this.noiseNode.start();
+
+                this.brakeGain = this.ctx.createGain();
+                this.brakeGain.gain.value = 0;
+                this.brakeGain.connect(this.masterGain);
+
+                this.brakeOsc = this.ctx.createOscillator();
+                this.brakeOsc.type = 'square'; 
+                this.brakeOsc.frequency.value = 1200;
+                
+                const brakeFilter = this.ctx.createBiquadFilter();
+                brakeFilter.type = 'highpass';
+                brakeFilter.frequency.value = 1000;
+                
+                this.brakeOsc.connect(brakeFilter);
+                brakeFilter.connect(this.brakeGain);
+                this.brakeOsc.start();
+            },
+
+            setupOscillators() {
+                if (this.engineOsc) this.engineOsc.stop();
+                if (this.engineOsc2) this.engineOsc2.stop();
+
+                const preset = this.types[this.currentType];
+
+                this.engineOsc = this.ctx.createOscillator();
+                this.engineOsc.type = preset.type1;
+                this.engineOsc.frequency.value = preset.baseFreq;
+
+                this.engineOsc2 = this.ctx.createOscillator();
+                this.engineOsc2.type = preset.type2;
+                this.engineOsc2.frequency.value = preset.baseFreq;
+                this.engineOsc2.detune.value = preset.detune; 
+
+                const filter = this.ctx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.value = 400;
+
+                this.engineOsc.connect(filter);
+                this.engineOsc2.connect(filter);
+                filter.connect(this.engineGain);
+
+                this.engineOsc.start();
+                this.engineOsc2.start();
+            },
+
+            cycleType() {
+                this.currentType = (this.currentType + 1) % this.types.length;
+                if (this.ctx) this.setupOscillators();
+                return this.types[this.currentType].name;
+            },
+
+            update(speedRatio, driftFactor, isBraking) {
+                if (!this.ctx) return;
+                
+                const preset = this.types[this.currentType];
+                const pitch = preset.baseFreq + (speedRatio * 300 * (preset.mult / 2));
+                
+                this.engineOsc.frequency.setTargetAtTime(pitch, this.ctx.currentTime, 0.1);
+                this.engineOsc2.frequency.setTargetAtTime(pitch * 1.01, this.ctx.currentTime, 0.1);
+
+                const vol = 0.3 + (speedRatio * 0.4);
+                this.engineGain.gain.setTargetAtTime(vol, this.ctx.currentTime, 0.1);
+                
+                this.noiseGain.gain.setTargetAtTime(driftFactor * 0.6, this.ctx.currentTime, 0.05);
+
+                if (isBraking && speedRatio > 0.1) {
+                    const pulse = (Math.sin(this.ctx.currentTime * 30) * 0.5 + 0.5); 
+                    const brakeVol = pulse * speedRatio * 0.4;
+                    this.brakeGain.gain.setTargetAtTime(brakeVol, this.ctx.currentTime, 0.02);
+                    this.brakeOsc.frequency.setTargetAtTime(800 + (speedRatio * 600), this.ctx.currentTime, 0.1);
+                } else {
+                    this.brakeGain.gain.setTargetAtTime(0, this.ctx.currentTime, 0.1);
+                }
+            }
+        };
+
+        /**
+         * ЛОГИКА ИГРЫ
+         */
+        const canvas = document.getElementById('road-canvas');
+        const ctx = canvas.getContext('2d', { alpha: false });
+        const wheelEl = document.getElementById('wheel');
+        const speedDisplay = document.getElementById('speed-display');
+        const engineBtn = document.getElementById('engine-select-btn');
+        const fsBtn = document.getElementById('fs-btn');
+        const fsIcon = document.getElementById('fs-icon');
+
+        const state = {
+            speed: 0,           
+            displayedSpeed: 0,  
+            maxSpeed: 120,
+            roadOffset: 0,
+            worldAngle: 0,      
+            steering: 0,        
+            gas: false,
+            brake: false,
+            drift: 0,
+            skidMarks: []
+        };
+
+        // Исправление Fullscreen
+        fsBtn.addEventListener('click', () => {
+            // Проверяем, разрешен ли полноэкранный режим политикой безопасности
+            if (document.fullscreenEnabled || document.webkitFullscreenEnabled) {
+                if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                    const req = document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen;
+                    if (req) {
+                        req.call(document.documentElement).catch(err => {
+                            console.warn("Afsuski to'liq ekran funksiyasi ishlamadi(Permissions Policy)");
+                            // Переключение иконки даже если системный FS не сработал (визуальная обратная связь)
+                        });
+                    }
+                } else {
+                    const exit = document.exitFullscreen || document.webkitExitFullscreen;
+                    if (exit) exit.call(document);
+                }
+            } else {
+                console.log("To'liq ekran funksiyasi sizda ishlamay qoldi");
+            }
+        });
+
+        const updateFSIcon = () => {
+            const isFS = document.fullscreenElement || document.webkitFullscreenElement;
+            if (isFS) {
+                fsIcon.innerHTML = '<path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>';
+            } else {
+                fsIcon.innerHTML = '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>';
+            }
+            resize();
+        };
+
+        document.addEventListener('fullscreenchange', updateFSIcon);
+        document.addEventListener('webkitfullscreenchange', updateFSIcon);
+
+        engineBtn.addEventListener('click', () => {
+            const newName = AudioEngine.cycleType();
+            engineBtn.innerText = "🔊 " + newName;
+        });
+
+        let asphaltPattern;
+        function createAsphaltTexture() {
+            const size = 512;
+            const c = document.createElement('canvas');
+            c.width = size;
+            c.height = size;
+            const cx = c.getContext('2d');
+            cx.fillStyle = '#2a2a2a';
+            cx.fillRect(0,0,size,size);
+            for(let i=0; i<6000; i++) {
+                cx.fillStyle = Math.random() > 0.5 ? '#333' : '#222';
+                cx.fillRect(Math.random()*size, Math.random()*size, 2, 2);
+            }
+            return ctx.createPattern(c, 'repeat');
+        }
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            asphaltPattern = createAsphaltTexture();
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        let isDragging = false;
+        let startAngle = 0;
+        let currentRotation = 0; 
+
+        function getAngle(cx, cy, x, y) {
+            return Math.atan2(y - cy, x - cx) * 180 / Math.PI;
+        }
+
+        const wheelZone = document.getElementById('wheel-zone');
+
+        const handleStart = (x, y) => {
+            const rect = wheelZone.getBoundingClientRect();
+            const cx = rect.left + rect.width/2;
+            const cy = rect.top + rect.height/2;
+            startAngle = getAngle(cx, cy, x, y) - currentRotation;
+            isDragging = true;
+        };
+
+        const handleMove = (x, y) => {
+            if (!isDragging) return;
+            const rect = wheelZone.getBoundingClientRect();
+            const cx = rect.left + rect.width/2;
+            const cy = rect.top + rect.height/2;
+            const angle = getAngle(cx, cy, x, y);
+            
+            currentRotation = angle - startAngle;
+            if (currentRotation > 120) currentRotation = 120;
+            if (currentRotation < -120) currentRotation = -120;
+            updateWheel();
+        };
+
+        const handleEnd = () => { isDragging = false; };
+
+        wheelZone.addEventListener('mousedown', e => handleStart(e.clientX, e.clientY));
+        window.addEventListener('mousemove', e => handleMove(e.clientX, e.clientY));
+        window.addEventListener('mouseup', handleEnd);
+        wheelZone.addEventListener('touchstart', e => { e.preventDefault(); handleStart(e.touches[0].clientX, e.touches[0].clientY); });
+        window.addEventListener('touchmove', e => { e.preventDefault(); handleMove(e.touches[0].clientX, e.touches[0].clientY); });
+        window.addEventListener('touchend', handleEnd);
+
+        function updateWheel() {
+            wheelEl.style.transform = `rotate(${currentRotation}deg)`;
+            state.steering = currentRotation / 120;
+        }
+
+        function autoCenterWheel() {
+            if (!isDragging && Math.abs(currentRotation) > 0.5) {
+                currentRotation *= 0.92;
+                updateWheel();
+            }
+        }
+
+        const btnGas = document.getElementById('btn-gas');
+        const btnBrake = document.getElementById('btn-brake');
+        const setPedal = (type, val) => {
+            state[type] = val;
+            const el = type === 'gas' ? btnGas : btnBrake;
+            if (val) el.classList.add('active'); else el.classList.remove('active');
+        };
+
+        ['mousedown', 'touchstart'].forEach(evt => {
+            btnGas.addEventListener(evt, (e) => { e.preventDefault(); setPedal('gas', true); });
+            btnBrake.addEventListener(evt, (e) => { e.preventDefault(); setPedal('brake', true); });
+        });
+        ['mouseup', 'touchend', 'mouseleave'].forEach(evt => {
+            btnGas.addEventListener(evt, (e) => { e.preventDefault(); setPedal('gas', false); });
+            btnBrake.addEventListener(evt, (e) => { e.preventDefault(); setPedal('brake', false); });
+        });
+
+        document.getElementById('start-btn').addEventListener('click', () => {
+            AudioEngine.init();
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('car-placeholder').style.opacity = '0.3'; 
+            loop();
+        });
+
+        function loop() {
+            updatePhysics();
+            render();
+            requestAnimationFrame(loop);
+        }
+
+        function updatePhysics() {
+            const speedRatio = state.speed / state.maxSpeed;
+
+            if (state.gas) {
+                let acceleration = 0.8 * (1 - (state.speed / (state.maxSpeed * 1.1))); 
+                state.speed += Math.max(0.1, acceleration);
+            } else {
+                state.speed *= 0.985; 
+            }
+
+            if (state.brake) {
+                const brakePower = 1.5 + (speedRatio * 1.0);
+                state.speed -= brakePower;
+                if (speedRatio > 0.1 && Math.random() > 0.5) addSkidMark(); 
+            }
+
+            if (state.speed > state.maxSpeed) state.speed = state.maxSpeed;
+            if (state.speed < 0) state.speed = 0;
+
+            state.displayedSpeed += (state.speed - state.displayedSpeed) * 0.1;
+            state.roadOffset += state.speed * 0.8;
+
+            if (Math.abs(state.steering) > 0.05) {
+                let turnRate = state.steering * speedRatio * 0.08;
+                state.worldAngle -= turnRate;
+            }
+
+            const driftIntensity = Math.max(0, (Math.abs(state.steering) * speedRatio) - 0.3);
+            if (driftIntensity > 0.2) {
+                state.drift = driftIntensity;
+                if (Math.random() > 0.4) addSkidMark();
+            } else {
+                state.drift *= 0.8; 
+            }
+
+            autoCenterWheel();
+            AudioEngine.update(speedRatio, state.drift, state.brake);
+            speedDisplay.innerText = Math.floor(state.displayedSpeed * 2); 
+        }
+
+        function addSkidMark() {
+            const rearAxleY = 60;
+            const wheelOffset = 25;
+            state.skidMarks.push({ x: -wheelOffset, y: rearAxleY, offsetAtTime: state.roadOffset, age: 0 });
+            state.skidMarks.push({ x: wheelOffset, y: rearAxleY, offsetAtTime: state.roadOffset, age: 0 });
+        }
+
+        function render() {
+            ctx.fillStyle = '#1e661e'; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const cx = canvas.width / 2;
+            const cy = canvas.height * 0.45;
+
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(state.worldAngle);
+            
+            const roadW = 380;
+            ctx.fillStyle = asphaltPattern;
+            ctx.translate(0, state.roadOffset); 
+            
+            const drawYStart = -state.roadOffset - 1200;
+            const drawH = canvas.height + 2400; 
+            ctx.fillRect(-roadW/2, drawYStart, roadW, drawH);
+            
+            const stripeH = 100;
+            const kerbW = 25;
+            const startStripeIndex = Math.floor(state.roadOffset / stripeH) - 15;
+            const endStripeIndex = startStripeIndex + 45; 
+
+            for (let i = startStripeIndex; i < endStripeIndex; i++) {
+                let sy = -state.roadOffset + (i * stripeH);
+                let color = Math.abs(i % 2) === 0 ? '#cc0000' : '#eeeeee';
+                ctx.fillStyle = color;
+                ctx.fillRect(-roadW/2 - kerbW, sy, kerbW, stripeH); 
+                ctx.fillRect(roadW/2, sy, kerbW, stripeH); 
+            }
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            for (let i = startStripeIndex; i < endStripeIndex; i++) {
+                if (i % 2 === 0) {
+                    let sy = -state.roadOffset + (i * stripeH);
+                    ctx.fillRect(-6, sy + 20, 12, stripeH - 40);
+                }
+            }
+            ctx.restore();
+
+            // Следы
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(state.worldAngle); 
+
+            state.skidMarks.forEach((mark, i) => {
+                mark.age++;
+                if (mark.age > 60) {
+                    state.skidMarks.splice(i, 1);
+                    return;
+                }
+                const dist = state.roadOffset - mark.offsetAtTime;
+                ctx.fillStyle = `rgba(10, 10, 10, ${0.4 - (mark.age/120)})`;
+                ctx.fillRect(mark.x - 5, mark.y + dist, 10, 15);
+            });
+            ctx.restore();
+
+            // Линии скорости
+            if (state.speed > 80) {
+                const alpha = (state.speed - 80) / 100;
+                ctx.save();
+                ctx.globalCompositeOperation = 'overlay';
+                ctx.strokeStyle = `rgba(255, 255, 255, ${alpha * 0.4})`;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                for(let i=0; i<8; i++) {
+                    let lx = Math.random() * canvas.width;
+                    let ly = Math.random() * canvas.height;
+                    ctx.moveTo(lx, ly);
+                    ctx.lineTo(lx, ly + 60);
+                }
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+    </script>
+</body>
+</html>
