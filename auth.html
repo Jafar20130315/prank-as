@@ -3,174 +3,149 @@
 <head>
   <meta charset="UTF-8">
   <title>Prank-as — Google Login</title>
-  <link rel="icon" type="image/x-icon" href="favicon.png"/>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- reCAPTCHA -->
+  <!-- reCAPTCHA v2 -->
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+  <!-- reCAPTCHA v3 -->
+  <script src="https://www.google.com/recaptcha/api.js?render=6LdfHDssAAAAAHlwdbWRhiJW5fnGwh1r32335fzZ"></script>
 
   <style>
     body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-family: sans-serif;
       background: radial-gradient(circle at top left, #1e293b 0%, #0f172a 100%);
-      overflow: hidden;
+      color: white;
     }
-    .glass-card {
-      background: rgba(255, 255, 255, 0.03);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    }
-    .btn-google {
-      background: #ffffff;
-      color: #1e293b;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    }
-    .btn-google:hover {
-      background: #f1f5f9;
-      transform: translateY(-1px);
-    }
-    .avatar-ring {
-      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+    .btn-disabled{
+      opacity: .5;
+      cursor: not-allowed;
     }
   </style>
 </head>
-<body class="min-h-screen flex items-center justify-center relative text-white px-4">
 
-  <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 blur-[120px] rounded-full"></div>
-  <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/10 blur-[120px] rounded-full"></div>
+<body class="min-h-screen flex items-center justify-center">
 
-  <div id="avatar-container" class="hidden absolute top-6 right-6 group cursor-pointer">
-    <img id="avatar"
-         class="w-10 h-10 rounded-full border border-white/20 avatar-ring transition-transform active:scale-95"
-         title="Akkauntdan chiqish" />
+<div class="glass-card rounded-3xl p-10 w-full max-w-md text-center">
+
+  <h1 class="text-3xl font-bold mb-5">Prank-as</h1>
+
+  <p id="status" class="mb-5 text-slate-300">
+    Google orqali tizimga kiring
+  </p>
+
+  <!-- reCAPTCHA v2 — faqat birinchi marta -->
+  <div id="captcha-box" class="g-recaptcha mb-4"
+       data-sitekey="6LeOGjssAAAAAHnJBytIycrKEvDJHjMIcnjF7XN2"
+       data-callback="recaptchaV2Done">
   </div>
 
-  <div class="glass-card rounded-3xl p-10 w-full max-w-md text-center transition-all duration-500">
-    <div class="mb-8">
-        <div class="w-16 h-16 bg-blue-600 rounded-2xl mx-auto mb-6 flex items-center justify-center shadow-lg shadow-blue-600/20">
-            <img src="icons/icon-192.png" alt="Logo" class="h-8 w-auto font-bold">
-        </div>
-        <h1 class="text-4xl font-extrabold tracking-tight mb-3">Prank-as</h1>
-        <p id="status" class="text-slate-400 text-lg">
-          Google orqali tizimga kiring
-        </p>
-    </div>
-
-    <div class="space-y-4">
-
-        <!-- reCAPTCHA -->
-        <div class="g-recaptcha flex justify-center"
-             data-sitekey="6LeOGjssAAAAAHnJBytIycrKEvDJHjMIcnjF7XN2"
-             data-callback="recaptchaSuccess">
-        </div>
-
-        <!-- LOGIN -->
-        <button id="google-login"
+  <button id="google-login"
           disabled
-          class="btn-google opacity-50 cursor-not-allowed w-full py-4 px-6 rounded-2xl font-bold transition-all flex items-center justify-center gap-3">
-          <svg class="w-5 h-5" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-            <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-            <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-            <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12-4.53z" fill="#EA4335"/>
-          </svg>
-          Google bilan kirish
-        </button>
+          class="w-full py-3 rounded-xl bg-white text-black font-bold btn-disabled">
+      Google bilan kirish
+  </button>
 
-        <!-- LOGOUT -->
-        <button id="logout"
-          class="hidden w-full py-4 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/10 font-semibold transition-all">
-          Chiqish
-        </button>
-    </div>
-  </div>
+  <button id="logout"
+          class="hidden mt-3 w-full py-3 rounded-xl bg-white/10 border border-white/20">
+      Chiqish
+  </button>
+</div>
 
-  <script type="module">
-    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+<script type="module">
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
-    // reCAPTCHA flag
-    let recaptchaPassed = false;
+const supabase = createClient(
+ 'https://gefaqrfjzwemwuxuoadp.supabase.co/',
+ 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'
+)
 
-    // callback from reCAPTCHA
-    window.recaptchaSuccess = function () {
-      recaptchaPassed = true;
-      const btn = document.getElementById("google-login");
-      btn.disabled = false;
-      btn.classList.remove("opacity-50", "cursor-not-allowed");
-    };
+const loginBtn = document.getElementById("google-login")
+const logoutBtn = document.getElementById("logout")
+const captchaBox = document.getElementById("captcha-box")
+const status = document.getElementById("status")
 
-    const supabase = createClient(
-      'https://gefaqrfjzwemwuxuoadp.supabase.co/',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'
-    )
+// holatlarni saqlash
+let registered = localStorage.getItem("user_registered") === "true"
+let attempts = Number(localStorage.getItem("login_attempts") || 0)
 
-    const loginBtn = document.getElementById('google-login')
-    const logoutBtn = document.getElementById('logout')
-    const status = document.getElementById('status')
-    const avatar = document.getElementById('avatar')
-    const avatarContainer = document.getElementById('avatar-container')
+let v2ok = false
+let v3ok = false
 
-    const updateUI = (user) => {
-      if (user) {
-        status.textContent = `Salom, ${user.user_metadata.full_name || 'Foydalanuvchi'}!`
-        status.classList.replace('text-slate-400', 'text-blue-400')
-        
-        loginBtn.classList.add('hidden')
-        logoutBtn.classList.remove('hidden')
+// v2 bajarilganda
+window.recaptchaV2Done = () => {
+  v2ok = true
+  enableLogin()
+}
 
-        avatar.src = user.user_metadata.picture
-        avatarContainer.classList.remove('hidden')
-      } else {
-        status.textContent = 'Google orqali tizimga kiring'
-        status.classList.remove('text-blue-400')
-        status.classList.add('text-slate-400')
-        
-        loginBtn.classList.remove('hidden')
-        logoutBtn.classList.add('hidden')
-        avatarContainer.classList.add('hidden')
-      }
-    }
-
-    async function checkSession() {
-      const { data: { session } } = await supabase.auth.getSession()
-      updateUI(session?.user)
-    }
-    
-    checkSession()
-
-    supabase.auth.onAuthStateChange((event, session) => {
-      updateUI(session?.user)
-    })
-
-    loginBtn.onclick = async () => {
-
-      if (!recaptchaPassed) {
-        alert("Avval reCAPTCHA dan o't!");
-        return;
-      }
-
-      status.textContent = 'Google oynasi ochilmoqda...'
-      await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: 'https://prank-as.site'
-        }
+// v3 ishga tushirish
+function runV3() {
+  grecaptcha.ready(() => {
+    grecaptcha.execute("6LdfHDssAAAAAHlwdbWRhiJW5fnGwh1r32335fzZ", {action: "login"})
+      .then(token => {
+        // token bor — ok
+        v3ok = Boolean(token)
+        enableLogin()
       })
-    }
+  })
+}
 
-    const handleLogout = async () => {
-      await supabase.auth.signOut()
-      window.location.reload()
-    }
+// tugma holatini boshqarish
+function enableLogin() {
+  // hali registratsiya bo'lmagan — v2 majburiy
+  if (!registered && !v2ok) {
+    loginBtn.disabled = true
+    loginBtn.classList.add("btn-disabled")
+    return
+  }
 
-    logoutBtn.onclick = handleLogout
-    avatarContainer.onclick = handleLogout
-  </script>
+  // ko‘p urinilgan — v3 majburiy
+  if (registered && attempts >= 3 && !v3ok) {
+    loginBtn.disabled = true
+    loginBtn.classList.add("btn-disabled")
+    return
+  }
+
+  // ruxsat beriladi
+  loginBtn.disabled = false
+  loginBtn.classList.remove("btn-disabled")
+}
+
+// UI sozlash
+if (registered) {
+  captchaBox.style.display = "none"
+  enableLogin()
+  if (attempts >= 3) runV3()
+}
+
+// sessiya tekshirish
+const { data: { session } } = await supabase.auth.getSession()
+if (session?.user) {
+  status.textContent = `Salom, ${session.user.user_metadata.full_name || "foydalanuvchi"}`
+  loginBtn.classList.add("hidden")
+  logoutBtn.classList.remove("hidden")
+}
+
+// login
+loginBtn.onclick = async () => {
+  await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo: "https://prank-as.site" }
+  })
+
+  localStorage.setItem("user_registered", "true")
+}
+
+// logout
+logoutBtn.onclick = async () => {
+  await supabase.auth.signOut()
+  attempts++
+  localStorage.setItem("login_attempts", attempts)
+  location.reload()
+}
+</script>
 
 </body>
 </html>
