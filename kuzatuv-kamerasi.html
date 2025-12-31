@@ -3,15 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kuzatuv Kamerasi (WebRTC)</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <title>Kuzatuv Kamerasi (ID & QR)</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Библиотеки для упрощенного соединения и QR -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', system-ui, sans-serif;
-            background: #0f172a; /* Fallback */
+            background: #0f172a;
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             color: #1f2937;
+            margin: 0;
+            min-height: 100vh;
         }
         .glass {
             background: rgba(255, 255, 255, 0.95);
@@ -23,366 +27,209 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transform: scaleX(-1); /* Default mirror for selfie feel */
+            border-radius: 1rem;
         }
-        /* Remote video shouldn't be mirrored usually, but let's keep consistent or fix via JS */
-        #remote-video { transform: scaleX(1); }
         .mirror { transform: scaleX(-1); }
-        
-        /* Tugmalar bosilishi uchun */
-        button { cursor: pointer; position: relative; z-index: 10; }
+        .step-card { display: none; }
+        .step-card.active { display: block; animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        #qrcode img { margin: 0 auto; border: 8px solid white; border-radius: 12px; }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
+<body class="flex items-center justify-center p-4">
 
-    <div id="app" class="w-full max-w-md glass rounded-3xl p-6 shadow-2xl relative overflow-hidden">
+    <div id="app" class="w-full max-w-lg glass rounded-3xl p-6 shadow-2xl relative">
         
-        <!-- Yuklanmoqda indikatori -->
-        <div id="loader" class="absolute inset-0 z-50 bg-white/90 flex items-center justify-center hidden">
-            <div class="animate-spin rounded-full h-10 w-10 border-4 border-indigo-500 border-t-transparent"></div>
+        <!-- Загрузка -->
+        <div id="loader" class="absolute inset-0 z-50 bg-white/90 flex flex-col items-center justify-center rounded-3xl hidden">
+            <div class="animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent mb-4"></div>
+            <p class="text-indigo-600 font-medium">Ulanmoqda...</p>
         </div>
 
-        <!-- 1. Rolni tanlash ekrani -->
-        <div id="setup-screen" class="space-y-6 animate-fade-in">
-            <div class="text-center space-y-2">
+        <!-- 1. Роль -->
+        <div id="step-1" class="step-card active space-y-6">
+            <div class="text-center">
                 <h1 class="text-3xl font-bold text-slate-800">Kuzatuv Tizimi</h1>
-                <p class="text-slate-500 text-sm">Qurilma vazifasini tanlang</p>
+                <p class="text-slate-500 mt-2">ID va QR orqali ulanish</p>
             </div>
             
-            <div class="grid grid-cols-1 gap-4 mt-8">
-                <button onclick="window.startRole('monitor')" class="group p-6 border-2 border-indigo-100 rounded-2xl hover:border-indigo-500 hover:bg-indigo-50 transition-all duration-300 text-left relative overflow-hidden">
-                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <svg class="w-16 h-16 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                    </div>
-                    <div class="text-indigo-600 font-bold text-xl mb-1">Monitor</div>
-                    <p class="text-sm text-gray-500 pr-8">Videoni ko'rish va nazorat qilish uchun</p>
+            <div class="grid gap-4 mt-8">
+                <button onclick="startRole('monitor')" class="p-6 border-2 border-indigo-100 rounded-2xl hover:border-indigo-500 hover:bg-indigo-50 transition-all text-left group">
+                    <div class="text-indigo-600 font-bold text-xl mb-1">Monitor bo'lish</div>
+                    <p class="text-sm text-gray-500">Boshqa qurilmani kuzatish</p>
                 </button>
 
-                <button onclick="window.startRole('camera')" class="group p-6 border-2 border-emerald-100 rounded-2xl hover:border-emerald-500 hover:bg-emerald-50 transition-all duration-300 text-left relative overflow-hidden">
-                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <svg class="w-16 h-16 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                    </div>
-                    <div class="text-emerald-600 font-bold text-xl mb-1">Kamera</div>
-                    <p class="text-sm text-gray-500 pr-8">Tasvirni uzatish qurilmasi sifatida</p>
+                <button onclick="startRole('camera')" class="p-6 border-2 border-emerald-100 rounded-2xl hover:border-emerald-500 hover:bg-emerald-50 transition-all text-left group">
+                    <div class="text-emerald-600 font-bold text-xl mb-1">Kamera bo'lish</div>
+                    <p class="text-sm text-gray-500">Tasvirni uzatish</p>
                 </button>
             </div>
         </div>
 
-        <!-- 2. Monitor: Kutish ekrani (QR va Kod) -->
-        <div id="monitor-setup" class="hidden flex flex-col items-center space-y-8 animate-fade-in py-4">
-            <h2 class="text-xl font-semibold text-center text-slate-700">Kamera ulanishini kuting</h2>
+        <!-- 2. Экран Монитора (Ожидание) -->
+        <div id="step-monitor" class="step-card space-y-6 text-center">
+            <h2 class="text-xl font-bold text-indigo-600">Kamera ulanishini kuting</h2>
             
-            <div class="relative group">
-                <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
-                <div id="qrcode" class="relative p-4 bg-white rounded-xl shadow-lg"></div>
-            </div>
-
-            <div class="text-center w-full">
-                <p class="text-gray-400 text-xs uppercase tracking-widest mb-2">Ulanish kodi</p>
-                <div onclick="navigator.clipboard.writeText(this.innerText)" id="display-id" class="text-5xl font-mono font-bold text-indigo-600 tracking-tighter cursor-pointer hover:scale-105 transition-transform select-all bg-indigo-50 py-2 rounded-lg mx-8 border border-indigo-100">
-                    ------
-                </div>
-                <p class="text-xs text-indigo-400 mt-2">Nusxalash uchun kod ustiga bosing</p>
+            <div id="qrcode" class="flex justify-center my-4"></div>
+            
+            <div class="bg-indigo-50 p-4 rounded-2xl border border-indigo-100">
+                <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Ulanish kodi</p>
+                <div id="my-id-display" class="text-4xl font-mono font-bold text-indigo-600 tracking-tighter">------</div>
             </div>
             
-            <button onclick="location.reload()" class="flex items-center gap-2 text-gray-500 hover:text-red-500 transition-colors px-4 py-2 rounded-lg hover:bg-red-50">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                Bekor qilish
-            </button>
+            <p class="text-sm text-gray-500">Kamerada ushbu kodni kiriting yoki QR-ni skanerlang</p>
+            <button onclick="location.reload()" class="text-red-500 font-medium pt-4">Bekor qilish</button>
         </div>
 
-        <!-- 3. Kamera: Kod kiritish ekrani -->
-        <div id="camera-setup" class="hidden space-y-6 text-center animate-fade-in py-4">
-            <div class="space-y-2">
-                <h2 class="text-2xl font-bold text-slate-800">Ulanish</h2>
-                <p class="text-gray-500 text-sm">Monitor ekranidagi kodni kiriting</p>
-            </div>
-
-            <div class="relative">
-                <input type="text" id="join-id" maxlength="6" inputmode="numeric" placeholder="000000" 
-                       class="w-full text-center text-4xl font-mono p-4 border-2 border-gray-200 rounded-2xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 outline-none transition-all placeholder-gray-300 bg-gray-50">
-            </div>
-
-            <div class="space-y-3">
-                <button onclick="window.joinSession()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-200 transition-all active:scale-95 flex items-center justify-center gap-2">
-                    <span>Ulanishni boshlash</span>
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
-                </button>
+        <!-- 3. Экран Камеры (Ввод кода) -->
+        <div id="step-camera" class="step-card space-y-6">
+            <h2 class="text-xl font-bold text-center text-emerald-600">Monitorga ulanish</h2>
+            
+            <div class="space-y-4">
+                <input type="text" id="peer-id-input" placeholder="ID kodni kiriting" 
+                       class="w-full text-center text-3xl font-mono p-4 border-2 border-gray-100 rounded-2xl focus:border-emerald-500 outline-none bg-gray-50">
                 
-                <button onclick="location.reload()" class="w-full text-gray-400 text-sm py-2 hover:text-gray-600">Orqaga qaytish</button>
+                <button onclick="connectToMonitor()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-5 rounded-2xl shadow-lg active:scale-95 transition-all text-xl">
+                    Ulanish
+                </button>
             </div>
+            
+            <p class="text-center text-gray-400 text-sm italic">Eslatma: Monitor ekranidagi 6 xonali sonni kiriting</p>
+            <button onclick="location.reload()" class="w-full text-gray-400">Orqaga</button>
         </div>
 
-        <!-- 4. Video Aloqa Ekrani -->
-        <div id="call-screen" class="hidden flex flex-col space-y-4 h-full animate-fade-in">
-            <div class="relative w-full aspect-[4/3] bg-black rounded-2xl overflow-hidden shadow-inner ring-4 ring-black/5">
-                <!-- Asosiy video (Remote) -->
+        <!-- 4. Видео экран -->
+        <div id="call-screen" class="step-card space-y-4">
+            <div class="relative aspect-video bg-black rounded-2xl overflow-hidden ring-4 ring-black/5 shadow-2xl">
                 <video id="remote-video" autoplay playsinline></video>
-                
-                <!-- Mening kameram (Preview) -->
-                <div id="local-preview-container" class="absolute bottom-4 right-4 w-24 h-32 rounded-lg overflow-hidden border-2 border-white/50 shadow-lg hidden bg-black">
+                <div id="local-preview" class="absolute bottom-3 right-3 w-1/4 aspect-video rounded-lg overflow-hidden border-2 border-white shadow-xl hidden bg-slate-900">
                     <video id="local-video" autoplay playsinline muted class="mirror"></video>
                 </div>
-
-                <!-- Statuslar -->
                 <div class="absolute top-4 left-4 flex gap-2">
-                    <span class="flex h-3 w-3 relative">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                    </span>
-                    <span id="role-badge" class="bg-black/60 backdrop-blur text-white text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wide border border-white/10"></span>
+                    <div class="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded font-bold animate-pulse">LIVE</div>
+                    <div id="role-label" class="bg-black/40 backdrop-blur text-white text-[10px] px-2 py-0.5 rounded font-bold uppercase"></div>
                 </div>
             </div>
             
-            <div class="flex-1 flex flex-col justify-end space-y-4">
-                <div id="status-msg" class="text-center text-sm font-medium text-indigo-600 bg-indigo-50 py-2 rounded-lg">
-                    Aloqa o'rnatildi
+            <div class="flex justify-between items-center bg-white/50 p-4 rounded-2xl border border-white">
+                <div class="flex items-center gap-3">
+                    <div class="w-3 h-3 bg-emerald-500 rounded-full animate-ping"></div>
+                    <span class="font-bold text-slate-700">Aloqa o'rnatildi</span>
                 </div>
-                
-                <button onclick="location.reload()" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-red-200 active:scale-95 flex items-center justify-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5 3a2 2 0 00-2 2v1c0 8.284 6.716 15 15 15h1a2 2 0 002-2v-3.28a1 1 0 00-.684-.948l-4.493-1.498a1 1 0 00-1.21.502l-1.13 2.257a11.042 11.042 0 01-5.516-5.517l2.257-1.128a1 1 0 00.502-1.21L9.228 3.683A1 1 0 008.279 3H5z"></path></svg>
-                    Aloqani tugatish
-                </button>
+                <button onclick="location.reload()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-xl font-bold transition-colors">Tugatish</button>
             </div>
         </div>
-
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection, addDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    <script>
+        let peer;
+        let myId;
+        let currentRole = '';
 
-        // Firebase konfiguratsiyasi
-        let app, db, auth, appId;
-        
-        try {
-            const firebaseConfig = JSON.parse(__firebase_config);
-            appId = typeof __app_id !== 'undefined' ? __app_id : 'kuzatuv-app-default';
-            app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-            console.log("Firebase muvaffaqiyatli ishga tushdi");
-        } catch (e) {
-            console.error("Firebase xatosi:", e);
-            alert("Tizim xatosi: Iltimos sahifani yangilang");
+        function showStep(id) {
+            document.querySelectorAll('.step-card').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
         }
 
-        // WebRTC Config
-        const servers = {
-            iceServers: [
-                { urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }
-            ],
-            iceCandidatePoolSize: 10,
-        };
+        function toggleLoader(show) {
+            document.getElementById('loader').classList.toggle('hidden', !show);
+        }
 
-        let pc = new RTCPeerConnection(servers);
-        let localStream = null;
-        let remoteStream = null;
-        let currentRole = null;
-        let currentUser = null;
+        // Инициализация PeerJS
+        function initPeer(callback) {
+            toggleLoader(true);
+            // Создаем случайный 6-значный ID
+            const shortId = Math.floor(100000 + Math.random() * 900000).toString();
+            
+            peer = new Peer(shortId, {
+                debug: 1,
+                config: {'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }]}
+            });
 
-        // Auth holatini kuzatish
-        onAuthStateChanged(auth, (user) => {
-            currentUser = user;
-        });
+            peer.on('open', (id) => {
+                myId = id;
+                toggleLoader(false);
+                callback(id);
+            });
 
-        // Autentifikatsiya (Anonim yoki Token)
-        const initAuth = async () => {
-            if (currentUser) return currentUser;
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-                return auth.currentUser;
-            } catch (error) {
-                console.error("Auth Error:", error);
-                throw error;
-            }
-        };
+            peer.on('error', (err) => {
+                console.error(err);
+                alert("Ulanish xatosi: " + err.type);
+                location.reload();
+            });
+        }
 
-        // --- GLOBAL FUNKSIYALAR ---
-        
-        // 1. Rolni boshlash
-        window.startRole = async (role) => {
+        window.startRole = (role) => {
             currentRole = role;
-            showLoader(true);
-            
-            try {
-                await initAuth();
-                document.getElementById('setup-screen').classList.add('hidden');
-                showLoader(false);
+            if (role === 'monitor') {
+                initPeer((id) => {
+                    showStep('step-monitor');
+                    document.getElementById('my-id-display').innerText = id;
+                    // Создаем QR код
+                    new QRCode(document.getElementById('qrcode'), {
+                        text: id,
+                        width: 180,
+                        height: 180,
+                        colorDark : "#4f46e5",
+                        colorLight : "#ffffff",
+                        correctLevel : QRCode.CorrectLevel.H
+                    });
 
-                if (role === 'monitor') {
-                    document.getElementById('monitor-setup').classList.remove('hidden');
-                    setupMonitor();
-                } else {
-                    document.getElementById('camera-setup').classList.remove('hidden');
-                }
-            } catch (e) {
-                showLoader(false);
-                alert("Ulanishda xatolik! Internetni tekshiring.");
-                console.error(e);
-            }
-        };
-
-        // 2. Monitor logikasi
-        async function setupMonitor() {
-            const sessionId = Math.floor(100000 + Math.random() * 900000).toString();
-            document.getElementById('display-id').innerText = sessionId;
-            
-            // QR kodni tozalab yangisini yaratish
-            document.getElementById('qrcode').innerHTML = "";
-            new QRCode(document.getElementById('qrcode'), { 
-                text: sessionId, 
-                width: 160, 
-                height: 160,
-                colorDark : "#4f46e5",
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.H
-            });
-
-            // Path structure: artifacts/{appId}/public/data/sessions/{sessionId}
-            const callDoc = doc(db, 'artifacts', appId, 'public', 'data', 'sessions', sessionId);
-            const offerCandidates = collection(callDoc, 'offerCandidates');
-            const answerCandidates = collection(callDoc, 'answerCandidates');
-
-            pc.onicecandidate = (event) => {
-                if (event.candidate) {
-                    addDoc(offerCandidates, event.candidate.toJSON());
-                }
-            };
-
-            // Monitor faqat audio yuboradi (gapirish uchun), lekin video qabul qiladi
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
-                localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-            } catch (e) {
-                console.warn("Mikrofon ruxsati yo'q, faqat kuzatuv rejimi");
-            }
-
-            remoteStream = new MediaStream();
-            document.getElementById('remote-video').srcObject = remoteStream;
-
-            pc.ontrack = (event) => {
-                event.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
-            };
-
-            const offerDescription = await pc.createOffer();
-            await pc.setLocalDescription(offerDescription);
-
-            await setDoc(callDoc, { offer: { type: offerDescription.type, sdp: offerDescription.sdp } });
-
-            onSnapshot(callDoc, (snapshot) => {
-                const data = snapshot.data();
-                if (!pc.currentRemoteDescription && data?.answer) {
-                    pc.setRemoteDescription(new RTCSessionDescription(data.answer));
-                    startCallUI('Monitor');
-                }
-            });
-
-            onSnapshot(answerCandidates, (snapshot) => {
-                snapshot.docChanges().forEach((change) => {
-                    if (change.type === 'added') pc.addIceCandidate(new RTCIceCandidate(change.doc.data()));
+                    // Ждем звонка от камеры
+                    peer.on('call', (call) => {
+                        // Монитор может отправлять аудио обратно, если нужно
+                        navigator.mediaDevices.getUserMedia({video: false, audio: true})
+                            .then(stream => {
+                                call.answer(stream);
+                                handleStream(call);
+                            })
+                            .catch(() => {
+                                call.answer(); // Отвечаем без своего потока
+                                handleStream(call);
+                            });
+                    });
                 });
-            });
-        }
-
-        // 3. Kamera sifatida ulanish
-        window.joinSession = async () => {
-            const sessionId = document.getElementById('join-id').value;
-            if (sessionId.length < 6) return alert("Kodni to'liq kiriting");
-            
-            showLoader(true);
-            await initAuth();
-
-            const callDoc = doc(db, 'artifacts', appId, 'public', 'data', 'sessions', sessionId);
-            const answerCandidates = collection(callDoc, 'answerCandidates');
-            const offerCandidates = collection(callDoc, 'offerCandidates');
-
-            pc.onicecandidate = (event) => {
-                if (event.candidate) {
-                    addDoc(answerCandidates, event.candidate.toJSON());
-                }
-            };
-
-            const callSnapshot = await getDoc(callDoc);
-            if (!callSnapshot.exists()) {
-                showLoader(false);
-                return alert("Bunday kod topilmadi yoki sessiya eskirgan");
-            }
-            const callData = callSnapshot.data();
-
-            try {
-                // Kamera video va audio yuboradi
-                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-                
-                // O'zimizni ko'rish uchun preview
-                const localVideo = document.getElementById('local-video');
-                localVideo.srcObject = localStream;
-                document.getElementById('local-preview-container').classList.remove('hidden');
-
-            } catch (e) {
-                showLoader(false);
-                return alert("Kamera yoki mikrofonga ruxsat berilmadi!");
-            }
-
-            remoteStream = new MediaStream();
-            // Kamera rejimidagi remote-video monitorning ovozini eshitish uchun (agar monitor gapirsa)
-            document.getElementById('remote-video').srcObject = remoteStream;
-
-            pc.ontrack = (event) => {
-                event.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
-            };
-
-            await pc.setRemoteDescription(new RTCSessionDescription(callData.offer));
-            const answerDescription = await pc.createAnswer();
-            await pc.setLocalDescription(answerDescription);
-
-            await updateDoc(callDoc, { answer: { type: answerDescription.type, sdp: answerDescription.sdp } });
-
-            onSnapshot(offerCandidates, (snapshot) => {
-                snapshot.docChanges().forEach((change) => {
-                    if (change.type === 'added') pc.addIceCandidate(new RTCIceCandidate(change.doc.data()));
-                });
-            });
-
-            showLoader(false);
-            startCallUI('Kamera');
-        };
-
-        function startCallUI(roleName) {
-            document.getElementById('monitor-setup').classList.add('hidden');
-            document.getElementById('camera-setup').classList.add('hidden');
-            document.getElementById('call-screen').classList.remove('hidden');
-            document.getElementById('role-badge').innerText = roleName;
-            
-            const statusMsg = document.getElementById('status-msg');
-            if (roleName === 'Kamera') {
-                statusMsg.innerText = "Monitorga video uzatilmoqda...";
-                statusMsg.className = "text-center text-sm font-medium text-emerald-600 bg-emerald-50 py-2 rounded-lg";
             } else {
-                statusMsg.innerText = "Kameradan signal qabul qilinmoqda";
+                showStep('step-camera');
+            }
+        };
+
+        async function connectToMonitor() {
+            const targetId = document.getElementById('peer-id-input').value;
+            if (!targetId || targetId.length < 6) return alert("ID kodni kiriting!");
+
+            toggleLoader(true);
+            
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                initPeer((id) => {
+                    document.getElementById('local-video').srcObject = stream;
+                    document.getElementById('local-preview').classList.remove('hidden');
+                    
+                    const call = peer.call(targetId, stream);
+                    handleStream(call);
+                });
+            } catch (err) {
+                alert("Kameraga ruxsat berilmadi!");
+                toggleLoader(false);
             }
         }
 
-        function showLoader(show) {
-            const loader = document.getElementById('loader');
-            if(show) loader.classList.remove('hidden');
-            else loader.classList.add('hidden');
-        }
-
-        // Input validatsiya (faqat raqamlar)
-        const joinInput = document.getElementById('join-id');
-        if(joinInput) {
-            joinInput.addEventListener('input', function(e) {
-                this.value = this.value.replace(/[^0-9]/g, '');
+        function handleStream(call) {
+            call.on('stream', (remoteStream) => {
+                document.getElementById('remote-video').srcObject = remoteStream;
+                document.getElementById('role-label').innerText = currentRole;
+                toggleLoader(false);
+                showStep('call-screen');
             });
+            
+            call.on('close', () => location.reload());
         }
 
+        // Фильтр только цифр для ввода
+        document.getElementById('peer-id-input').oninput = function() {
+            this.value = this.value.replace(/\D/g,'');
+        };
     </script>
 </body>
 </html>
