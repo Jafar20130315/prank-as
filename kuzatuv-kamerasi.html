@@ -3,118 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kuzatuv Kamerasi (Xavfsiz)</title>
+    <title>Kuzatuv kamerasi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', system-ui, sans-serif;
-            background: #0f172a;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            color: #1f2937;
+            background: #020617;
+            background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+            color: #f8fafc;
             margin: 0;
             min-height: 100vh;
         }
         .glass {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         video {
             background: #000;
             width: 100%;
             height: 100%;
             object-fit: cover;
-            border-radius: 1rem;
+            border-radius: 1.5rem;
         }
         .mirror { transform: scaleX(-1); }
         .step-card { display: none; }
-        .step-card.active { display: block; animation: fadeIn 0.3s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        #qrcode img { margin: 0 auto; border: 8px solid white; border-radius: 12px; }
+        .step-card.active { display: block; animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        #qrcode img { margin: 0 auto; border: 12px solid white; border-radius: 16px; }
+        input::placeholder { color: #475569; }
     </style>
 </head>
 <body class="flex items-center justify-center p-4">
 
-    <div id="app" class="w-full max-w-lg glass rounded-3xl p-6 shadow-2xl relative">
+    <div id="app" class="w-full max-w-lg glass rounded-[2.5rem] p-8 shadow-2xl relative border border-slate-700/50">
         
         <!-- Загрузка -->
-        <div id="loader" class="absolute inset-0 z-50 bg-white/90 flex flex-col items-center justify-center rounded-3xl hidden">
-            <div class="animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent mb-4"></div>
-            <p class="text-indigo-600 font-medium">Ulanmoqda...</p>
+        <div id="loader" class="absolute inset-0 z-50 bg-slate-950/90 flex flex-col items-center justify-center rounded-[2.5rem] hidden">
+            <div class="relative w-16 h-16">
+                <div class="absolute inset-0 border-4 border-indigo-500/20 rounded-full"></div>
+                <div class="absolute inset-0 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+            <p class="text-indigo-400 font-medium mt-6 tracking-wide">Xavfsiz ulanish o'rnatilmoqda...</p>
         </div>
 
-        <!-- 1. Роль -->
-        <div id="step-1" class="step-card active space-y-6">
-            <div class="text-center">
-                <h1 class="text-3xl font-bold text-slate-800">Maxfiy Kuzatuv</h1>
-                <p class="text-slate-500 mt-2">Faqat siz uchun himoyalangan aloqa</p>
+        <!-- 1. Главный экран -->
+        <div id="step-1" class="step-card active space-y-8">
+            <div class="text-center space-y-2">
+                <div class="inline-block p-3 bg-indigo-500/10 rounded-2xl mb-2">
+                    <svg class="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                </div>
+                <h1 class="text-3xl font-extrabold tracking-tight text-white">Kuzatuv kamerasi</h1>
+                <p class="text-slate-400">Ikkita qurilma orqali kuzatuv kamerasi qiling.</p>
             </div>
             
-            <div class="grid gap-4 mt-8">
-                <button onclick="openPassModal('monitor')" class="p-6 border-2 border-indigo-100 rounded-2xl hover:border-indigo-500 hover:bg-indigo-50 transition-all text-left group">
-                    <div class="text-indigo-600 font-bold text-xl mb-1">Monitor bo'lish</div>
-                    <p class="text-sm text-gray-500">Parol bilan himoyalangan kirish</p>
+            <div class="grid gap-4">
+                <button onclick="openPassModal('monitor')" class="group p-6 bg-slate-800/50 border border-slate-700 rounded-3xl hover:bg-indigo-500/10 hover:border-indigo-500/50 transition-all text-left">
+                    <div class="text-indigo-400 font-bold text-xl mb-1 flex items-center justify-between">
+                        Monitor
+                        <svg class="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+                    </div>
+                    <p class="text-sm text-slate-500 font-medium">Boshqa qurilmani ko'rish</p>
                 </button>
 
-                <button onclick="openPassModal('camera')" class="p-6 border-2 border-emerald-100 rounded-2xl hover:border-emerald-500 hover:bg-emerald-50 transition-all text-left group">
-                    <div class="text-emerald-600 font-bold text-xl mb-1">Kamera bo'lish</div>
-                    <p class="text-sm text-gray-500">Tasvirni xavfsiz uzatish</p>
+                <button onclick="openPassModal('camera')" class="group p-6 bg-slate-800/50 border border-slate-700 rounded-3xl hover:bg-emerald-500/10 hover:border-emerald-500/50 transition-all text-left">
+                    <div class="text-emerald-400 font-bold text-xl mb-1 flex items-center justify-between">
+                        Kamera
+                        <svg class="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+                    </div>
+                    <p class="text-sm text-slate-500 font-medium">Tasvirni uzatish</p>
                 </button>
             </div>
         </div>
 
-        <!-- Модальное окно пароля -->
-        <div id="pass-modal" class="step-card space-y-6 text-center">
-            <h2 class="text-xl font-bold text-slate-800">Xavfsizlik kaliti</h2>
-            <p class="text-sm text-gray-500">Ulanish uchun parolni o'rnating yoki kiriting</p>
-            <input type="password" id="session-pass" placeholder="Parol" 
-                   class="w-full text-center text-2xl p-4 border-2 border-gray-100 rounded-2xl focus:border-indigo-500 outline-none bg-gray-50">
-            <button onclick="validateAndStart()" class="w-full bg-slate-800 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition-all">
-                Davom etish
+        <!-- Экран пароля -->
+        <div id="pass-modal" class="step-card space-y-8 text-center">
+            <h2 class="text-2xl font-bold text-white">Xavfsizlik kaliti</h2>
+            <div class="space-y-4">
+                <input type="password" id="session-pass" placeholder="Shaxsiy parolingiz" 
+                       class="w-full text-center text-2xl p-5 bg-slate-900 border-2 border-slate-700 rounded-[1.5rem] focus:border-indigo-500 outline-none transition-all text-white">
+                <p class="text-xs text-slate-500 px-4">Ushbu parol ID kodini shifrlash uchun ishlatiladi. Server egalari faqat tasodifiy harflarni ko'rishadi.</p>
+            </div>
+            <button onclick="validateAndStart()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-5 rounded-[1.5rem] shadow-xl shadow-indigo-500/20 active:scale-[0.98] transition-all">
+                Keyingi
             </button>
-            <button onclick="location.reload()" class="text-gray-400">Bekor qilish</button>
+            <button onclick="location.reload()" class="text-slate-500 hover:text-white transition-colors">Orqaga qaytish</button>
         </div>
 
-        <!-- 2. Экран Монитора -->
+        <!-- Монитор -->
         <div id="step-monitor" class="step-card space-y-6 text-center">
-            <h2 class="text-xl font-bold text-indigo-600">Kamera ulanishini kuting</h2>
-            <div id="qrcode" class="flex justify-center my-4"></div>
-            <div class="bg-indigo-50 p-4 rounded-2xl border border-indigo-100">
-                <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">ID kod</p>
-                <div id="my-id-display" class="text-4xl font-mono font-bold text-indigo-600 tracking-tighter">------</div>
+            <div id="qrcode" class="flex justify-center my-4 scale-90"></div>
+            <div class="bg-slate-900/50 p-6 rounded-[2rem] border border-slate-700">
+                <p class="text-xs text-slate-500 uppercase tracking-[0.2em] mb-2">Sizning ID kodingiz</p>
+                <div id="my-id-display" class="text-5xl font-mono font-black text-white tracking-tighter">------</div>
             </div>
-            <p class="text-sm text-gray-500">Ushbu kod va parolni kiriting</p>
-            <button onclick="location.reload()" class="text-red-500 font-medium pt-4">Yopish</button>
+            <button onclick="location.reload()" class="bg-red-500/10 text-red-400 px-8 py-3 rounded-2xl hover:bg-red-500/20 transition-all font-bold">Yopish</button>
         </div>
 
-        <!-- 3. Экран Камеры -->
+        <!-- Камера -->
         <div id="step-camera" class="step-card space-y-6 text-center">
-            <h2 class="text-xl font-bold text-emerald-600">Monitor ID raqami</h2>
+            <h2 class="text-xl font-bold text-emerald-400">Monitorga ulanish</h2>
             <input type="text" id="peer-id-input" placeholder="000000" maxlength="6"
-                   class="w-full text-center text-4xl font-mono p-4 border-2 border-gray-100 rounded-2xl focus:border-emerald-500 outline-none bg-gray-50">
-            <button onclick="connectWithSecurity()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-5 rounded-2xl shadow-lg active:scale-95 transition-all text-xl">
-                Kamerani yoqish
+                   class="w-full text-center text-5xl font-mono p-6 bg-slate-900 border-2 border-slate-700 rounded-[2rem] focus:border-emerald-500 outline-none text-white">
+            <button onclick="connectWithSecurity()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-6 rounded-[2rem] shadow-xl shadow-emerald-500/20 active:scale-[0.98] transition-all text-xl">
+                Bog'lanish
             </button>
-            <button onclick="location.reload()" class="text-gray-400">Orqaga</button>
+            <button onclick="location.reload()" class="text-slate-500">Orqaga</button>
         </div>
 
-        <!-- 4. Видео экран -->
-        <div id="call-screen" class="step-card space-y-4">
-            <div class="relative aspect-video bg-black rounded-2xl overflow-hidden ring-4 ring-black/5 shadow-2xl">
-                <video id="remote-video" autoplay playsinline></video>
-                <div id="local-preview" class="absolute bottom-3 right-3 w-1/4 aspect-video rounded-lg overflow-hidden border-2 border-white shadow-xl hidden bg-slate-900">
+        <!-- Видео экран -->
+        <div id="call-screen" class="step-card space-y-6">
+            <div class="relative aspect-[4/3] bg-black rounded-[2.5rem] overflow-hidden shadow-2xl ring-1 ring-white/10">
+                <video id="remote-video" autoplay playsinline class="w-full h-full"></video>
+                <div id="local-preview" class="absolute bottom-4 right-4 w-1/4 aspect-video rounded-2xl overflow-hidden border-2 border-white/20 shadow-2xl hidden bg-slate-900">
                     <video id="local-video" autoplay playsinline muted class="mirror"></video>
                 </div>
-            </div>
-            <div class="flex justify-between items-center bg-white/50 p-4 rounded-2xl border border-white">
-                <div class="flex items-center gap-3">
-                    <div class="w-3 h-3 bg-emerald-500 rounded-full animate-ping"></div>
-                    <span class="font-bold text-slate-700">Xavfsiz ulanish</span>
+                <div class="absolute top-6 left-6 flex items-center gap-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
+                    <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                    <span class="text-[10px] font-black uppercase tracking-widest">E2E Himoyalangan</span>
                 </div>
-                <button onclick="location.reload()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-xl font-bold transition-colors">Tugatish</button>
             </div>
+            <button onclick="location.reload()" class="w-full bg-white text-slate-950 font-bold py-5 rounded-[1.5rem] hover:bg-slate-200 transition-all active:scale-[0.98]">
+                Aloqani uzish
+            </button>
         </div>
     </div>
 
@@ -122,6 +135,15 @@
         let peer;
         let currentRole = '';
         let password = '';
+
+        // Вспомогательная функция для хеширования (для анонимизации ID на сервере)
+        async function hashString(str) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(str + "salt_123_private"); // Соль для защиты
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 16);
+        }
 
         function showStep(id) {
             document.querySelectorAll('.step-card').forEach(s => s.classList.remove('active'));
@@ -137,12 +159,12 @@
             showStep('pass-modal');
         }
 
-        function validateAndStart() {
+        async function validateAndStart() {
             password = document.getElementById('session-pass').value;
-            if (password.length < 3) return alert("Parol juda qisqa!");
+            if (password.length < 4) return alert("Parol xavfsizlik uchun kamida 4 belgidan iborat bo'lishi kerak!");
             
             if (currentRole === 'monitor') {
-                startMonitor();
+                await startMonitor();
             } else {
                 showStep('step-camera');
             }
@@ -150,9 +172,13 @@
 
         function initPeer(customId, callback) {
             toggleLoader(true);
+            // Используем только необходимые опции для анонимности
             peer = new Peer(customId, {
-                debug: 1,
-                config: {'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }]}
+                debug: 0,
+                config: {
+                    'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }],
+                    'sdpSemantics': 'unified-plan'
+                }
             });
 
             peer.on('open', (id) => {
@@ -162,21 +188,17 @@
 
             peer.on('error', (err) => {
                 toggleLoader(false);
-                if (err.type === 'unavailable-id') {
-                    alert("Bu ID band yoki ulanishda xato. Iltimos, qayta urinib ko'ring.");
-                } else {
-                    alert("Xato: " + err.type);
-                }
+                alert("Ulanish xatosi. Sahifani yangilang.");
                 location.reload();
             });
         }
 
-        function startMonitor() {
+        async function startMonitor() {
             const shortId = Math.floor(100000 + Math.random() * 900000).toString();
-            // Смешиваем ID с паролем для уникальности сессии
-            const secureId = shortId + "_" + btoa(password).substring(0, 8);
+            // Генерируем секретный ID для сервера, который невозможно расшифровать
+            const serverId = await hashString(shortId + password);
 
-            initPeer(secureId, (id) => {
+            initPeer(serverId, (id) => {
                 showStep('step-monitor');
                 document.getElementById('my-id-display').innerText = shortId;
                 
@@ -184,12 +206,12 @@
                     text: shortId,
                     width: 180,
                     height: 180,
-                    colorDark : "#1e293b",
+                    colorDark : "#0f172a",
                     colorLight : "#ffffff"
                 });
 
                 peer.on('call', (call) => {
-                    call.answer(); // Монитор просто принимает видео
+                    call.answer(); 
                     handleStream(call);
                 });
             });
@@ -197,23 +219,26 @@
 
         async function connectWithSecurity() {
             const shortId = document.getElementById('peer-id-input').value;
-            if (shortId.length < 6) return alert("ID kodni to'liq kiriting!");
+            if (shortId.length < 6) return alert("6 xonali kodni kiriting!");
             
-            const secureId = shortId + "_" + btoa(password).substring(0, 8);
+            const serverId = await hashString(shortId + password);
             
             toggleLoader(true);
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                // Для камеры создаем временный ID
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: "user" }, 
+                    audio: true 
+                });
+                
                 initPeer(null, (id) => {
                     document.getElementById('local-video').srcObject = stream;
                     document.getElementById('local-preview').classList.remove('hidden');
                     
-                    const call = peer.call(secureId, stream);
+                    const call = peer.call(serverId, stream);
                     handleStream(call);
                 });
             } catch (err) {
-                alert("Kamera ruxsati rad etildi!");
+                alert("Kamera ruxsati kerak!");
                 toggleLoader(false);
             }
         }
@@ -225,14 +250,13 @@
                 showStep('call-screen');
             });
             
-            call.on('error', () => location.reload());
             setTimeout(() => { 
                 if (document.getElementById('call-screen').classList.contains('hidden')) {
                     toggleLoader(false);
-                    alert("Ulanib bo'lmadi. Parol yoki ID xato bo'lishi mumkin.");
+                    alert("Bog'lanish muvaffaqiyatsiz. Kod yoki parol xato.");
                     location.reload();
                 }
-            }, 10000);
+            }, 12000);
         }
 
         document.getElementById('peer-id-input').oninput = function() {
