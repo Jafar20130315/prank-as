@@ -6,10 +6,10 @@
 <title>Prank-as</title>
 <meta name="description" content="Prank-as — ko‘ngilochar va ta’limiy onlayn platforma. Internetdagi prank va tajriba elementlari qanday ishlashini tushuntirish uchun yaratilgan loyiha.">
 <link rel="icon" type="image/x-icon" href="favicon.png"/>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet" />
 <link rel="manifest" href="/manifest.json">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1867701562878781"
-     crossorigin="anonymous"></script>
+      crossorigin="anonymous"></script>
   <link rel="stylesheet" href="style.css?v=2">
 <script src="app.js?v=3"></script>
   
@@ -61,10 +61,45 @@ body {
   background:linear-gradient(270deg,#1f1f1f,#111,#222,#333);
   background-size:800% 800%;animation:gradientBG 20s ease infinite;
   min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;
+  overflow-x: hidden; /* Gorizontal skrollni oldini olish uchun */
+}
+
+/* ===== 2026 Doodle Style (YANGI QO'SHILDI) ===== */
+.doodle-year {
+  position: absolute;
+  top: 120px; /* H1 sarlavha orqasida */
+  left: 50%;
+  transform: translateX(-50%) rotate(-8deg);
+  font-size: clamp(6rem, 20vw, 12rem); /* Katta o'lcham, moslashuvchan */
+  font-weight: 900;
+  /* Google Doodle ranglari */
+  background: linear-gradient(90deg, #4285F4 20%, #EA4335 40%, #FBBC05 60%, #34A853 80%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  opacity: 0.12; /* Juda xira, xalaqit bermaydi */
+  z-index: 1; /* Kontentdan orqada */
+  pointer-events: none; /* Bosib bo'lmaydi, o'tkazib yuboradi */
+  user-select: none;
+  white-space: nowrap;
+  filter: blur(1px); /* Yumshoqlik uchun */
+  animation: doodleFloat 6s ease-in-out infinite;
+}
+
+@keyframes doodleFloat {
+  0%, 100% { transform: translateX(-50%) rotate(-8deg) scale(1); }
+  50% { transform: translateX(-50%) rotate(-4deg) scale(1.05); }
 }
 
 /* ===== Text Styling ===== */
-h1 { text-align:center;margin-bottom:40px; text-shadow:0 2px 6px rgba(0,0,0,0.7); position: relative; z-index: 7001; }
+h1 { 
+    text-align:center;
+    margin-bottom:40px; 
+    text-shadow:0 2px 6px rgba(0,0,0,0.7); 
+    position: relative; 
+    z-index: 7001; /* 2026 dan yuqorida */
+}
+
 .button-container {
   display:grid;gap:15px;width:100%;max-width:800px;margin-bottom:100px; position: relative; z-index: 7001;
 }
@@ -167,6 +202,8 @@ h1 { text-align:center;margin-bottom:40px; text-shadow:0 2px 6px rgba(0,0,0,0.7)
   margin: 12px auto 30px;
   line-height: 1.6;
   text-align: center;
+  position: relative;
+  z-index: 2; /* Matn ko'rinishi uchun */
 }
 
 
@@ -215,6 +252,9 @@ h1 { text-align:center;margin-bottom:40px; text-shadow:0 2px 6px rgba(0,0,0,0.7)
 
 <!-- ❄ Qor -->
 <div class="snow"></div>
+
+<!-- 2026 Doodle (YANGI) -->
+<div class="doodle-year">2026</div>
 
 
 <!-- Overlay layer -->
