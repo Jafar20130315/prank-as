@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Активность</title>
+    <title>Admin Panel</title>
+    <link rel="icon" type="image/x-icon" href="favicon.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -22,70 +23,45 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
             </div>
-            <h2 class="text-2xl font-bold mb-2">Доступ к админ-панели</h2>
-            <p class="text-gray-400 mb-6">Введите секретный ключ для управления данными</p>
-            <div class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-                <input type="password" id="adminPassword" placeholder="Пароль..." 
-                    class="flex-grow px-4 py-3 rounded-xl bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
-                <button onclick="checkPassword()" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-xl transition font-bold shadow-lg shadow-blue-900/20">
-                    Войти
-                </button>
+            <h2 class="text-2xl font-bold mb-2">Baza</h2>
+            <div class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto mt-6">
+                <input type="password" id="adminPassword" placeholder="Parol..." 
+                    class="flex-grow px-4 py-3 rounded-xl bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button onclick="checkPassword()" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-xl transition font-bold">Davom etish</button>
             </div>
         </div>
 
         <!-- Main Content -->
-        <div id="adminContent" class="hidden animate-in fade-in duration-500">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                <h1 class="text-3xl font-black tracking-tight flex items-center gap-3">
-                    <span class="p-2 bg-blue-600 rounded-lg">📊</span>
-                    <span>Admin <span class="text-blue-500">Panel</span></span>
-                </h1>
-                <div class="flex gap-3">
-                    <button id="loadActivityBtn" onclick="loadActivity()"
-                        class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 px-5 py-2.5 rounded-xl transition font-bold flex items-center gap-2">
-                        <svg id="refreshIcon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                        Обновить
+        <div id="adminContent" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-black tracking-tight">JONLI <span class="text-blue-500">STATISTIKA</span></h1>
+                <div class="flex gap-2">
+                    <button onclick="loadActivity()" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2">
+                        <svg id="refreshIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        Ma'lumotlarni yangilash
                     </button>
-                    <button onclick="handleLogout()" class="bg-gray-800 hover:bg-gray-700 border border-white/10 px-5 py-2.5 rounded-xl transition font-medium text-gray-300">
-                        Выйти
-                    </button>
+                    <button onclick="handleLogout()" class="bg-gray-800 px-4 py-2 rounded-lg text-sm">Chiqish</button>
                 </div>
             </div>
 
-            <!-- Debug Console -->
-            <div class="mb-6 bg-black/40 border border-white/5 rounded-xl overflow-hidden shadow-inner">
-                <div class="bg-white/5 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 flex justify-between">
-                    <span>Системный лог</span>
-                    <button onclick="document.getElementById('debugInfo').innerHTML=''" class="hover:text-white text-[9px]">ОЧИСТИТЬ ЛОГ</button>
-                </div>
-                <div id="debugInfo" class="p-4 h-32 overflow-y-auto font-mono text-xs space-y-1 text-blue-200/70">Инициализация...</div>
-            </div>
+            <!-- Debug Log -->
+            <div id="debugInfo" class="mb-4 p-3 bg-black/30 rounded-lg font-mono text-[10px] h-20 overflow-y-auto text-blue-300 border border-white/5"></div>
 
-            <!-- Data Table -->
-            <div class="bg-gray-800/30 rounded-2xl border border-white/10 overflow-hidden shadow-xl backdrop-blur-sm">
+            <!-- Table -->
+            <div class="bg-gray-800/40 rounded-xl border border-white/10 overflow-hidden">
                 <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left table-fixed-layout min-w-[1000px]">
-                        <thead class="bg-white/5 text-gray-400 uppercase text-[10px] tracking-widest border-b border-white/5">
+                    <table class="w-full text-left text-sm table-fixed-layout min-w-[900px]">
+                        <thead class="bg-white/5 text-gray-400 text-[10px] uppercase tracking-tighter">
                             <tr>
-                                <th class="p-4 font-bold w-1/4">Пользователь</th>
-                                <th class="p-4 font-bold w-1/6">Активность</th>
-                                <th class="p-4 font-bold w-1/5">Дата и время</th>
-                                <th class="p-4 font-bold text-center w-32">Время (сек)</th>
-                                <th class="p-4 font-bold w-1/5">Локация</th>
-                                <th class="p-4 font-bold w-1/6">IP Адрес</th>
+                                <th class="p-4 w-64">Foydalanuvchining ismi</th>
+                                <th class="p-4 w-48">Sahifa</th>
+                                <th class="p-4 w-40">Vaqt</th>
+                                <th class="p-4 w-24 text-center">Davomiylik</th>
+                                <th class="p-4 w-40 text-right">IP</th>
                             </tr>
                         </thead>
                         <tbody id="activityTable" class="divide-y divide-white/5">
-                            <tr>
-                                <td colspan="6" class="p-20 text-center text-gray-500">
-                                    <div class="flex flex-col items-center gap-3">
-                                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-                                        <p class="italic">Ожидание авторизации...</p>
-                                    </div>
-                                </td>
-                            </tr>
+                            <!-- Data goes here -->
                         </tbody>
                     </table>
                 </div>
@@ -94,171 +70,86 @@
     </div>
 
     <script>
-        // Configuration
         const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg';
-        const ADMIN_PASSWORD = 'admin21100';
+        const SUPABASE_ANON_KEY = 'e4yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg';
+        const ADMIN_PASS = 'admin21100';
 
-        // Initialize Supabase Client with a unique name to avoid SyntaxError
-        let supabaseClient;
+        let sb;
         try {
-            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        } catch (e) {
-            console.error("Supabase init error:", e);
-        }
+            sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } catch(e) { console.error(e); }
 
-        // Elements
-        const debugEl = document.getElementById('debugInfo');
-        const tableEl = document.getElementById('activityTable');
-        const btnEl = document.getElementById('loadActivityBtn');
-        const refreshIcon = document.getElementById('refreshIcon');
-        const passwordContainer = document.getElementById('passwordContainer');
-        const adminContent = document.getElementById('adminContent');
-        const passInput = document.getElementById('adminPassword');
-
-        function updateDebug(msg, color = 'text-gray-400') {
-            if (!debugEl) return;
-            const time = new Date().toLocaleTimeString();
-            debugEl.innerHTML += `<div class="${color} opacity-0 animate-in fade-in slide-in-from-left-2 duration-300">[${time}] ${msg}</div>`;
-            debugEl.scrollTop = debugEl.scrollHeight;
-            console.log(`[Admin] ${msg}`);
+        function updateLog(m) {
+            const d = document.getElementById('debugInfo');
+            d.innerHTML += `<div>> ${m}</div>`;
+            d.scrollTop = d.scrollHeight;
         }
 
         function checkPassword() {
-            const enteredPassword = passInput.value.trim();
-            if (enteredPassword === ADMIN_PASSWORD) {
-                updateDebug('Доступ разрешен. Соединение с базой...', 'text-green-400');
-                passwordContainer.classList.add('hidden');
-                adminContent.classList.remove('hidden');
-                btnEl.disabled = false;
+            if (document.getElementById('adminPassword').value === ADMIN_PASS) {
+                document.getElementById('passwordContainer').classList.add('hidden');
+                document.getElementById('adminContent').classList.remove('hidden');
                 loadActivity();
-            } else {
-                updateDebug('ОШИБКА: Неверный пароль', 'text-red-500');
-                passInput.value = '';
-                passInput.classList.add('ring-2', 'ring-red-500');
-                setTimeout(() => passInput.classList.remove('ring-2', 'ring-red-500'), 1000);
-                passInput.focus();
             }
         }
 
-        window.handleLogout = function() {
-            updateDebug('Сессия завершена', 'text-yellow-500');
-            adminContent.classList.add('hidden');
-            passwordContainer.classList.remove('hidden');
-            tableEl.innerHTML = `<tr><td colspan="6" class="p-12 text-center text-gray-500 italic">Войдите снова для просмотра</td></tr>`;
-            btnEl.disabled = true;
-            passInput.value = '';
-        };
+        function handleLogout() {
+            location.reload();
+        }
 
         async function loadActivity() {
-            if (btnEl.disabled || !supabaseClient) return;
+            const icon = document.getElementById('refreshIcon');
+            icon.classList.add('animate-spin');
+            updateLog("Загрузка последних данных...");
 
-            refreshIcon.classList.add('animate-spin');
-            updateDebug('Запрос данных из user_activity...');
-            
             try {
-                // Fetch data using the renamed client
-                const { data, error } = await supabaseClient
+                // ВАЖНО: Тянем данные из таблицы user_activity
+                // Мы используем поле user_email или email (смотря как в базе)
+                const { data, error } = await sb
                     .from('user_activity')
-                    .select('user_id, email, prank_name, opened_at, duration, city, country, ip_address')
-                    .order('opened_at', { ascending: false });
+                    .select('*')
+                    .order('opened_at', { ascending: false })
+                    .limit(50);
 
                 if (error) throw error;
 
-                if (!data || data.length === 0) {
-                    tableEl.innerHTML = `<tr><td colspan="6" class="p-20 text-center text-gray-500">
-                        <div class="text-4xl mb-2 text-gray-700">📭</div>
-                        <p>В таблице 'user_activity' пока нет записей</p>
-                    </td></tr>`;
-                    updateDebug('Таблица пуста.', 'text-yellow-500');
-                    return;
-                }
+                const tbody = document.getElementById('activityTable');
+                tbody.innerHTML = '';
 
-                tableEl.innerHTML = '';
-                data.forEach(item => {
-                    const dateObj = item.opened_at ? new Date(item.opened_at) : null;
-                    const dateFormatted = dateObj ? dateObj.toLocaleDateString('ru-RU') : '—';
-                    const timeFormatted = dateObj ? dateObj.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) : '';
+                data.forEach(row => {
+                    // Убираем admin@example.com (если вдруг попал в выборку)
+                    if (row.user_email === 'admin@example.com' || row.email === 'admin@example.com') return;
+
+                    const date = new Date(row.opened_at).toLocaleString('ru-RU', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
                     
-                    const row = document.createElement('tr');
-                    row.className = 'hover:bg-white/5 transition group border-b border-white/5 last:border-0';
-                    row.innerHTML = `
-                        <td class="p-4 align-top">
-                            <div class="flex items-center gap-2">
-                                <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-xs uppercase">
-                                    ${(item.email || 'A')[0]}
-                                </div>
-                                <div class="overflow-hidden">
-                                    <div class="font-bold text-gray-100 truncate w-full" title="${item.email || 'Аноним'}">${item.email || 'Анонимный пользователь'}</div>
-                                    <div class="text-[10px] text-gray-500 font-mono truncate w-full mt-0.5">${item.user_id || 'ID не указан'}</div>
-                                </div>
-                            </div>
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-white/5 transition";
+                    tr.innerHTML = `
+                        <td class="p-4">
+                            <div class="font-bold text-blue-300 truncate">${row.user_email || row.email || 'Аноним'}</div>
+                            <div class="text-[10px] text-gray-500">${row.user_name || 'Guest'}</div>
                         </td>
-                        <td class="p-4 align-top">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-blue-400/10 text-blue-300">
-                                ${item.prank_name || 'Неизвестно'}
+                        <td class="p-4">
+                            <span class="bg-blue-500/10 text-blue-400 px-2 py-1 rounded text-xs border border-blue-500/20">
+                                /${row.prank_name || 'index'}
                             </span>
                         </td>
-                        <td class="p-4 align-top">
-                            <div class="text-gray-200 font-medium">${dateFormatted}</div>
-                            <div class="text-xs text-gray-500">${timeFormatted}</div>
-                        </td>
-                        <td class="p-4 align-top text-center">
-                            <div class="inline-block px-3 py-1 bg-slate-800 rounded-lg border border-white/5 font-mono text-blue-400 text-xs shadow-sm">
-                                ${item.duration || 0}<span class="text-[10px] text-gray-600 ml-1">сек</span>
-                            </div>
-                        </td>
-                        <td class="p-4 align-top">
-                            <div class="flex items-start gap-1.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-gray-500 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                <div>
-                                    <div class="text-sm font-medium text-gray-300">${item.city || 'Город не определен'}</div>
-                                    <div class="text-[11px] text-gray-500 uppercase tracking-tight">${item.country || 'Страна'}</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="p-4 align-top">
-                            <code class="text-[11px] text-purple-400 bg-purple-400/5 px-2 py-1 rounded border border-purple-400/10 block w-fit">
-                                ${item.ip_address || '0.0.0.0'}
-                            </code>
+                        <td class="p-4 text-gray-400 text-xs">${date}</td>
+                        <td class="p-4 text-center font-mono text-xs text-green-400">${row.duration || 0}s</td>
+                        <td class="p-4 text-right">
+                            <div class="text-xs text-gray-300">${row.ip_address || '0.0.0.0'}</div>
+                            <div class="text-[10px] text-gray-500">${row.city || ''} ${row.country || ''}</div>
                         </td>
                     `;
-                    tableEl.appendChild(row);
+                    tbody.appendChild(tr);
                 });
-
-                updateDebug(`Готово. Получено записей: ${data.length}`, 'text-green-400');
-
-            } catch (err) {
-                console.error("Fetch Error:", err);
-                let errorMsg = err.message;
-                if (err.code === 'PGRST301') errorMsg = "Ошибка JWT/Ключа (Supabase Anon Key)";
-                if (err.message && err.message.includes('policy')) errorMsg = "Ошибка RLS (Нужно настроить политики в Supabase)";
-                
-                updateDebug(`ОШИБКА: ${errorMsg}`, 'text-red-400');
-                tableEl.innerHTML = `<tr><td colspan="6" class="p-12 text-center">
-                    <div class="bg-red-900/20 border border-red-500/50 p-6 rounded-2xl inline-block">
-                        <p class="text-red-400 font-bold mb-2 text-lg">Ошибка загрузки</p>
-                        <p class="text-sm text-red-300/70">${errorMsg}</p>
-                        <p class="text-xs mt-4 text-gray-500">Проверьте консоль браузера (F12) и настройки RLS в Supabase</p>
-                    </div>
-                </td></tr>`;
+                updateLog("" + data.length + " ma'lumotlar yangilandi.");
+            } catch (e) {
+                updateLog("Xato yuz berdi" + e.message);
             } finally {
-                refreshIcon.classList.remove('animate-spin');
+                icon.classList.remove('animate-spin');
             }
         }
-
-        // Event Listeners
-        window.addEventListener('DOMContentLoaded', () => {
-            if (passInput) {
-                passInput.focus();
-                passInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') checkPassword();
-                });
-            }
-        });
     </script>
 </body>
 </html>
