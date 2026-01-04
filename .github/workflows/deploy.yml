@@ -55,27 +55,32 @@ function walkDir(dir, callback) {
 }
 
 /**
- * Основная логика впрыска скрипта
+ * Основная логика впрыска и обновления скрипта
  */
-console.log('--- Начало процесса проверки файлов ---');
+console.log('--- Начало процесса проверки и обновления файлов ---');
 
 walkDir('./', (filePath) => {
     if (path.extname(filePath) === '.html') {
         let content = fs.readFileSync(filePath, 'utf8');
-        
-        // Проверяем, не вставлен ли уже скрипт
-        if (!content.includes('<!-- Tracking Script Start -->')) {
-            if (content.includes('</body>')) {
-                console.log(`[НОВЫЙ ФАЙЛ] Вставка скрипта в: ${filePath}`);
-                const updatedContent = content.replace('</body>', `${trackingScript}\n</body>`);
-                fs.writeFileSync(filePath, updatedContent, 'utf8');
-            } else {
-                console.warn(`[ПРЕДУПРЕЖДЕНИЕ] Тег </body> не найден в файле: ${filePath}. Пропускаю.`);
-            }
+        const startTag = '<!-- Tracking Script Start -->';
+        const endTag = '<!-- Tracking Script End -->';
+
+        if (content.includes(startTag)) {
+            // Если скрипт уже есть, мы его обновляем
+            console.log(`[ОБНОВЛЕНИЕ] Обновление существующего скрипта в: ${filePath}`);
+            
+            // Регулярное выражение для поиска всего блока между тегами
+            const regex = new RegExp(`${startTag}[\\s\\S]*?${endTag}`, 'g');
+            const updatedContent = content.replace(regex, trackingScript.trim());
+            
+            fs.writeFileSync(filePath, updatedContent, 'utf8');
+        } else if (content.includes('</body>')) {
+            // Если скрипта нет, вставляем новый перед </body>
+            console.log(`[НОВЫЙ ФАЙЛ] Вставка скрипта в: ${filePath}`);
+            const updatedContent = content.replace('</body>', `${trackingScript}\n</body>`);
+            fs.writeFileSync(filePath, updatedContent, 'utf8');
         } else {
-            // Если скрипт уже есть, мы можем его обновить (опционально)
-            // В данном случае просто сообщаем, что файл уже защищен
-            console.log(`[OK] Скрипт уже присутствует в: ${filePath}`);
+            console.warn(`[ПРЕДУПРЕЖДЕНИЕ] Тег </body> не найден в файле: ${filePath}. Пропускаю.`);
         }
     }
 });
