@@ -28,6 +28,20 @@
   }
 }
 </script>
+  <!-- Bildirishnoma -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "3b7b6b4f-c457-42e4-ad68-65d990d783a6",
+      safari_web_id: "web.onesignal.auto.2cd5950f-b486-4c84-8005-0f30059d0b0c",
+      notifyButton: {
+        enable: true,
+      },
+    });
+  });
+</script>
   
   <script>
 if ('serviceWorker' in navigator) {
@@ -229,20 +243,7 @@ h1 {
 
 
 </style>
-  <!-- Bildirishnoma -->
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "3b7b6b4f-c457-42e4-ad68-65d990d783a6",
-      safari_web_id: "web.onesignal.auto.2cd5950f-b486-4c84-8005-0f30059d0b0c",
-      notifyButton: {
-        enable: true,
-      },
-    });
-  });
-</script>
+  
 </head>
 <body>
 <!-- SOUNDEFFECT-->
