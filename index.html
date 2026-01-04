@@ -37,7 +37,7 @@
       appId: "3b7b6b4f-c457-42e4-ad68-65d990d783a6",
       safari_web_id: "web.onesignal.auto.2cd5950f-b486-4c84-8005-0f30059d0b0c",
       notifyButton: {
-        enable: true,
+        enable: false,
       },
     });
   });
@@ -241,11 +241,35 @@ h1 {
   background: #2563eb;
 }
 
+  .notify-btn{
+  padding: 12px 18px;
+  border-radius: 10px;
+  border: none;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  background: linear-gradient(45deg, #ffbb00, #ff7b00);
+  color: #111;
+  box-shadow: 0 5px 20px rgba(0,0,0,.4);
+  transition: .25s;
+}
+
+.notify-btn:hover{
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(0,0,0,.5);
+}
+
+
 
 </style>
   
 </head>
 <body>
+  
+  <button id="notifyBtn" class="notify-btn">
+  🔔 Yangiliklardan xabardor bo‘lish
+</button>
+
 <!-- SOUNDEFFECT-->
 <audio id="clickSound" preload="auto">
   <source src="/media/click.mp3" type="audio/mpeg">
@@ -618,6 +642,47 @@ function playErrorSound() {
   errorSound.play().catch(()=>{});
 }
 </script>
+  <script>
+OneSignalDeferred.push(async function(OneSignal){
+
+  async function updateButton(){
+    const sub = await OneSignal.User.PushSubscription.getSubscription();
+    const btn = document.getElementById("notifyBtn");
+
+    if(sub && sub.id){
+      btn.textContent = "✔️ Bildirishnomalarga ruxsat berilgan";
+      btn.disabled = true;
+      btn.style.opacity = "0.6";
+    }
+  }
+
+  // sahifa ochilganda tekshiradi
+  updateButton();
+
+  // tugma bosilganda
+  document.getElementById("notifyBtn").onclick = async () => {
+
+    const permission = Notification.permission;
+
+    if(permission === "granted"){
+      // allaqachon ruxsat berilgan → qayta so'ramaymiz
+      await updateButton();
+      return;
+    }
+
+    if(permission === "denied"){
+      alert("🚫 Bildirishnomalar bloklangan. Brauzer sozlamasidan yoqishingiz kerak.");
+      return;
+    }
+
+    // faqat bir marta so‘raydi
+    await OneSignal.User.PushSubscription.optIn();
+
+    await updateButton();
+  };
+});
+</script>
+
 
 
 
