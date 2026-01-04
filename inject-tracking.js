@@ -1,0 +1,59 @@
+const fs = require('fs');
+const path = require('path');
+
+// Код, который нужно вставить
+const trackingScript = `
+<!-- Tracking Script Start -->
+<script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+    const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg';
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    async function startTracking() {
+        const startTime = Date.now();
+        const openedAt = new Date().toISOString();
+        const prankName = window.location.pathname.split('/').filter(Boolean).pop() || 'index';
+        const { data: { user } } = await supabase.auth.getUser();
+        let recordId = null;
+        const { data } = await supabase.from('user_activity').insert({
+            user_id: user?.id || null,
+            user_email: user?.email || null,
+            user_name: user?.user_metadata?.full_name || user?.user_metadata?.name || 'Guest',
+            prank_name: prankName,
+            opened_at: openedAt,
+            duration: 0
+        }).select();
+        if (data && data.length > 0) recordId = data[0].id;
+        setInterval(async () => {
+            if (!recordId) return;
+            const currentDuration = Math.floor((Date.now() - startTime) / 1000);
+            await supabase.from('user_activity').update({ duration: currentDuration }).eq('id', recordId);
+        }, 10000);
+    }
+    startTracking();
+</script>
+<!-- Tracking Script End -->
+`;
+
+function walkDir(dir, callback) {
+    fs.readdirSync(dir).forEach(f => {
+        let dirPath = path.join(dir, f);
+        let isDirectory = fs.statSync(dirPath).isDirectory();
+        // Пропускаем node_modules
+        if (f === 'node_modules' || f === '.git') return;
+        isDirectory ? walkDir(dirPath, callback) : callback(path.join(dir, f));
+    });
+}
+
+walkDir('./', (filePath) => {
+    if (path.extname(filePath) === '.html') {
+        let content = fs.readFileSync(filePath, 'utf8');
+        // Проверяем, не вставлен ли уже скрипт, чтобы не дублировать
+        if (!content.includes('Tracking Script Start')) {
+            console.log(`Injecting into: ${filePath}`);
+            // Вставляем перед закрывающим тегом body
+            const updatedContent = content.replace('</body>', `${trackingScript}\n</body>`);
+            fs.writeFileSync(filePath, updatedContent, 'utf8');
+        }
+    }
+});
