@@ -241,23 +241,23 @@ h1 {
   background: #2563eb;
 }
 
+ 
   .notify-btn{
   padding: 12px 18px;
-  border-radius: 10px;
+  border-radius: 12px;
   border: none;
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
-  background: linear-gradient(45deg, #ffbb00, #ff7b00);
-  color: #111;
-  box-shadow: 0 5px 20px rgba(0,0,0,.4);
-  transition: .25s;
+  background: linear-gradient(45deg,#ffbb00,#ff7b00);
+  color:#111;
+  box-shadow:0 5px 20px rgba(0,0,0,.4);
+  transition:.25s;
+}
+.notify-btn:hover{
+  transform:scale(1.05);
 }
 
-.notify-btn:hover{
-  transform: scale(1.05);
-  box-shadow: 0 8px 25px rgba(0,0,0,.5);
-}
 
 
 
@@ -266,9 +266,10 @@ h1 {
 </head>
 <body>
   
-  <button id="notifyBtn" class="notify-btn">
+ <button id="notifyBtn" class="notify-btn" style="display:none">
   🔔 Yangiliklardan xabardor bo‘lish
 </button>
+
 
 <!-- SOUNDEFFECT-->
 <audio id="clickSound" preload="auto">
@@ -642,51 +643,46 @@ function playErrorSound() {
   errorSound.play().catch(()=>{});
 }
 </script>
+
   <script>
 OneSignalDeferred.push(async function(OneSignal){
 
-  async function updateButton(){
-    const sub = await OneSignal.User.PushSubscription.getSubscription();
-    const btn = document.getElementById("notifyBtn");
+  const btn = document.getElementById("notifyBtn");
 
-    if(sub && sub.id){
-      btn.textContent = "✔️ Bildirishnomalarga ruxsat berilgan";
-      btn.disabled = true;
-      btn.style.opacity = "0.6";
-    }
-  }
-
-  // sahifa ochilganda tekshiradi
-  updateButton();
-
-  // tugma bosilganda
-  document.getElementById("notifyBtn").onclick = async () => {
+  // 1️⃣ ruxsat holatini tekshiruvchi funksiya
+  async function checkStatus(){
 
     const permission = Notification.permission;
 
-    if(permission === "granted"){
-      // allaqachon ruxsat berilgan → qayta so'ramaymiz
-      await updateButton();
+    // ❌ bloklangan yoki allaqachon ruxsat berilgan bo‘lsa → tugma ko‘rsatmaymiz
+    if(permission === "granted" || permission === "denied"){
+      btn.style.display = "none";
       return;
     }
 
-    if(permission === "denied"){
-      alert("🚫 Bildirishnomalar bloklangan. Brauzer sozlamasidan yoqishingiz kerak.");
-      return;
-    }
+    // 2️⃣ ruxsat hali berilmagan → 3 soniyadan keyin ko‘rsatamiz
+    setTimeout(()=>{
+      btn.style.display = "inline-block";
+    },3000);
+  }
 
-    // faqat bir marta so‘raydi
+  // sahifa yuklanganda tekshiradi
+  checkStatus();
+
+  // 3️⃣ tugma bosilganda
+  btn.onclick = async ()=>{
+
     await OneSignal.User.PushSubscription.optIn();
 
-    await updateButton();
-  };
+    // agar ruxsat berilsa — tugmani yo‘q qilamiz
+    if(Notification.permission === "granted"){
+      btn.style.display = "none";
+      alert("✔️ Bildirishnomalar yoqildi!");
+    }
+  }
+
 });
 </script>
-
-
-
-
-
 
 
 </body>
