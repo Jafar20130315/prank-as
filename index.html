@@ -42,6 +42,47 @@
     });
   });
 </script>
+   
+  <script>
+OneSignalDeferred.push(async function(OneSignal){
+
+  const btn = document.getElementById("notifyBtn");
+
+  // 1️⃣ ruxsat holatini tekshiruvchi funksiya
+  async function checkStatus(){
+
+    const permission = Notification.permission;
+
+    // ❌ bloklangan yoki allaqachon ruxsat berilgan bo‘lsa → tugma ko‘rsatmaymiz
+    if(permission === "granted" || permission === "denied"){
+      btn.style.display = "none";
+      return;
+    }
+
+    // 2️⃣ ruxsat hali berilmagan → 3 soniyadan keyin ko‘rsatamiz
+    setTimeout(()=>{
+      btn.style.display = "inline-block";
+    },3000);
+  }
+
+  // sahifa yuklanganda tekshiradi
+  checkStatus();
+
+  // 3️⃣ tugma bosilganda
+  btn.onclick = async ()=>{
+
+    await OneSignal.User.PushSubscription.optIn();
+
+    // agar ruxsat berilsa — tugmani yo‘q qilamiz
+    if(Notification.permission === "granted"){
+      btn.style.display = "none";
+      alert("✔️ Bildirishnomalar yoqildi!");
+    }
+  }
+
+});
+</script>
+
   
   <script>
 if ('serviceWorker' in navigator) {
@@ -644,46 +685,7 @@ function playErrorSound() {
 }
 </script>
 
-  <script>
-OneSignalDeferred.push(async function(OneSignal){
-
-  const btn = document.getElementById("notifyBtn");
-
-  // 1️⃣ ruxsat holatini tekshiruvchi funksiya
-  async function checkStatus(){
-
-    const permission = Notification.permission;
-
-    // ❌ bloklangan yoki allaqachon ruxsat berilgan bo‘lsa → tugma ko‘rsatmaymiz
-    if(permission === "granted" || permission === "denied"){
-      btn.style.display = "none";
-      return;
-    }
-
-    // 2️⃣ ruxsat hali berilmagan → 3 soniyadan keyin ko‘rsatamiz
-    setTimeout(()=>{
-      btn.style.display = "inline-block";
-    },3000);
-  }
-
-  // sahifa yuklanganda tekshiradi
-  checkStatus();
-
-  // 3️⃣ tugma bosilganda
-  btn.onclick = async ()=>{
-
-    await OneSignal.User.PushSubscription.optIn();
-
-    // agar ruxsat berilsa — tugmani yo‘q qilamiz
-    if(Notification.permission === "granted"){
-      btn.style.display = "none";
-      alert("✔️ Bildirishnomalar yoqildi!");
-    }
-  }
-
-});
-</script>
-
+ 
 
 </body>
 </html>
