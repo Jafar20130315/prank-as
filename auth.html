@@ -8,35 +8,14 @@
   <link rel="icon" type="image/x-icon" href="favicon.png"/>
 
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <style>
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background: radial-gradient(circle at top left, #1e293b 0%, #0f172a 100%);
-    }
-    .glass-card {
-      background: rgba(255, 255, 255, 0.03);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 25px 50px -12px rgba(0,0,0,.5);
-    }
-    .btn-google{
-      background:#fff;color:#1e293b
-    }
-    .btn-telegram{
-      background:#229ED9;color:white
-    }
-  </style>
-
-  <!-- reCAPTCHA -->
-  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-
 </head>
 
-<body class="min-h-screen flex items-center justify-center text-white">
+<body class="min-h-screen flex items-center justify-center text-white"
+      style="font-family: sans-serif; background:#0f172a">
 
-<div class="glass-card rounded-3xl p-10 w-full max-w-md text-center">
+<div class="rounded-3xl p-10 w-full max-w-md text-center"
+     style="background: rgba(255,255,255,.05);backdrop-filter:blur(10px)">
+
   <h1 class="text-4xl font-bold mb-2">Prank-as</h1>
 
   <p class="text-slate-400 mb-6">
@@ -45,26 +24,27 @@
 
   <div class="space-y-4">
 
-    <!-- reCAPTCHA -->
-    <div class="g-recaptcha flex justify-center"
-         data-sitekey="6LeOGjssAAAAAHnJBytIycrKEvDJHjMIcnjF7XN2"
-         data-callback="recaptchaV2Success">
-    </div>
-
     <!-- GOOGLE LOGIN -->
     <button id="google-login"
-            disabled
-            class="btn-google w-full py-3 rounded-2xl font-semibold">
+            class="w-full py-3 rounded-2xl font-semibold bg-white text-black">
       Google bilan kirish
     </button>
 
     <!-- TELEGRAM LOGIN -->
     <button id="telegram-login"
-            class="btn-telegram w-full py-3 rounded-2xl font-semibold">
+            class="w-full py-3 rounded-2xl font-semibold"
+            style="background:#229ED9">
       Telegram bilan kirish
     </button>
 
+    <!-- LOGOUT -->
+    <button id="logout"
+            class="hidden w-full py-3 rounded-2xl font-semibold bg-red-500">
+      Chiqish
+    </button>
+
   </div>
+
 </div>
 
 <script type="module">
@@ -77,13 +57,11 @@
 
   const googleBtn = document.getElementById("google-login")
   const tgBtn = document.getElementById("telegram-login")
+  const logoutBtn = document.getElementById("logout")
 
-  // reCAPTCHA success
-  window.recaptchaV2Success = function(){
-    googleBtn.disabled = false
-  }
-
+  // =========================
   // GOOGLE LOGIN
+  // =========================
   googleBtn.onclick = async () => {
     await supabase.auth.signInWithOAuth({
       provider:'google',
@@ -91,42 +69,65 @@
     })
   }
 
-  // TELEGRAM CALLBACK FUNCTION
+  // =========================
+  // TELEGRAM CALLBACK
+  // =========================
   window.onTelegramAuth = async function(user){
 
-    // avatar & name localStorage
-    localStorage.setItem("tg_photo", user.photo_url || "");
-    localStorage.setItem("tg_name", user.first_name || "");
+    // local saqlaymiz (asosiy sahifada avatar uchun)
+    localStorage.setItem("tg_name", user.first_name || "")
+    localStorage.setItem("tg_avatar", user.photo_url || "")
 
-    // Worker'ga yuboramiz
-    await fetch("https://prankasapi.windowsnoutbook.workers.dev/auth",{
+    // workerga yuboramiz
+    await fetch("https:/prankasapi.windowsnoutbook.workers.dev/auth",{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
       body: JSON.stringify(user)
-    });
+    })
 
-    alert("Salom, " + (user.first_name || "foydalanuvchi") + "!");
+    alert("Salom, " + (user.first_name || "foydalanuvchi") + "!")
 
-    // asosiy sahifaga qaytaramiz
-    window.location.href = "/";
+    window.location.href = "/"
   }
 
-  // TELEGRAM BUTTON CLICK
+  // TELEGRAM LOGIN BUTTON
   tgBtn.onclick = () => {
-    const s = document.createElement("script");
-    s.src = "https://telegram.org/js/telegram-widget.js?22";
+    const s = document.createElement("script")
+    s.src = "https://telegram.org/js/telegram-widget.js?22"
 
-    s.setAttribute("data-telegram-login","prank_as_bot");
-    s.setAttribute("data-size","large");
-    s.setAttribute("data-userpic","true");
-    s.setAttribute("data-request-access","write");
+    s.setAttribute("data-telegram-login","prank_as_bot")
+    s.setAttribute("data-size","large")
+    s.setAttribute("data-userpic","true")
+    s.setAttribute("data-request-access","write")
+    s.setAttribute("data-onauth","onTelegramAuth(user)")
 
-    // MUHIM
-    s.setAttribute("data-onauth","onTelegramAuth(user)");
-
-    document.body.appendChild(s);
+    document.body.appendChild(s)
   }
 
+  // =========================
+  // LOGOUT — UNIVERSAL
+  // =========================
+  logoutBtn.onclick = async () => {
+
+    // 1) Supabase sessiya chiqish (Google uchun)
+    await supabase.auth.signOut().catch(()=>{})
+
+    // 2) Telegram kirishni tozalash
+    localStorage.removeItem("tg_name")
+    localStorage.removeItem("tg_avatar")
+
+    alert("Chiqildi 👌")
+    window.location.href = "/"
+  }
+
+  // Agar foydalanuvchi uje login bo'lsa logout ko‘rinadi
+  (async () => {
+    const { data: { session } } = await supabase.auth.getSession()
+
+    if (session || localStorage.getItem("tg_name")) {
+      logoutBtn.classList.remove("hidden")
+    }
+  })()
 </script>
 
 </body>
