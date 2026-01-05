@@ -110,13 +110,10 @@
 <!-- ===================== -->
 
 <script>
-  // 1) Callback – Telegram auth tugagach shu chaqiriladi
+  // Callback
   function onTelegramAuth(user){
 
-    console.log("TG user:", user);
-
-    // Cloudflare Worker'ga yuboramiz
-    fetch("https://prankasapi.windowsnoutbook.workers.dev/auth", {
+    fetch("https://SENING-WORKERING.workers.dev/auth", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(user)
@@ -125,8 +122,11 @@
     alert("Salom, " + (user.first_name || "foydalanuvchi") + "!");
   }
 
-  // 2) Tugma bosilganda widget ochiladi
   document.getElementById("telegram-login").onclick = function(){
+
+    // avval eski widget bo‘lsa — tozalaymiz
+    const box = document.getElementById("telegram-login-container");
+    box.innerHTML = "";
 
     const script = document.createElement("script");
     script.src = "https://telegram.org/js/telegram-widget.js?22";
@@ -137,7 +137,8 @@
     script.setAttribute("data-request-access", "write");
     script.setAttribute("data-onauth", "onTelegramAuth(user)");
 
-    document.body.appendChild(script);
+    // >>> MUHIM <<< — ENDI BODY EMAS, KONTEYNERGA QO‘YAMIZ
+    box.appendChild(script);
   };
 </script>
 
