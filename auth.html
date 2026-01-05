@@ -8,6 +8,10 @@
   <link rel="icon" type="image/x-icon" href="favicon.png"/>
 
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- reCAPTCHA -->
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
 </head>
 
 <body class="min-h-screen flex items-center justify-center text-white"
@@ -22,18 +26,27 @@
     Quyidagi usullardan biri orqali tizimga kiring
   </p>
 
+  <!-- reCAPTCHA BOX -->
+  <div class="flex justify-center mb-5">
+    <div class="g-recaptcha"
+         data-sitekey="6LctEEEsAAAAAIYEMkFvKyCVj6ftjhm3iVPkwQyY"
+         data-callback="captchaOk">
+    </div>
+  </div>
+
   <div class="space-y-4">
 
     <!-- GOOGLE LOGIN -->
     <button id="google-login"
-            class="w-full py-3 rounded-2xl font-semibold bg-white text-black">
+            disabled
+            class="w-full py-3 rounded-2xl font-semibold bg-white/40 text-black cursor-not-allowed">
       Google bilan kirish
     </button>
 
     <!-- TELEGRAM LOGIN -->
     <button id="telegram-login"
-            class="w-full py-3 rounded-2xl font-semibold"
-            style="background:#229ED9">
+            disabled
+            class="w-full py-3 rounded-2xl font-semibold bg-blue-400 cursor-not-allowed">
       Telegram bilan kirish
     </button>
 
@@ -50,6 +63,8 @@
 <script type="module">
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+  const WORKER_URL = "https://prankasapi.windowsnoutbook.workers.dev";
+
   const supabase = createClient(
     'https://gefaqrfjzwemwuxuoadp.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'
@@ -58,6 +73,18 @@
   const googleBtn = document.getElementById("google-login")
   const tgBtn = document.getElementById("telegram-login")
   const logoutBtn = document.getElementById("logout")
+
+  // ============= CAPTCHA CALLBACK ===================
+  window.captchaOk = function(){
+    googleBtn.disabled = false
+    tgBtn.disabled = false
+
+    googleBtn.classList.remove("cursor-not-allowed","bg-white/40")
+    googleBtn.classList.add("bg-white")
+
+    tgBtn.classList.remove("cursor-not-allowed","bg-blue-400")
+    tgBtn.classList.add("bg-blue-500")
+  }
 
   // =========================
   // GOOGLE LOGIN
@@ -74,12 +101,10 @@
   // =========================
   window.onTelegramAuth = async function(user){
 
-    // local saqlaymiz (asosiy sahifada avatar uchun)
-    localStorage.setItem("tg_name", user.first_name || "")
-    localStorage.setItem("tg_avatar", user.photo_url || "")
+    // ---> BU MA’LUMOTNI LOCALSTORAGEGA EMAS
+    // ---> SERVER TOMONIDA KVDA SAQLAYSAN (tushuntirish pastda)
 
-    // workerga yuboramiz
-    await fetch("https:/prankasapi.windowsnoutbook.workers.dev/auth",{
+    await fetch(`${WORKER_URL}/auth`,{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
       body: JSON.stringify(user)
@@ -109,22 +134,26 @@
   // =========================
   logoutBtn.onclick = async () => {
 
-    // 1) Supabase sessiya chiqish (Google uchun)
     await supabase.auth.signOut().catch(()=>{})
 
-    // 2) Telegram kirishni tozalash
-    localStorage.removeItem("tg_name")
-    localStorage.removeItem("tg_avatar")
-
     alert("Chiqildi 👌")
-    window.location.href = "/"
+    window.location.href = "/auth"
   }
 
-  // Agar foydalanuvchi uje login bo'lsa logout ko‘rinadi
+  // =========================
+  // HOLATNI TEKSHIRISH
+  // =========================
   (async () => {
+
     const { data: { session } } = await supabase.auth.getSession()
 
-    if (session || localStorage.getItem("tg_name")) {
+    if (session) {
+
+      // 🔥 login tugmalarni yashiramiz
+      googleBtn.classList.add("hidden")
+      tgBtn.classList.add("hidden")
+
+      // 🔥 logout tugmasini ko'rsatamiz
       logoutBtn.classList.remove("hidden")
     }
   })()
