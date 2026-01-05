@@ -85,9 +85,6 @@ OneSignalDeferred.push(async function(OneSignal){
 
   
   <script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', async () => {
-    const reg = await navigator.serviceWorker.register('/sw.js');
 
     // Yangi SW topilsa
     reg.addEventListener('updatefound', () => {
