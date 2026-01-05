@@ -14,7 +14,6 @@
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
       background: radial-gradient(circle at top left, #1e293b 0%, #0f172a 100%);
-      overflow: hidden;
     }
     .glass-card {
       background: rgba(255, 255, 255, 0.03);
@@ -22,11 +21,11 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
       box-shadow: 0 25px 50px -12px rgba(0,0,0,.5);
     }
-    .btn-google { background:#fff; color:#1e293b }
-    .btn-telegram { background:#229ED9; color:#fff }
-    .btn-telegram:hover{
-      opacity:.9;
-      transform:translateY(-1px);
+    .btn-google{
+      background:#fff;color:#1e293b
+    }
+    .btn-telegram{
+      background:#229ED9;color:white
     }
   </style>
 
@@ -47,11 +46,9 @@
   <div class="space-y-4">
 
     <!-- reCAPTCHA -->
-    <div class="flex justify-center mb-2">
-      <div class="g-recaptcha"
-           data-sitekey="6LeOGjssAAAAAHnJBytIycrKEvDJHjMIcnjF7XN2"
-           data-callback="recaptchaV2Success">
-      </div>
+    <div class="g-recaptcha flex justify-center"
+         data-sitekey="6LeOGjssAAAAAHnJBytIycrKEvDJHjMIcnjF7XN2"
+         data-callback="recaptchaV2Success">
     </div>
 
     <!-- GOOGLE LOGIN -->
@@ -63,26 +60,13 @@
 
     <!-- TELEGRAM LOGIN -->
     <button id="telegram-login"
-            class="btn-telegram w-full py-4 px-6 rounded-2xl font-bold flex items-center justify-center gap-3">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 240 240">
-        <path d="M120 0C53.73 0 0 53.73 0 120s53.73 120 120 120 120-53.73 120-120S186.27 0 120 0z" fill="#039be5"/>
-        <path d="M178.3 70.2l-23.3 109.7s-3.3 8.3-12.5 4.3l-55-42.7-20.1-9.7-34.5-11.6s-5.3-1.9-5.8-6.1c-.5-4.2 6-6.5 6-6.5l139.7-55.1s11.6-5 11.6 3.3z" fill="#fff"/>
-      </svg>
+            class="btn-telegram w-full py-3 rounded-2xl font-semibold">
       Telegram bilan kirish
-    </button>
-
-    <!-- LOGOUT -->
-    <button id="logout"
-            class="hidden w-full py-3 rounded-2xl bg-white/10">
-      Chiqish
     </button>
 
   </div>
 </div>
 
-<!-- ===================== -->
-<!--   GOOGLE (Supabase)   -->
-<!-- ===================== -->
 <script type="module">
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -91,55 +75,58 @@
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'
   )
 
-  const loginBtn = document.getElementById("google-login")
+  const googleBtn = document.getElementById("google-login")
+  const tgBtn = document.getElementById("telegram-login")
 
+  // reCAPTCHA success
   window.recaptchaV2Success = function(){
-    loginBtn.disabled = false
+    googleBtn.disabled = false
   }
 
-  loginBtn.onclick = async () => {
+  // GOOGLE LOGIN
+  googleBtn.onclick = async () => {
     await supabase.auth.signInWithOAuth({
       provider:'google',
       options:{ redirectTo:'https://prank-as.site' }
     })
   }
-</script>
 
-<!-- ===================== -->
-<!--   TELEGRAM LOGIN      -->
-<!-- ===================== -->
+  // TELEGRAM CALLBACK FUNCTION
+  window.onTelegramAuth = async function(user){
 
-<script>
-  // Callback
-  function onTelegramAuth(user){
+    // avatar & name localStorage
+    localStorage.setItem("tg_photo", user.photo_url || "");
+    localStorage.setItem("tg_name", user.first_name || "");
 
-    fetch("https://SENING-WORKERING.workers.dev/auth", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    // Worker'ga yuboramiz
+    await fetch("https://prankasapi.windowsnoutbook.workers.dev/auth",{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
       body: JSON.stringify(user)
     });
 
     alert("Salom, " + (user.first_name || "foydalanuvchi") + "!");
+
+    // asosiy sahifaga qaytaramiz
+    window.location.href = "/";
   }
 
-  document.getElementById("telegram-login").onclick = function(){
+  // TELEGRAM BUTTON CLICK
+  tgBtn.onclick = () => {
+    const s = document.createElement("script");
+    s.src = "https://telegram.org/js/telegram-widget.js?22";
 
-    // avval eski widget bo‘lsa — tozalaymiz
-    const box = document.getElementById("telegram-login-container");
-    box.innerHTML = "";
+    s.setAttribute("data-telegram-login","prank_as_bot");
+    s.setAttribute("data-size","large");
+    s.setAttribute("data-userpic","true");
+    s.setAttribute("data-request-access","write");
 
-    const script = document.createElement("script");
-    script.src = "https://telegram.org/js/telegram-widget.js?22";
+    // MUHIM
+    s.setAttribute("data-onauth","onTelegramAuth(user)");
 
-    script.setAttribute("data-telegram-login", "prank_as_bot");
-    script.setAttribute("data-size", "large");
-    script.setAttribute("data-userpic", "true");
-    script.setAttribute("data-request-access", "write");
-    script.setAttribute("data-onauth", "onTelegramAuth(user)");
+    document.body.appendChild(s);
+  }
 
-    // >>> MUHIM <<< — ENDI BODY EMAS, KONTEYNERGA QO‘YAMIZ
-    box.appendChild(script);
-  };
 </script>
 
 </body>
