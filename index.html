@@ -684,6 +684,25 @@ function playErrorSound() {
 fetch("https://prankasapi.windowsnoutbook.workers.dev/visit");
 </script>
 
+<script>
+  // localStorage’dan Telegram ma'lumotlarini olamiz
+  const tgAvatar = localStorage.getItem("tg_avatar");
+
+  const icon = document.getElementById("userIcon");
+
+  if (tgAvatar && icon) {
+
+    icon.innerHTML = `
+      <img src="${tgAvatar}"
+           style="
+             width:100%;
+             height:100%;
+             border-radius:50%;
+             object-fit:cover;
+           ">
+    `;
+  }
+</script>
 
  
 
