@@ -22,32 +22,17 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
       box-shadow: 0 25px 50px -12px rgba(0,0,0,.5);
     }
-    .btn-google{
-      background:#fff;color:#1e293b
+    .btn-google { background:#fff; color:#1e293b }
+    .btn-telegram { background:#229ED9; color:#fff }
+    .btn-telegram:hover{
+      opacity:.9;
+      transform:translateY(-1px);
     }
-.btn-telegram{
-  background:#229ED9;
-  color:white;
-}
-.btn-telegram:hover{
-  opacity:.9;
-  transform:translateY(-1px);
-}
-
   </style>
-
-  <!-- Telegram Login Widget -->
-  <script async src="https://telegram.org/js/telegram-widget.js?22"
-          data-telegram-login="prank_as_bot"
-          data-size="large"
-          data-userpic="true"
-          data-radius="16"
-          data-request-access="write"
-          data-auth-url="https://prank-as.site/tg-auth.html">
-  </script>
 
   <!-- reCAPTCHA -->
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
 </head>
 
 <body class="min-h-screen flex items-center justify-center text-white">
@@ -59,16 +44,11 @@
     Quyidagi usullardan biri orqali tizimga kiring
   </p>
 
-  <!-- AVATAR CONTAINER -->
-  <div id="avatar-container" class="hidden absolute top-6 right-6">
-    <img id="avatar" class="w-10 h-10 rounded-full"/>
-  </div>
-
   <div class="space-y-4">
 
     <!-- reCAPTCHA -->
-    <div id="recaptcha-container" class="flex justify-center mb-2">
-      <div id="v2-box" class="g-recaptcha"
+    <div class="flex justify-center mb-2">
+      <div class="g-recaptcha"
            data-sitekey="6LeOGjssAAAAAHnJBytIycrKEvDJHjMIcnjF7XN2"
            data-callback="recaptchaV2Success">
       </div>
@@ -80,22 +60,16 @@
             class="btn-google w-full py-3 rounded-2xl font-semibold">
       Google bilan kirish
     </button>
-<!-- TELEGRAM LOGIN -->
-<button id="telegram-login"
-  class="btn-telegram w-full py-4 px-6 rounded-2xl font-bold transition-all flex items-center justify-center gap-3">
 
-  <!-- Telegram ikonka -->
-  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 240 240">
-    <path d="M120 0C53.73 0 0 53.73 0 120s53.73 120 120 120 120-53.73 120-120S186.27 0 120 0z" fill="#039be5"/>
-    <path d="M178.3 70.2l-23.3 109.7s-3.3 8.3-12.5 4.3l-55-42.7-20.1-9.7-34.5-11.6s-5.3-1.9-5.8-6.1c-.5-4.2 6-6.5 6-6.5l139.7-55.1s11.6-5 11.6 3.3z" fill="#fff"/>
-  </svg>
-
-  Telegram bilan kirish
-</button>
-
-
-    <!-- TELEGRAM LOGIN BUTTON PLACE -->
-    <div id="telegram-login-container" class="flex justify-center pt-2"></div>
+    <!-- TELEGRAM LOGIN -->
+    <button id="telegram-login"
+            class="btn-telegram w-full py-4 px-6 rounded-2xl font-bold flex items-center justify-center gap-3">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 240 240">
+        <path d="M120 0C53.73 0 0 53.73 0 120s53.73 120 120 120 120-53.73 120-120S186.27 0 120 0z" fill="#039be5"/>
+        <path d="M178.3 70.2l-23.3 109.7s-3.3 8.3-12.5 4.3l-55-42.7-20.1-9.7-34.5-11.6s-5.3-1.9-5.8-6.1c-.5-4.2 6-6.5 6-6.5l139.7-55.1s11.6-5 11.6 3.3z" fill="#fff"/>
+      </svg>
+      Telegram bilan kirish
+    </button>
 
     <!-- LOGOUT -->
     <button id="logout"
@@ -106,16 +80,18 @@
   </div>
 </div>
 
+<!-- ===================== -->
+<!--   GOOGLE (Supabase)   -->
+<!-- ===================== -->
 <script type="module">
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
   const supabase = createClient(
-    'https://gefaqrfjzwemwuxuoadp.supabase.co/',
+    'https://gefaqrfjzwemwuxuoadp.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'
   )
 
   const loginBtn = document.getElementById("google-login")
-  const logoutBtn = document.getElementById("logout")
 
   window.recaptchaV2Success = function(){
     loginBtn.disabled = false
@@ -127,56 +103,20 @@
       options:{ redirectTo:'https://prank-as.site' }
     })
   }
-
-  logoutBtn.onclick = async () => {
-    await supabase.auth.signOut()
-    location.reload()
-  }
-
-  // ---------------------------
-  //  TELEGRAM LOGIN – TUZATILGAN
-  // ---------------------------
-
-  // 1) callback funksiyasi (global bo‘lishi shart)
-  window.onTelegramAuth = async function(user){
-
-    // Worker'ga yuboramiz ( /auth endpoint )
-    await fetch("https://SENING-WORKERING.workers.dev/auth", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(user)
-    })
-
-    alert("Salom, " + user.first_name)
-
-    // xohlasang redirect ham qilasan:
-    // window.location.href = "/"
-  }
-
-  // 2) tugma bosilganda widgetni yuklaymiz
-  document.getElementById("telegram-login").onclick = () => {
-
-    const script = document.createElement("script");
-    script.src = "https://telegram.org/js/telegram-widget.js?22";
-
-    script.setAttribute("data-telegram-login", "prank_as_bot");   // username
-    script.setAttribute("data-size", "large");
-    script.setAttribute("data-userpic", "true");
-    script.setAttribute("data-request-access", "write");
-
-    // !!! MUHIM: to‘g‘ri handler
-    script.setAttribute("data-onauth", "onTelegramAuth(user)");
-
-    document.body.appendChild(script);
-  };
 </script>
-  <script>
-  // 1) Telegramdan qaytadigan callback
+
+<!-- ===================== -->
+<!--   TELEGRAM LOGIN      -->
+<!-- ===================== -->
+
+<script>
+  // 1) Callback – Telegram auth tugagach shu chaqiriladi
   function onTelegramAuth(user){
 
     console.log("TG user:", user);
 
-    fetch("https://prankasapi.windowsnoutbook.workers.dev/visit", {
+    // Cloudflare Worker'ga yuboramiz
+    fetch("https://prankasapi.windowsnoutbook.workers.dev/auth", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(user)
@@ -188,22 +128,18 @@
   // 2) Tugma bosilganda widget ochiladi
   document.getElementById("telegram-login").onclick = function(){
 
-    const s = document.createElement("script");
-    s.src = "https://telegram.org/js/telegram-widget.js?22";
+    const script = document.createElement("script");
+    script.src = "https://telegram.org/js/telegram-widget.js?22";
 
-    s.setAttribute("data-telegram-login", "prank_as_bot"); // bot username
-    s.setAttribute("data-size", "large");
-    s.setAttribute("data-userpic", "true");
-    s.setAttribute("data-request-access", "write");
-    s.setAttribute("data-onauth", "onTelegramAuth(user)");
+    script.setAttribute("data-telegram-login", "prank_as_bot");
+    script.setAttribute("data-size", "large");
+    script.setAttribute("data-userpic", "true");
+    script.setAttribute("data-request-access", "write");
+    script.setAttribute("data-onauth", "onTelegramAuth(user)");
 
-    document.body.appendChild(s);
+    document.body.appendChild(script);
   };
 </script>
-
-  
-
-
 
 </body>
 </html>
