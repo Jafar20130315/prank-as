@@ -2,58 +2,60 @@
 <html lang="uz">
 <head>
   <meta charset="UTF-8">
-  <title>Prank-as — Login</title>
-
+  <title>Prank-as — Kirish</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.png"/>
 
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- reCAPTCHA -->
-  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-
 </head>
 
 <body class="min-h-screen flex items-center justify-center text-white"
-      style="font-family: sans-serif; background:#0f172a">
+      style="background:linear-gradient(135deg,#0f172a,#020617)">
 
-<div class="rounded-3xl p-10 w-full max-w-md text-center"
-     style="background: rgba(255,255,255,.05);backdrop-filter:blur(10px)">
+<div class="rounded-3xl p-8 w-full max-w-md text-center"
+     style="background:rgba(255,255,255,.06);backdrop-filter:blur(10px)">
 
   <h1 class="text-4xl font-bold mb-2">Prank-as</h1>
 
-  <p class="text-slate-400 mb-6">
-    Quyidagi usullardan biri orqali tizimga kiring
+  <p class="text-slate-300 mb-6">
+    Tizimga kirish va akkauntingni boshqarish oynasi
   </p>
 
-  <!-- reCAPTCHA BOX -->
-  <div class="flex justify-center mb-5">
-    <div class="g-recaptcha"
-         data-sitekey="6LctEEEsAAAAAIYEMkFvKyCVj6ftjhm3iVPkwQyY"
-         data-callback="captchaOk">
-    </div>
+  <!-- CAPTCHA BOX -->
+  <div id="captchaBox" class="mb-5">
+    <p class="mb-2">Robot emasligingizni tasdiqlang</p>
+    <button id="captchaBtn"
+            class="w-full py-3 rounded-2xl font-semibold bg-yellow-400 text-black">
+   Davom etish
+    </button>
   </div>
 
-  <div class="space-y-4">
+  <!-- LOGIN BUTTONS -->
+  <div id="loginBox" class="space-y-4">
 
-    <!-- GOOGLE LOGIN -->
     <button id="google-login"
-            disabled
-            class="w-full py-3 rounded-2xl font-semibold bg-white/40 text-black cursor-not-allowed">
+            class="w-full py-3 rounded-2xl font-semibold bg-white text-black">
       Google bilan kirish
     </button>
 
-    <!-- TELEGRAM LOGIN -->
     <button id="telegram-login"
-            disabled
-            class="w-full py-3 rounded-2xl font-semibold bg-blue-400 cursor-not-allowed">
+            class="w-full py-3 rounded-2xl font-semibold"
+            style="background:#229ED9">
       Telegram bilan kirish
     </button>
 
-    <!-- LOGOUT -->
+  </div>
+
+  <!-- LOGOUT / DELETE -->
+  <div id="accountBox" class="hidden space-y-3 mt-6">
+
     <button id="logout"
-            class="hidden w-full py-3 rounded-2xl font-semibold bg-red-500">
-      Chiqish
+            class="w-full py-3 rounded-2xl font-semibold bg-red-500">
+      🚪 Chiqish
+    </button>
+
+    <button id="deleteAccount"
+            class="w-full py-3 rounded-2xl font-semibold bg-black border">
+      🗑 Hisobni unutish (o'chirish)
     </button>
 
   </div>
@@ -63,27 +65,34 @@
 <script type="module">
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-  const WORKER_URL = "https://prankasapi.windowsnoutbook.workers.dev";
-
   const supabase = createClient(
-    'https://gefaqrfjzwemwuxuoadp.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'
+    "https://gefaqrfjzwemwuxuoadp.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg"
   )
+
+  const captchaBox = document.getElementById("captchaBox")
+  const captchaBtn = document.getElementById("captchaBtn")
+
+  const loginBox = document.getElementById("loginBox")
+  const accountBox = document.getElementById("accountBox")
 
   const googleBtn = document.getElementById("google-login")
   const tgBtn = document.getElementById("telegram-login")
   const logoutBtn = document.getElementById("logout")
+  const deleteBtn = document.getElementById("deleteAccount")
 
-  // ============= CAPTCHA CALLBACK ===================
-  window.captchaOk = function(){
-    googleBtn.disabled = false
-    tgBtn.disabled = false
+  // ====== CAPTCHA ======
+  captchaBtn.onclick = () => {
+    localStorage.setItem("captcha_ok", "yes")
+    captchaBox.classList.add("hidden")
+    loginBox.classList.remove("opacity-50")
+  }
 
-    googleBtn.classList.remove("cursor-not-allowed","bg-white/40")
-    googleBtn.classList.add("bg-white")
-
-    tgBtn.classList.remove("cursor-not-allowed","bg-blue-400")
-    tgBtn.classList.add("bg-blue-500")
+  // agar allaqachon o'tgan bo'lsa captcha ko‘rsatilmaydi
+  if (localStorage.getItem("captcha_ok") === "yes") {
+    captchaBox.classList.add("hidden")
+  } else {
+    loginBox.classList.add("opacity-50")
   }
 
   // =========================
@@ -91,38 +100,32 @@
   // =========================
   googleBtn.onclick = async () => {
     await supabase.auth.signInWithOAuth({
-      provider:'google',
-      options:{ redirectTo:'https://prank-as.site' }
+      provider: "google",
+      options: { redirectTo: "https://prank-as.site" }
     })
   }
 
   // =========================
-  // TELEGRAM CALLBACK
+  // TELEGRAM LOGIN
   // =========================
   window.onTelegramAuth = async function(user){
+    localStorage.setItem("tg_user", JSON.stringify(user))
 
-    // ---> BU MA’LUMOTNI LOCALSTORAGEGA EMAS
-    // ---> SERVER TOMONIDA KVDA SAQLAYSAN (tushuntirish pastda)
-
-    await fetch(`${WORKER_URL}/auth`,{
+    await fetch("https://prankasapi.windowsnoutbook.workers.dev/auth",{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
       body: JSON.stringify(user)
     })
 
-    alert("Salom, " + (user.first_name || "foydalanuvchi") + "!")
-
-    window.location.href = "/"
+    location.href="/"
   }
 
-  // TELEGRAM LOGIN BUTTON
   tgBtn.onclick = () => {
     const s = document.createElement("script")
     s.src = "https://telegram.org/js/telegram-widget.js?22"
 
     s.setAttribute("data-telegram-login","prank_as_bot")
     s.setAttribute("data-size","large")
-    s.setAttribute("data-userpic","true")
     s.setAttribute("data-request-access","write")
     s.setAttribute("data-onauth","onTelegramAuth(user)")
 
@@ -130,34 +133,59 @@
   }
 
   // =========================
-  // LOGOUT — UNIVERSAL
+  // LOGOUT (sessiya yopiladi)
   // =========================
   logoutBtn.onclick = async () => {
-
     await supabase.auth.signOut().catch(()=>{})
-
+    localStorage.removeItem("tg_user")
     alert("Chiqildi 👌")
-    window.location.href = "/auth"
+    location.reload()
   }
 
   // =========================
-  // HOLATNI TEKSHIRISH
+  // ACCOUNT DELETE (to'liq)
+  // =========================
+  deleteBtn.onclick = async () => {
+
+    const tg = localStorage.getItem("tg_user")
+    let id = null
+
+    if (tg) id = JSON.parse(tg).id
+
+    if (!id) {
+      alert("Telegram orqali ro'yxatdan o'tilgan bo'lsa o'chiriladi.")
+      return
+    }
+
+    await fetch("https://gefaqrfjzwemwuxuoadp.supabase.co/rest/v1/auth_users?id=eq."+id,{
+      method:"DELETE",
+      headers:{
+        "apikey":"YOUR_SERVICE_KEY",
+        "Authorization":"Bearer YOUR_SERVICE_KEY"
+      }
+    })
+
+    localStorage.clear()
+
+    alert("Hisob o'chirildi 🗑")
+    location.href="/"
+  }
+
+  // =========================
+  // UI HOLATINI TEKSHIRISH
   // =========================
   (async () => {
+    const { data:{ session }} = await supabase.auth.getSession()
 
-    const { data: { session } } = await supabase.auth.getSession()
-
-    if (session) {
-
-      // 🔥 login tugmalarni yashiramiz
-      googleBtn.classList.add("hidden")
-      tgBtn.classList.add("hidden")
-
-      // 🔥 logout tugmasini ko'rsatamiz
-      logoutBtn.classList.remove("hidden")
+    if (session || localStorage.getItem("tg_user")) {
+      // login qilingan holat
+      loginBox.classList.add("hidden")
+      captchaBox.classList.add("hidden")
+      accountBox.classList.remove("hidden")
     }
   })()
 </script>
 
 </body>
 </html>
+
