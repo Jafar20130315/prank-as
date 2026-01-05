@@ -170,6 +170,37 @@
     document.body.appendChild(script);
   };
 </script>
+  <script>
+  // 1) Telegramdan qaytadigan callback
+  function onTelegramAuth(user){
+
+    console.log("TG user:", user);
+
+    fetch("https://prankasapi.windowsnoutbook.workers.dev/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(user)
+    });
+
+    alert("Salom, " + (user.first_name || "foydalanuvchi") + "!");
+  }
+
+  // 2) Tugma bosilganda widget ochiladi
+  document.getElementById("telegram-login").onclick = function(){
+
+    const s = document.createElement("script");
+    s.src = "https://telegram.org/js/telegram-widget.js?22";
+
+    s.setAttribute("data-telegram-login", "prank_as_bot"); // bot username
+    s.setAttribute("data-size", "large");
+    s.setAttribute("data-userpic", "true");
+    s.setAttribute("data-request-access", "write");
+    s.setAttribute("data-onauth", "onTelegramAuth(user)");
+
+    document.body.appendChild(s);
+  };
+</script>
+
 
 
 </body>
