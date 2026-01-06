@@ -1,163 +1,702 @@
 <!DOCTYPE html>
-<html lang="uz">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Prank-as — Kirish</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google reCAPTCHA API -->
-  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-  <style>
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-    .animate-fade { animation: fadeIn 0.5s ease-out forwards; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Prank-as</title>
+<meta name="description" content="Prank-as — ko‘ngilochar va ta’limiy onlayn platforma. Internetdagi prank va tajriba elementlari qanday ishlashini tushuntirish uchun yaratilgan loyiha.">
+<link rel="icon" type="image/x-icon" href="favicon.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet" />
+<link rel="manifest" href="/manifest.json">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1867701562878781"
+      crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="style.css?v=2">
+<script src="app.js?v=3"></script>
+  
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Prank-as",
+  "url": "https://prank-as.site",
+  "logo": "https://prank-as.site/icons/icon-512.png",
+  "description": "Prank-as — tajriba va ko‘ngilochar maqsadlarda yaratilgan onlayn platforma.",
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "email": "admin@prank-as.site",
+    "contactType": "customer support"
+  }
+}
+</script>
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "3b7b6b4f-c457-42e4-ad68-65d990d783a6",
+      safari_web_id: "web.onesignal.auto.2cd5950f-b486-4c84-8005-0f30059d0b0c",
+      notifyButton: {
+        enable: false,
+      },
+    });
+  });
+</script>
+   
+  <script>
+OneSignalDeferred.push(async function(OneSignal){
+
+  const btn = document.getElementById("notifyBtn");
+
+  // 1️⃣ ruxsat holatini tekshiruvchi funksiya
+  async function checkStatus(){
+
+    const permission = Notification.permission;
+
+    // ❌ bloklangan yoki allaqachon ruxsat berilgan bo‘lsa → tugma ko‘rsatmaymiz
+    if(permission === "granted" || permission === "denied"){
+      btn.style.display = "none";
+      return;
+    }
+
+    // 2️⃣ ruxsat hali berilmagan → 3 soniyadan keyin ko‘rsatamiz
+    setTimeout(()=>{
+      btn.style.display = "inline-block";
+    },3000);
+  }
+
+  // sahifa yuklanganda tekshiradi
+  checkStatus();
+
+  // 3️⃣ tugma bosilganda
+  btn.onclick = async ()=>{
+
+    await OneSignal.User.PushSubscription.optIn();
+
+    // agar ruxsat berilsa — tugmani yo‘q qilamiz
+    if(Notification.permission === "granted"){
+      btn.style.display = "none";
+      alert("✔️ Bildirishnomalar yoqildi!");
+    }
+  }
+
+});
+</script>
+
+  
+  <script>
+
+    // Yangi SW topilsa
+    reg.addEventListener('updatefound', () => {
+      const newWorker = reg.installing;
+      newWorker.addEventListener('statechange', () => {
+        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+        }
+      });
+    });
+  });
+}
+</script>
+
+
+
+
+
+<style>
+/* ===== Global ===== */
+@keyframes gradientBG { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+*{margin:0;padding:0;box-sizing:border-box}
+body {
+  font-family:'Poppins',sans-serif;line-height:1.6;color:#fff;
+  background:linear-gradient(270deg,#1f1f1f,#111,#222,#333);
+  background-size:800% 800%;animation:gradientBG 20s ease infinite;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;
+  overflow-x: hidden; /* Gorizontal skrollni oldini olish uchun */
+}
+
+/* ===== 2026 Doodle Style (YANGI QO'SHILDI) ===== */
+.doodle-year {
+  position: absolute;
+  top: 120px; /* H1 sarlavha orqasida */
+  left: 50%;
+  transform: translateX(-50%) rotate(-8deg);
+  font-size: clamp(6rem, 20vw, 12rem); /* Katta o'lcham, moslashuvchan */
+  font-weight: 900;
+  /* Google Doodle ranglari */
+  background: linear-gradient(90deg, #4285F4 20%, #EA4335 40%, #FBBC05 60%, #34A853 80%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  opacity: 0.12; /* Juda xira, xalaqit bermaydi */
+  z-index: 1; /* Kontentdan orqada */
+  pointer-events: none; /* Bosib bo'lmaydi, o'tkazib yuboradi */
+  user-select: none;
+  white-space: nowrap;
+  filter: blur(1px); /* Yumshoqlik uchun */
+  animation: doodleFloat 6s ease-in-out infinite;
+}
+
+@keyframes doodleFloat {
+  0%, 100% { transform: translateX(-50%) rotate(-8deg) scale(1); }
+  50% { transform: translateX(-50%) rotate(-4deg) scale(1.05); }
+}
+
+/* ===== Text Styling ===== */
+h1 { 
+    text-align:center;
+    margin-bottom:40px; 
+    text-shadow:0 2px 6px rgba(0,0,0,0.7); 
+    position: relative; 
+    z-index: 7001; /* 2026 dan yuqorida */
+}
+
+.button-container {
+  display:grid;gap:15px;width:100%;max-width:800px;margin-bottom:100px; position: relative; z-index: 7001;
+}
+@media(min-width:768px){.button-container{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1200px){.button-container{grid-template-columns:repeat(3,1fr)}}
+
+/* ===== Buttons ===== */
+.btn{
+  display:block;padding:16px 20px;background:rgba(255,255,255,0.1);
+  border:2px solid rgba(255,255,255,0.5);border-radius:8px;color:#fff;
+  text-decoration:none;font-weight:600;box-shadow:0 4px 6px rgba(0,0,0,0.3);
+  transition:all 0.3s;opacity:0;transform:translateY(20px);animation:moveBtn 0.5s ease forwards;
+  position: relative;
+}
+.btn:hover{
+  transform: translateY(-4px) scale(1.05);
+  box-shadow:0 8px 20px rgba(0,0,0,0.4);
+  background:rgba(255,255,255,0.95);
+  color:#111;
+}
+@keyframes moveBtn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.btn.new { background: linear-gradient(45deg, #FFD700, #FFC107); color: #111; z-index: 20; animation: pulse 1.5s infinite alternate, moveBtn 0.5s ease forwards; }
+@keyframes pulse { 0% { transform: translateY(0) scale(1); } 50% { transform: translateY(-5px) scale(1.05); } 100% { transform: translateY(0) scale(1); } }
+
+/* ===== Top menu ===== */
+.top-left-menu-toggle{
+  position:fixed;top:15px;left:15px;background:rgba(255,255,255,0.15);
+  border:none;border-radius:12px;padding:10px 12px;cursor:pointer;
+  z-index:99999; /* eng yuqori */
+  box-shadow:0 4px 12px rgba(0,0,0,0.4);backdrop-filter:blur(6px);transition:0.3s;width:48px;height:48px;
+  display:flex;align-items:center;justify-content:center;
+}
+.top-left-menu-toggle:hover{background:rgba(255,255,255,0.35);transform:scale(1.1)}
+.top-left-menu-toggle svg{fill:#fff;width:26px;height:26px}
+.dropdown-menu-small{
+  position:fixed;top:70px;left:15px;width:220px;background:rgba(20,20,20,0.95);
+  backdrop-filter:blur(12px);border-radius:12px;box-shadow:0 8px 25px rgba(0,0,0,0.7);
+  padding:15px 10px;display:flex;flex-direction:column;gap:12px;
+  opacity:0;pointer-events:none;transform:translateY(-10px);transition:all 0.35s ease;
+  z-index:99998;
+}
+.dropdown-menu-small.show{opacity:1;pointer-events:auto;transform:translateY(0)}
+.dropdown-menu-small a{color:#fff;font-weight:600;text-decoration:none;padding:8px 12px;border-radius:8px;transition:background 0.3s}
+.dropdown-menu-small a:hover{background:rgba(255,255,255,0.12)}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);opacity:0;pointer-events:none;transition:opacity 0.3s ease;z-index:99997;backdrop-filter:blur(3px)}
+
+/* ===== Tags ===== */
+.btn .tag { position: absolute; top: -10px; right: -10px; background: #FF4500; color: #fff; font-size: 13px; font-weight: 500; padding: 2px 10px; border-radius: 6px; animation: smoothMove 1.5s ease-in-out infinite; }
+@keyframes smoothMove { 0% { transform: translateY(0); } 50% { transform: translateY(-4px); } 100% { transform: translateY(0); } }
+
+/* ===== Top message ===== */
+.top-message {
+  position: fixed;top: 10px;left: 50%;transform: translateX(-50%);
+  background: #222;color: #fff;padding: 10px 20px;border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);z-index: 99999;opacity: 0;transition: opacity 0.4s ease;font-size: 14px;
+}
+.top-message.show { opacity: 1; }
+
+/* ===== Top Bar & Clock Layout Fix ===== */
+ .top-bar {
+  position: fixed;
+  top: 10px;
+  right: 15px;
+  z-index: 9999; /* Z-indexni oshirdik */
+  display: flex;
+  justify-content: flex-end;
+}
+
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* Icon va soat orasidagi masofa */
+}
+
+/* Soat stili o'zgartirildi: fixed olib tashlandi */
+.desktop-clock {
+  font-size: 16px;
+  background: rgba(0,0,0,0.4);
+  padding: 6px 12px;
+  border-radius: 8px;
+  backdrop-filter: blur(6px);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  /* position: fixed; <-- BU OLIB TASHLANDI */
+  display: none;
+}
+@media (min-width: 768px) { .desktop-clock { display: block; } }
+
+
+/* ===== Minimal qor ===== */
+.snow { pointer-events: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: 5000; }
+.snowflake { position: absolute; top: -10px; color: #fff; opacity: 0.7; font-size: 8px; animation: fall linear infinite; }
+@keyframes fall { to { transform: translateY(105vh); } }
+
+  .subtitle {
+  font-size: 16px;      /* kichikroq matn */
+  color: #666;          /* yumshoq rang */
+  max-width: 700px;
+  margin: 12px auto 30px;
+  line-height: 1.6;
+  text-align: center;
+  position: relative;
+  z-index: 2; /* Matn ko'rinishi uchun */
+}
+
+
+.user-icon {
+  font-size: 26px;
+  text-decoration: none;
+  background: #111;
+  color: #fff;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  box-shadow: 0 4px 15px rgba(0,0,0,.3);
+  transition: 0.3s;
+}
+
+.user-icon:hover {
+  transform: scale(1.1);
+  background: #2563eb;
+}
+
+ 
+  .notify-btn{
+  padding: 12px 18px;
+  border-radius: 12px;
+  border: none;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  background: linear-gradient(45deg,#ffbb00,#ff7b00);
+  color:#111;
+  box-shadow:0 5px 20px rgba(0,0,0,.4);
+  transition:.25s;
+}
+.notify-btn:hover{
+  transform:scale(1.05);
+}
+
+
+
+
+</style>
+  
 </head>
+<body>
+  
+ <button id="notifyBtn" class="notify-btn" style="display:none">
+  🔔 Yangiliklardan xabardor bo‘lish
+</button>
 
-<body class="min-h-screen flex items-center justify-center text-white p-4"
-      style="background: radial-gradient(circle at center, #1e293b 0%, #020617 100%)">
 
-<div class="rounded-3xl p-8 w-full max-w-md text-center shadow-2xl animate-fade"
-     style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1)">
+<audio id="clickSound" preload="auto">
+  <source src="/media/click.mp3" type="audio/mpeg">
+</audio>
 
-  <h1 class="text-4xl font-black mb-2 tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-500">
-    Prank-as
-  </h1>
-  <p class="text-slate-400 mb-8 text-sm font-medium">Xavfsiz avtorizatsiya tizimi</p>
+<audio id="errorSound" preload="auto">
+  <source src="/media/error.mp3" type="audio/mpeg">
+</audio>
 
-  <!-- CAPTCHA BOX -->
-  <div id="captchaBox" class="flex flex-col items-center mb-8">
-    <!-- ВАЖНО: Замените data-sitekey на ваш реальный ключ -->
-    <div class="g-recaptcha" 
-         data-sitekey="6LeOGjssAAAAAHnJBytIycrKEvDJHjMIcnjF7XN2" 
-         data-theme="dark" 
-         data-callback="onCaptchaSuccess"></div>
-    <p class="text-slate-500 text-[10px] mt-3 uppercase tracking-widest">Davom etish uchun tasdiqlang</p>
+  <header class="top-bar">
+  <div class="top-bar-right">
+    <div class="desktop-clock" id="desktopClock">Hozir</div>
+    <a href="/auth" class="user-icon" id="userIcon" title="Kirish / Ro'yxatdan o'tish">👤</a>
   </div>
+</header>
 
-  <!-- LOGIN BUTTONS -->
-  <div id="loginBox" class="space-y-4 opacity-20 pointer-events-none transition-all duration-700 scale-95">
-    <button id="google-login"
-            class="w-full py-4 rounded-2xl font-bold bg-white text-black hover:bg-slate-200 active:scale-95 transition-all flex items-center justify-center gap-3 shadow-lg">
-      <img src="https://www.google.com/favicon.ico" class="w-5 h-5" alt="G"> 
-      Google bilan kirish
-    </button>
 
-    <button id="telegram-login"
-            class="w-full py-4 rounded-2xl font-bold text-white hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-3 shadow-lg"
-            style="background: linear-gradient(135deg, #37aee2 0%, #1e96c8 100%)">
-      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
-      Telegram bilan kirish
-    </button>
-  </div>
+<div class="snow"></div>
 
-  <!-- ACCOUNT ACTIONS -->
-  <div id="accountBox" class="hidden space-y-4 mt-6 border-t border-white/10 pt-8 animate-fade">
-    <div class="flex items-center justify-center mb-4">
-        <div id="userPreview" class="w-16 h-16 rounded-full border-2 border-blue-500 p-1">
-            <div class="w-full h-full rounded-full bg-slate-800 flex items-center justify-center overflow-hidden">
-                <span class="text-2xl">👤</span>
-            </div>
-        </div>
-    </div>
-    
-    <button id="logout"
-            class="w-full py-3.5 rounded-2xl font-bold bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500 hover:text-white transition-all">
-      Chiqish
-    </button>
+<div class="doodle-year">2026</div>
 
-    <button id="deleteAccount"
-            class="w-full py-2 text-slate-500 text-xs font-medium hover:text-slate-300 transition-colors">
-      Hisobni butunlay o'chirish
-    </button>
-  </div>
+
+<div class="overlay"></div>
+
+<h1>Prank-as orqali do‘stlaringiz bilan hazillashing!</h1>
+  
+  <p class="subtitle">
+Prank-as — tajriba va ko‘ngilochar maqsadlarda
+yaratilgan onlayn platforma.
+</p>
+
+
+
+<div class="button-container">
+  <a class="btn" href="/soxta-ulanish-sistemasi">Soxta ulanish sistemasi</a>
+  <a class="btn" href="/soxta-uyin-bank-kartasi">Soxta o‘yin bank kartasi</a>
+  <a class="btn" href="/soxta-wifi-parol-aniqlovchi">Soxta Wi-Fi parol aniqlovchi</a>
+  <a class="btn" href="/soxta-joylashuv-aniqlovchi">Soxta joylashuv aniqlovchi</a>
+  <a class="btn" href="/soxta-random-yashash-joyi">Soxta random yashash joyi</a>
+  <a class="btn" href="/soxta-shaxs-aniqlovchi">Soxta shaxs aniqlovchi</a>
+  <a class="btn" href="/avtoraqam-rasm-generatori">Avtoraqam rasm generatori</a>
+  <a class="btn" href="/soxta-parol-aniqlovchi">Soxta parol aniqlovchi</a>
+  <a class="btn" href="/soxta-balans-aniqlovchi">Soxta balans aniqlovchi</a>
+  <a class="btn" href="/oyin-barabani">O‘yin barabani</a>
+  <a class="btn" href="/ovoz-olchovchi">Ovoz o‘lchovchi</a>
+  <a class="btn" href="/tekst-ovoz">Tekst → Ovo‍z</a>
+  <a class="btn" href="/soxta-wifi-parol-joylashuv-aniqlovchi">Soxta Wi-Fi parol aniqlovchi PRO</a>
+  <a class="btn" href="/rangligradient">Rangli sensor</a>
+  <a class="btn" href="/3d-qol-boshqaruvi">3D Shakl boshqaruvi</a>
+  <a class="btn" href="/ai-kamera">Aqlli kamera</a>
+  <a class="btn" href="/musiqa-zarba-kuzatuvchi">Musiqa pleyeri</a>
+  <a class="btn new" href="/kuzatuv-kamerasi">Kuzatuv kamerasi (telefon orqali)</a>
+  <a class="btn new" href="/avtomobil-yo'li">Avtomobil yo'li</a>
 </div>
 
-<script type="module">
+
+<p class="subtitle">
+Vaqti-vaqti bilan yangilanib turadigan faktlar:</p>
+
+  
+<section style="max-width:900px;margin:50px auto;background:rgba(0,0,0,0.4);padding:25px;border-radius:12px;backdrop-filter:blur(8px);box-shadow:0 8px 25px rgba(0,0,0,0.4);">
+
+  <h2 style="margin-bottom:20px;font-size:28px;font-weight:700;text-align:center;">
+    🕵️ Telefon va Internetdagi Yashirin Funksiyalar
+  </h2>
+
+  <p style="margin-bottom:15px;">
+    Ko‘pchilik bilmaydigan, ammo juda foydali bo‘lgan telefon va internet funksiyalari mavjud. 
+    Ular yordamida vaqtni tejash, maxfiylikni oshirish va qulaylik yaratish mumkin.
+  </p>
+
+  <h3 style="margin-top:25px;">1️⃣ YouTube videoni aniq vaqtdan ulashish</h3>
+  <p>
+    Video aynan qaysi sekunddan boshlab ochilishini xohlaysanmi? Pauza → “Share” → 
+    “Start at…” tugmasini bosish kifoya. Havolani yuborsang, video o‘sha joydan boshlanadi.
+  </p>
+
+  <h3 style="margin-top:25px;">2️⃣ Wi-Fi parolni QR-kod orqali ulashish</h3>
+  <p>
+    Parol aytib o‘tirish shart emas. Telefon sozlamalaridan Wi-Fi tarmog‘ini och → 
+    “QR kod orqali ulashish” funksiyasi bilan boshqalar kamerada skaner qilib ulanadi.
+  </p>
+
+  <h3 style="margin-top:25px;">3️⃣ Google’da kalkulyator va konvertor yashiringan</h3>
+  <p>
+    “5*7”, “100 usd to uzs” yoki “12 cm in inch” deb yozsang — alohida sayt ochmasdan 
+    natijani Google’ning o‘zida ko‘rsatadi.
+  </p>
+
+  <h3 style="margin-top:25px;">4️⃣ Telefon kamerasi skaner sifatida ishlaydi</h3>
+  <p>
+    Hujjatlarni skaner qilish uchun printer kerak emas. Telefon kamerasida “Scan document”
+    yoki “Skaner” rejimini yoqsang, hujjatni PDF qilib saqlash mumkin.
+  </p>
+
+  <h3 style="margin-top:25px;">5️⃣ Telegramda xabarni tahrirlash mumkin</h3>
+  <p>
+    Yuborilgan xabarni o‘chirmay turib tuzatish mumkin. Xabarga bosib tur —
+    “Edit” tugmasi orqali xatolarni to‘g‘rilash mumkin.
+  </p>
+
+  <h3 style="margin-top:25px;">6️⃣ Offline xaritalar — internet bo‘lmasa ham ishlaydi</h3>
+  <p>
+    Google Maps’da hududni yuklab qo‘ysang, internet bo‘lmasa ham yo‘l-yo‘riq ko‘rsatadi.
+    Ayniqsa sayohat yoki tog‘lik joylarda juda foydali.
+  </p>
+
+  <h3 style="margin-top:25px;">7️⃣ Reklamalarsiz sayt ko‘rinishi (Reader Mode)</h3>
+  <p>
+    Brauzerlarning ko‘pida “Reader Mode” mavjud. U matnni toza ko‘rinishda ochib beradi —
+    keraksiz banner va reklamalar ko‘rinmaydi.
+  </p>
+
+  <h3 style="margin-top:25px;">8️⃣ Telefonni bitta tugma bilan tez topish</h3>
+  <p>
+    Agar telefon uy ichida yo‘qolsa, smart-soatlar, kompyuter yoki “Find my device”
+    xizmatlari orqali ovoz chiqarib topish mumkin — hatto ovozsiz rejimda ham.
+  </p>
+
+  <p style="margin-top:30px;margin-bottom:10px;font-weight:600;">
+    🔚 Xulosa: Telefon va internet imkoniyatlari ko‘pchilik o‘ylagandan ham keng. 
+    Agar ularni bilib ishlatsang, vaqt, internet va asabni juda ko‘p tejaysan.
+  </p>
+
+</section>
+
+
+<button class="top-left-menu-toggle">
+  <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+</button>
+
+<div class="overlay"></div>
+
+<nav id="dropdown-menu" class="dropdown-menu-small">
+  <a href="/index">🏠 Bosh sahifa</a>
+  <a href="/disclaimer">Disclaimer</a>
+  <a href="#" id="installAppBtn">📱 Ilovani o‘rnatish</a>
+  <a href="#" id="resetChoice">♻️ Tanlovni tiklash</a>
+  <a href="/baholash">Fikr qoldirish</a>
+  <a href="https://help.prank-as.site">Yordam</a>
+  <a href="https://old.prank-as.site">Oldingi saytga qaytish</a>
+<a href="/about">About</a>
+  <a href="/contact">Contact</a>
+  <a href="/privacypolicy">Privacy policy</a>
+</nav>
+
+<div class="top-message" id="topMsg"></div>
+
+<script>
+// Fade message
+function showMessage(text,time=2500){
+  const msg=document.getElementById('topMsg');
+  msg.textContent=text;
+  msg.classList.add('show');
+  setTimeout(()=>msg.classList.remove('show'),time);
+}
+
+// Service Worker
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js');});
+}
+
+// Menu toggle (click + touchstart)
+const menuBtn=document.querySelector('.top-left-menu-toggle');
+const menu=document.getElementById('dropdown-menu');
+const overlay=document.querySelector('.overlay');
+
+function toggleMenu(e){
+  e.preventDefault();
+  menu.classList.toggle('show');
+  overlay.classList.toggle('show');
+}
+
+menuBtn.addEventListener('click', toggleMenu);
+menuBtn.addEventListener('touchstart', toggleMenu);
+overlay.addEventListener('click',()=>{menu.classList.remove('show');overlay.classList.remove('show');});
+
+// Reset choice
+document.getElementById('resetChoice').addEventListener('click',()=>{
+  localStorage.removeItem('continueChoice');
+  localStorage.removeItem('promo');
+  showMessage("Tanlov tiklandi! Endi yangilang 🔄");
+});
+
+// PWA install
+let installPrompt;
+window.addEventListener('beforeinstallprompt', e=>{e.preventDefault();installPrompt=e;});
+document.getElementById('installAppBtn').addEventListener('click', async()=>{
+  if(installPrompt){
+    installPrompt.prompt();
+    const {outcome}=await installPrompt.userChoice;
+    if(outcome==='accepted') showMessage("✅ Ilova o‘rnatilmoqda...");
+    else showMessage("❌ O‘rnatish bekor qilindi");
+    installPrompt=null;
+  } else showMessage("Bu brauzer qo‘llamaydi 😕");
+});
+
+// Tugmalar animatsiya delay
+document.querySelectorAll('.button-container a').forEach((btn,i)=>{
+  btn.style.animationDelay=`${i*0.15}s`;
+});
+
+// Kompyuter soati
+function updateClock() {
+  const now = new Date();
+  document.getElementById("desktopClock").textContent =
+    `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} | ${String(now.getDate()).padStart(2,'0')}:${String(now.getMonth()+1).padStart(2,'0')}:${now.getFullYear()}`;
+}
+setInterval(updateClock,1000);
+updateClock();
+
+
+setInterval(updateClock,1000);
+updateClock();
+// Yangi tugmalarni tepaga chiqarish
+const container = document.querySelector('.button-container');
+const newBtns = Array.from(container.querySelectorAll('.btn.new'));
+
+newBtns.forEach(btn => {
+  const tag = document.createElement('span');
+  tag.className = 'tag';
+  tag.textContent = 'YANGI';
+  btn.appendChild(tag);
+  container.prepend(btn);
+});
+
+// 🔁 Animatsiya delay'ni QAYTA hisoblash
+Array.from(container.children).forEach((btn, i) => {
+  btn.style.animationDelay = `${i * 0.15}s`;
+});
+
+
+// ❄ Minimal qor funksiyasi
+function createSnow() {
+  const container = document.querySelector('.snow');
+  for (let i = 0; i < 10; i++) {
+    let flake = document.createElement("div");
+    flake.className = "snowflake";
+    flake.textContent = "❄";
+    flake.style.left = Math.random() * 100 + "vw";
+    flake.style.fontSize = (6 + Math.random() * 6) + "px";
+    flake.style.animationDuration = (6 + Math.random() * 8) + "s";
+    container.appendChild(flake);
+    setTimeout(() => flake.remove(), 15000);
+  }
+}
+createSnow();
+setInterval(createSnow, 5000);
+  
+  // SUPABASE UCHUN! O'CHIB KETMASIN
+</script>
+  
+  <script type="module">
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+  // Те же данные, что и в auth.html
   const supabase = createClient(
-    "https://gefaqrfjzwemwuxuoadp.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg"
+    'https://GEFAQRFJZWEMWUXUOADP.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'
   )
 
-  const loginBox = document.getElementById("loginBox");
-  const accountBox = document.getElementById("accountBox");
-  const captchaBox = document.getElementById("captchaBox");
-  const userPreview = document.getElementById("userPreview");
+  async function checkUser() {
+    // 1. Проверяем текущую сессию
+    const { data: { session } } = await supabase.auth.getSession()
 
-  // RECAPTCHA SUCCESS
-  window.onCaptchaSuccess = function(token) {
-    if(token) {
-      loginBox.classList.remove("opacity-20", "pointer-events-none", "scale-95");
-      captchaBox.classList.add("hidden");
-    }
-  }
-
-  // GOOGLE LOGIN
-  document.getElementById("google-login").onclick = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: "https://prank-as.site" }
-    });
-  }
-
-  // TELEGRAM LOGIN
-  window.onTelegramAuth = async function(user) {
-    // Сохраняем данные пользователя
-    localStorage.setItem("tg_user", JSON.stringify(user));
-    
-    // ВАЖНО: Сохраняем фото, чтобы оно отображалось на главной странице вместо смайлика
-    if (user.photo_url) {
-        localStorage.setItem("tg_avatar", user.photo_url);
-    }
-
-    try {
-        await fetch("https://prankasapi.windowsnoutbook.workers.dev/auth", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(user)
-        });
-    } finally {
-        // Редирект на главную
-        window.location.href = "https://prank-as.site";
-    }
-  }
-
-  document.getElementById("telegram-login").onclick = () => {
-    const s = document.createElement("script");
-    s.src = "https://telegram.org/js/telegram-widget.js?22";
-    s.setAttribute("data-telegram-login", "prank_as_bot");
-    s.setAttribute("data-size", "large");
-    s.setAttribute("data-onauth", "onTelegramAuth(user)");
-    s.setAttribute("data-request-access", "write");
-    document.body.appendChild(s);
-  }
-
-  // LOGOUT
-  document.getElementById("logout").onclick = async () => {
-    await supabase.auth.signOut();
-    localStorage.removeItem("tg_user");
-    localStorage.removeItem("tg_avatar");
-    window.location.reload();
-  }
-
-  // INITIAL STATE
-  (async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    const tgUser = localStorage.getItem("tg_user");
-
-    if (session || tgUser) {
-      loginBox.classList.add("hidden");
-      captchaBox.classList.add("hidden");
-      accountBox.classList.remove("hidden");
-
-      // Показ аватарки в предпросмотре (если есть)
-      const avatarUrl = session?.user?.user_metadata?.picture || localStorage.getItem("tg_avatar");
-      if (avatarUrl) {
-        userPreview.innerHTML = `<img src="${avatarUrl}" class="w-full h-full object-cover rounded-full">`;
+    if (session?.user) {
+      console.log('Пользователь найден:', session.user)
+      const userIcon = document.querySelector('.user-icon')
+      
+      // 2. Если пользователь есть, меняем иконку на его фото
+      if (userIcon && session.user.user_metadata.picture) {
+        userIcon.innerHTML = `
+          <img src="${session.user.user_metadata.picture}" 
+               alt="User" 
+               style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+        `
+        // (Опционально) При клике на фото можно отправлять на страницу выхода или профиля
+        userIcon.href = "/auth" 
       }
     }
-  })();
+  }
+
+  // Запускаем проверку
+  checkUser()
+
+    // SUPABASE UCHUN! O'CHIB KETMASIN! 
+  </script>
+
+  <script type="module">
+        // --- SUPABASE CONFIG ---
+        const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function initTracking() {
+            const startTime = Date.now();
+            const openedAt = new Date().toISOString();
+            const prankName = location.pathname.split('/').pop() || 'index';
+            
+            // 1. Получаем данные пользователя
+            const { data: { user } } = await supabase.auth.getUser();
+            
+            // Обновляем аватарку если залогинен
+            if (user?.user_metadata?.picture) {
+                document.getElementById('userLink').innerHTML = `<img src="${user.user_metadata.picture}" style="width:100%;height:100%;object-fit:cover;">`;
+            }
+
+            // 2. Создаем запись СРАЗУ (чтобы админ видел онлайн)
+            let recordId = null;
+            const { data, error } = await supabase.from('user_activity').insert({
+                user_id: user?.id || null,
+                user_email: user?.email || null,
+                user_name: user?.user_metadata?.full_name || 'Guest',
+                prank_name: prankName,
+                opened_at: openedAt,
+                duration: 0
+            }).select();
+
+            if (data && data.length > 0) recordId = data[0].id;
+
+            // 3. Пинг системы: обновляем время каждые 10 секунд
+            const interval = setInterval(async () => {
+                if (!recordId) return;
+                const currentDuration = Math.floor((Date.now() - startTime) / 1000);
+                
+                await supabase.from('user_activity').update({ 
+                    duration: currentDuration 
+                }).eq('id', recordId);
+            }, 10000);
+
+            // 4. Финальное обновление при уходе (если сработает)
+            window.addEventListener('beforeunload', async () => {
+                const finalDuration = Math.floor((Date.now() - startTime) / 1000);
+                await supabase.from('user_activity').update({ duration: finalDuration }).eq('id', recordId);
+            });
+        }
+
+        initTracking();
+    </script>
+
+<script>
+// =======================
+// SOUNDEFFECT
+// =======================
+const clickSound = document.getElementById("clickSound");
+const errorSound = document.getElementById("errorSound");
+
+clickSound.volume = 0.25;
+errorSound.volume = 0.35;
+
+// ✅ Oddiy tugma / link bosilganda
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("button, a");
+  if (!btn) return;
+
+  clickSound.currentTime = 0;
+  clickSound.play().catch(()=>{});
+});
+
+// ❌ XATOLIK OVOZI — global funksiya
+function playErrorSound() {
+  errorSound.currentTime = 0;
+  errorSound.play().catch(()=>{});
+}
 </script>
+  
+  <script>
+fetch("https://prankasapi.windowsnoutbook.workers.dev/visit");
+</script>
+
+<script>
+  // localStorage’dan Telegram ma'lumotlarini olamiz
+  const tgAvatar = localStorage.getItem("tg_avatar");
+
+  const icon = document.getElementById("userIcon");
+
+  if (tgAvatar && icon) {
+
+    icon.innerHTML = `
+      <img src="${tgAvatar}"
+           style="
+             width:100%;
+             height:100%;
+             border-radius:50%;
+             object-fit:cover;
+           ">
+    `;
+  }
+</script>
+
+ 
+
 </body>
 </html>
