@@ -163,7 +163,8 @@
     if (msg.includes("invalid login credentials") || msg.includes("invalid grant")) return "Email yoki parol/kod noto'g'ri!";
     if (msg.includes("user already registered")) return "Bu email allaqachon ro'yxatdan o'tgan!";
     if (msg.includes("at least 6 characters")) return "Parol kamida 6 ta belgidan iborat bo'lishi kerak!";
-    if (msg.includes("rate limit")) return "Siz juda ko'p urinish qildingiz. Biroz kuting.";
+    if (msg.includes("rate limit")) return "Siz juda ko'p urinish qildingiz. Biroz kiting.";
+    if (msg.includes("expired")) return "Kodning amal qilish muddati tugagan. Yangisini so'rang.";
     return "Xatolik: " + err.message;
   };
 
@@ -214,11 +215,12 @@
     try {
         if (isWaitingForOTP) {
             const token = elements.otpInput.value.trim();
-            // Используем 'magiclink' для входа по коду и 'signup' для регистрации
+            // Пытаемся подтвердить код
+            // Для входа используется 'email' или 'magiclink', для регистрации 'signup'
             const { error } = await supabase.auth.verifyOtp({
                 email,
                 token,
-                type: isLoginMode ? 'magiclink' : 'signup'
+                type: isLoginMode ? 'email' : 'signup' 
             });
 
             if (error) throw error;
@@ -234,14 +236,16 @@
                 if (error) throw error;
                 window.location.reload();
             } else {
-                // ПРИНУДИТЕЛЬНО ПЕРЕЗАПУСКАЕМ OTP, чтобы каждый раз спрашивало код
+                // Принудительная отправка OTP
                 const { error } = await supabase.auth.signInWithOtp({ 
                     email,
-                    options: { shouldCreateUser: false } 
+                    options: { 
+                      shouldCreateUser: false // Не создаем нового юзера при входе
+                    } 
                 });
                 if (error) throw error;
                 isWaitingForOTP = true;
-                elements.successMsg.innerText = "Yangi tasdiqlash kodi yuborildi!";
+                elements.successMsg.innerText = "Tasdiqlash kodi emailga yuborildi!";
                 elements.successMsg.style.display = "block";
                 updateUI();
             }
@@ -251,7 +255,7 @@
             if (error) throw error;
             
             isWaitingForOTP = true;
-            elements.successMsg.innerText = "Kod yuborildi! Emailni tekshiring.";
+            elements.successMsg.innerText = "Ro'yxatdan o'tish kodi yuborildi!";
             elements.successMsg.style.display = "block";
             updateUI();
         }
@@ -278,24 +282,16 @@
     window.location.reload();
   };
 
-  // Логика удаления аккаунта
   elements.deleteAccountBtn.onclick = async () => {
     const confirmDelete = window.confirm("Hisobingizni o'chirishni xohlaysizmi? Bu amalni ortga qaytarib bo'lmaydi.");
     if (!confirmDelete) return;
 
     try {
-        // 1. Выходим из системы
         await supabase.auth.signOut();
-        // 2. Очищаем всё локальное хранилище
         localStorage.clear();
         sessionStorage.clear();
-        
-        // Показываем уведомление (так как реальное удаление из auth.users требует Admin SDK)
         document.getElementById("delete-notice").classList.remove("hidden");
-        
-        setTimeout(() => {
-            window.location.reload();
-        }, 3000);
+        setTimeout(() => { window.location.reload(); }, 3000);
     } catch (err) {
         console.error("Xato:", err);
     }
