@@ -16,7 +16,6 @@
     .status-msg { font-size: 11px; padding: 10px; border-radius: 8px; margin-top: 10px; display: none; }
     .btn-disabled { opacity: 0.5; pointer-events: none; }
     #otp-section { display: none; }
-    /* Скрываем стандартную кнопку TG, если хотим использовать свою */
     #tg-widget-container iframe { margin: 0 auto !important; }
   </style>
 </head>
@@ -90,8 +89,7 @@
           </button>
 
           <!-- Контейнер для виджета Telegram -->
-          <div id="tg-widget-container" class="w-full flex justify-center">
-            <!-- Сюда Telegram вставит свой iframe -->
+          <div id="tg-widget-container" class="w-full flex justify-center min-h-[40px]">
             <script async src="https://telegram.org/js/telegram-widget.js?22" 
                     data-telegram-login="prank_as_bot" 
                     data-size="large" 
@@ -124,21 +122,39 @@
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg"
   )
 
+  // API URL Worker'а
+  const API_BASE = "https://prankasapi.windowsnoutbook.workers.dev";
+
+  // Сбор статистики при загрузке (как требует ваш Worker)
+  async function trackVisit() {
+      try {
+          await fetch(`${API_BASE}/visit`);
+      } catch (e) {
+          console.log("Visit tracking failed", e);
+      }
+  }
+  trackVisit();
+
   window.onTelegramAuth = async function(user) {
+    console.log("Telegram user received:", user);
     localStorage.setItem("tg_user", JSON.stringify(user));
     if (user.photo_url) localStorage.setItem("tg_avatar", user.photo_url);
+    
     try {
-        await fetch("https://prankasapi.windowsnoutbook.workers.dev/auth", {
+        const response = await fetch(`${API_BASE}/auth`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(user)
         });
+        const result = await response.json();
+        console.log("Auth result:", result);
+    } catch (err) {
+        console.error("Auth server error:", err);
     } finally {
         window.location.reload();
     }
   };
 
-  // Остальная логика без изменений (Капча, Email, OTP)
   const loginBox = document.getElementById("loginBox"),
         accountBox = document.getElementById("accountBox"),
         authContent = document.getElementById("authContent"),
@@ -169,7 +185,7 @@
   };
 
   window.onCaptchaExpired = () => {
-    grecaptcha.reset();
+    if (typeof grecaptcha !== 'undefined') grecaptcha.reset();
     loginBox.classList.add("opacity-20", "pointer-events-none", "scale-95");
     captchaBox.classList.remove("hidden");
   };
@@ -246,7 +262,7 @@
     if (session || tgUser) {
       authContent.classList.add("hidden");
       accountBox.classList.remove("hidden");
-      document.getElementById("userEmailDisplay").innerText = session?.user?.email || tgUser?.username || "Foydalanuvchi";
+      document.getElementById("userEmailDisplay").innerText = session?.user?.email || tgUser?.username || tgUser?.first_name || "Foydalanuvchi";
       const avatarUrl = session?.user?.user_metadata?.avatar_url || localStorage.getItem("tg_avatar");
       if (avatarUrl) userPreview.innerHTML = `<img src="${avatarUrl}" class="w-full h-full object-cover rounded-full">`;
     }
