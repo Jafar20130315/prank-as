@@ -1,617 +1,333 @@
 <!DOCTYPE html>
-
 <html lang="uz">
-
 <head>
-
   <meta charset="UTF-8">
-
   <title>Prank-as — Avtorizatsiya</title>
-
   <link rel="icon" type="image/x-icon" href="favicon.png">
-
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
   <script src="https://cdn.tailwindcss.com"></script>
-
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-
   <style>
-
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-
     .animate-fade { animation: fadeIn 0.5s ease-out forwards; }
-
     .tab-active { color: white; border-bottom: 2px solid #3b82f6; }
-
     .tab-inactive { color: #64748b; }
-
     input::placeholder { color: #475569; }
-
     .status-msg { font-size: 11px; padding: 10px; border-radius: 8px; margin-top: 10px; display: none; }
-
     .btn-disabled { opacity: 0.5; pointer-events: none; }
-
+    #otp-section { display: none; }
   </style>
-
 </head>
 
-
-
 <body class="min-h-screen flex items-center justify-center text-white p-4"
-
       style="background: radial-gradient(circle at center, #1e293b 0%, #020617 100%)">
 
-
-
 <div class="rounded-3xl p-8 w-full max-w-md text-center shadow-2xl animate-fade"
-
      style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1)">
 
-
-
   <h1 class="text-4xl font-black mb-2 tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-500">
-
     Prank-as
-
   </h1>
-
   <p id="system-subtitle" class="text-slate-400 mb-8 text-sm font-medium">Xavfsiz avtorizatsiya tizimi</p>
 
-
-
   <div id="authContent">
-
     <div id="tabs" class="flex justify-center gap-8 mb-6 border-b border-white/5">
-
       <button id="tab-login" class="pb-2 text-sm font-bold transition-all tab-active">KIRISH</button>
-
       <button id="tab-register" class="pb-2 text-sm font-bold transition-all tab-inactive">RO'YXATDAN O'TISH</button>
-
     </div>
 
-
-
+    <!-- Основная форма -->
     <div id="emailForm" class="space-y-3 mb-6 transition-all">
-
-      <div class="relative">
-
-        <input type="email" id="email-input" placeholder="Email manzilingiz" 
-
-               class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition-colors">
-
+      <div id="credentials-inputs" class="space-y-3">
+        <div class="relative">
+          <input type="email" id="email-input" placeholder="Email manzilingiz" 
+                 class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition-colors">
+        </div>
+        <div class="relative">
+          <input type="password" id="password-input" placeholder="Parol" 
+                 class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition-colors">
+        </div>
       </div>
 
-      <div class="relative">
-
-        <input type="password" id="password-input" placeholder="Parol" 
-
-               class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition-colors">
-
+      <!-- Секция ввода кода (OTP) -->
+      <div id="otp-section" class="space-y-3 animate-fade">
+        <p class="text-xs text-blue-400 mb-2">Emailingizga yuborilgan 6 xonali kodni kiriting:</p>
+        <input type="text" id="otp-input" placeholder="000000" maxlength="6"
+               class="w-full bg-white/10 border border-blue-500/50 rounded-xl px-4 py-3 text-center text-xl tracking-[1em] font-mono focus:outline-none focus:border-blue-500 transition-colors">
+        <button id="otp-verify-btn" 
+                class="w-full py-3 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-500 transition-all shadow-lg text-sm">
+          Tasdiqlash
+        </button>
+        <button id="back-to-login" class="text-[10px] text-slate-500 uppercase hover:text-white transition-colors">
+          Orqaga qaytish
+        </button>
       </div>
 
       <button id="email-action-btn" 
-
               class="w-full py-3 rounded-xl font-bold bg-blue-600 hover:bg-blue-500 active:scale-95 transition-all shadow-lg text-sm flex items-center justify-center">
-
         <span id="btn-text">Kirish</span>
-
       </button>
-
       
-
       <p id="error-msg" class="status-msg bg-red-500/10 text-red-400 border border-red-500/20"></p>
-
-      <p id="success-msg" class="status-msg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-
-        Tasdiqlash havolasi emailingizga yuborildi. Iltimos, pochtangizni tekshiring!
-
-      </p>
-
+      <p id="success-msg" class="status-msg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"></p>
     </div>
 
-
-
-    <div class="flex items-center gap-4 mb-6">
-
-      <div class="h-[1px] bg-white/10 flex-1"></div>
-
-      <span class="text-[10px] text-slate-500 uppercase tracking-widest">Yoki</span>
-
-      <div class="h-[1px] bg-white/10 flex-1"></div>
-
-    </div>
-
-
-
-    <div id="captchaBox" class="flex flex-col items-center mb-6">
-
-      <div class="g-recaptcha" 
-
-           data-sitekey="6LeOGjssAAAAAHnJBytIycrKEvDJHjMIcnjF7XN2" 
-
-           data-theme="dark" 
-
-           data-callback="onCaptchaSuccess"></div>
-
-      <p class="text-slate-500 text-[10px] mt-3 uppercase tracking-widest">Davom etish uchun tasdiqlang</p>
-
-    </div>
-
-
-
-    <div id="loginBox" class="space-y-3 opacity-20 pointer-events-none transition-all duration-700 scale-95">
-
-      <button id="google-login"
-
-              class="w-full py-3.5 rounded-2xl font-bold bg-white text-black hover:bg-slate-200 active:scale-95 transition-all flex items-center justify-center gap-3 shadow-lg text-sm">
-
-        <img src="https://www.google.com/favicon.ico" class="w-4 h-4" alt="G"> 
-
-        <span id="google-text-span">Google bilan kirish</span>
-
-      </button>
-
-
-
-      <button id="telegram-login"
-
-              class="w-full py-3.5 rounded-2xl font-bold text-white hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-3 shadow-lg text-sm"
-
-              style="background: linear-gradient(135deg, #37aee2 0%, #1e96c8 100%)">
-
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
-
-        <span id="telegram-text-span">Telegram bilan kirish</span>
-
-      </button>
-
-    </div>
-
-  </div>
-
-
-
-  <div id="accountBox" class="hidden space-y-4 mt-6 border-t border-white/10 pt-8 animate-fade">
-
-    <div class="flex flex-col items-center justify-center mb-4">
-
-        <div id="userPreview" class="w-16 h-16 rounded-full border-2 border-blue-500 p-1 mb-2">
-
-            <div class="w-full h-full rounded-full bg-slate-800 flex items-center justify-center overflow-hidden">
-
-                <span class="text-2xl">👤</span>
-
-            </div>
-
+    <div id="divider-section">
+        <div class="flex items-center gap-4 mb-6">
+          <div class="h-[1px] bg-white/10 flex-1"></div>
+          <span class="text-[10px] text-slate-500 uppercase tracking-widest">Yoki</span>
+          <div class="h-[1px] bg-white/10 flex-1"></div>
         </div>
 
-        <p id="userEmailDisplay" class="text-xs text-slate-400"></p>
+        <div id="captchaBox" class="flex flex-col items-center mb-6">
+          <div class="g-recaptcha" 
+               data-sitekey="6LeOGjssAAAAAHnJBytIycrKEvDJHjMIcnjF7XN2" 
+               data-theme="dark" 
+               data-callback="onCaptchaSuccess"
+               data-expired-callback="onCaptchaExpired"
+               data-error-callback="onCaptchaError"></div>
+          <p class="text-slate-500 text-[10px] mt-3 uppercase tracking-widest">Davom etish uchun tasdiqlang</p>
+        </div>
 
+        <div id="loginBox" class="space-y-3 opacity-20 pointer-events-none transition-all duration-700 scale-95">
+          <button id="google-login"
+                  class="w-full py-3.5 rounded-2xl font-bold bg-white text-black hover:bg-slate-200 active:scale-95 transition-all flex items-center justify-center gap-3 shadow-lg text-sm">
+            <img src="https://www.google.com/favicon.ico" class="w-4 h-4" alt="G"> 
+            <span id="google-text-span">Google bilan kirish</span>
+          </button>
+
+          <button id="telegram-login"
+                  class="w-full py-3.5 rounded-2xl font-bold text-white hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-3 shadow-lg text-sm"
+                  style="background: linear-gradient(135deg, #37aee2 0%, #1e96c8 100%)">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+            <span id="telegram-text-span">Telegram bilan kirish</span>
+          </button>
+        </div>
     </div>
-
-    
-
-    <button id="logout"
-
-            class="w-full py-3 rounded-xl font-bold bg-white/5 text-slate-300 hover:bg-white/10 transition-all border border-white/10">
-
-      Chiqish
-
-    </button>
-
-    
-
-    <button id="deleteAccount"
-
-            class="w-full py-3 rounded-xl font-bold bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-600 hover:text-white transition-all text-xs">
-
-      Hisobni butunlay o'chirish
-
-    </button>
-
   </div>
 
+  <!-- Профиль пользователя -->
+  <div id="accountBox" class="hidden space-y-4 mt-6 border-t border-white/10 pt-8 animate-fade">
+    <div class="flex flex-col items-center justify-center mb-4">
+        <div id="userPreview" class="w-16 h-16 rounded-full border-2 border-blue-500 p-1 mb-2">
+            <div class="w-full h-full rounded-full bg-slate-800 flex items-center justify-center overflow-hidden">
+                <span class="text-2xl">👤</span>
+            </div>
+        </div>
+        <p id="userEmailDisplay" class="text-xs text-slate-400"></p>
+    </div>
+    <button id="logout" class="w-full py-3 rounded-xl font-bold bg-white/5 text-slate-300 hover:bg-white/10 transition-all border border-white/10">Chiqish</button>
+    <button id="deleteAccount" class="w-full py-3 rounded-xl font-bold bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-600 hover:text-white transition-all text-xs">Hisobni butunlay o'chirish</button>
+  </div>
 </div>
 
-
-
 <script type="module">
-
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-
-
   const supabase = createClient(
-
     "https://gefaqrfjzwemwuxuoadp.supabase.co",
-
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg"
-
   )
 
-
-
-  // Elementlarni yuklash
-
   const loginBox = document.getElementById("loginBox"),
-
         accountBox = document.getElementById("accountBox"),
-
         authContent = document.getElementById("authContent"),
-
         captchaBox = document.getElementById("captchaBox"),
-
         userPreview = document.getElementById("userPreview"),
-
         emailInput = document.getElementById("email-input"),
-
         passwordInput = document.getElementById("password-input"),
-
         emailActionBtn = document.getElementById("email-action-btn"),
-
         errorMsg = document.getElementById("error-msg"),
-
         successMsg = document.getElementById("success-msg"),
-
         btnText = document.getElementById("btn-text"),
-
         tabLogin = document.getElementById("tab-login"),
-
         tabRegister = document.getElementById("tab-register"),
-
-        googleTextSpan = document.getElementById("google-text-span"),
-
-        telegramTextSpan = document.getElementById("telegram-text-span");
-
-
+        otpSection = document.getElementById("otp-section"),
+        credentialsInputs = document.getElementById("credentials-inputs"),
+        otpInput = document.getElementById("otp-input"),
+        otpVerifyBtn = document.getElementById("otp-verify-btn"),
+        backToLogin = document.getElementById("back-to-login"),
+        dividerSection = document.getElementById("divider-section");
 
   let isLoginMode = true;
 
+  // Капча функции
+  window.onCaptchaSuccess = (token) => {
+    if(token) {
+      loginBox.classList.remove("opacity-20", "pointer-events-none", "scale-95");
+      captchaBox.classList.add("hidden");
+    }
+  };
 
+  window.onCaptchaExpired = () => {
+    grecaptcha.reset();
+    loginBox.classList.add("opacity-20", "pointer-events-none", "scale-95");
+    captchaBox.classList.remove("hidden");
+  };
 
-  // Xatoliklarni tarjima qilish funksiyasi
+  window.onCaptchaError = () => {
+    grecaptcha.reset();
+  };
 
   const translateError = (err) => {
-
     const msg = err.message.toLowerCase();
-
     if (msg.includes("invalid login credentials")) return "Email yoki parol noto'g'ri!";
-
     if (msg.includes("user already registered")) return "Bu email allaqachon ro'yxatdan o'tgan!";
-
     if (msg.includes("password should be at least 6 characters")) return "Parol kamida 6 ta belgidan iborat bo'lishi kerak!";
-
-    if (msg.includes("email not confirmed")) return "Iltimos, avval email manzilingizni tasdiqlang!";
-
-    return "Xatolik yuz berdi: " + err.message;
-
+    if (msg.includes("otp expired")) return "Kod muddati tugagan!";
+    if (msg.includes("invalid id token")) return "Kod noto'g'ri!";
+    return "Xatolik: " + err.message;
   };
-
-
-
-  // UI Yangilash
 
   function updateUI() {
-
     errorMsg.style.display = "none";
-
     successMsg.style.display = "none";
-
+    otpSection.style.display = "none";
+    credentialsInputs.style.display = "block";
+    emailActionBtn.style.display = "flex";
+    dividerSection.style.display = "block";
+    
     if (isLoginMode) {
-
       tabLogin.className = "pb-2 text-sm font-bold transition-all tab-active";
-
       tabRegister.className = "pb-2 text-sm font-bold transition-all tab-inactive";
-
       btnText.innerText = "Kirish";
-
-      googleTextSpan.innerText = "Google bilan kirish";
-
-      telegramTextSpan.innerText = "Telegram bilan kirish";
-
     } else {
-
       tabLogin.className = "pb-2 text-sm font-bold transition-all tab-inactive";
-
       tabRegister.className = "pb-2 text-sm font-bold transition-all tab-active";
-
       btnText.innerText = "Ro'yxatdan o'tish";
-
-      googleTextSpan.innerText = "Google orqali ro'yxatdan o'tish";
-
-      telegramTextSpan.innerText = "Telegram orqali ro'yxatdan o'tish";
-
     }
-
   }
-
-
 
   tabLogin.onclick = () => { isLoginMode = true; updateUI(); };
-
   tabRegister.onclick = () => { isLoginMode = false; updateUI(); };
+  backToLogin.onclick = () => { updateUI(); };
 
-
-
-  window.onCaptchaSuccess = (token) => {
-
-    if(token) {
-
-      loginBox.classList.remove("opacity-20", "pointer-events-none", "scale-95");
-
-      captchaBox.classList.add("hidden");
-
-    }
-
-  }
-
-
-
-  // Email orqali kirish/ro'yxatdan o'tish
-
+  // Основное действие (Вход/Регистрация)
   emailActionBtn.onclick = async () => {
-
     const email = emailInput.value.trim();
-
     const password = passwordInput.value.trim();
-
     if(!email || !password) return;
-
     
-
     emailActionBtn.classList.add("btn-disabled");
-
     errorMsg.style.display = "none";
 
-
-
     let result;
-
     if(isLoginMode) {
-
       result = await supabase.auth.signInWithPassword({ email, password });
-
     } else {
-
-      result = await supabase.auth.signUp({ 
-
-        email, 
-
-        password,
-
-        options: { emailRedirectTo: window.location.origin } 
-
-      });
-
+      result = await supabase.auth.signUp({ email, password });
     }
-
-
 
     if(result.error) {
-
       errorMsg.innerText = translateError(result.error);
-
       errorMsg.style.display = "block";
-
       emailActionBtn.classList.remove("btn-disabled");
-
     } else {
-
+      // Если регистрация требует подтверждения (OTP)
       if (!isLoginMode && !result.data.session) {
-
-        successMsg.style.display = "block";
-
-        emailInput.value = "";
-
-        passwordInput.value = "";
-
-        emailActionBtn.classList.remove("btn-disabled");
-
+        showOtpForm();
       } else {
-
         window.location.reload();
-
       }
-
     }
+  };
 
+  function showOtpForm() {
+    credentialsInputs.style.display = "none";
+    emailActionBtn.style.display = "none";
+    dividerSection.style.display = "none";
+    otpSection.style.display = "block";
+    errorMsg.style.display = "none";
   }
 
+  // Подтверждение OTP
+  otpVerifyBtn.onclick = async () => {
+    const token = otpInput.value.trim();
+    const email = emailInput.value.trim();
+    if (token.length < 6) return;
 
-
-  // Google Login
-
-  document.getElementById("google-login").onclick = async () => {
-
-    await supabase.auth.signInWithOAuth({
-
-      provider: "google",
-
-      options: { redirectTo: window.location.origin }
-
+    otpVerifyBtn.classList.add("btn-disabled");
+    
+    const { data, error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: 'signup'
     });
 
-  }
+    if (error) {
+      errorMsg.innerText = translateError(error);
+      errorMsg.style.display = "block";
+      otpVerifyBtn.classList.remove("btn-disabled");
+    } else {
+      window.location.reload();
+    }
+  };
 
-
+  // Google Login
+  document.getElementById("google-login").onclick = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: window.location.origin }
+    });
+  };
 
   // Telegram Login
-
   window.onTelegramAuth = async function(user) {
-
     localStorage.setItem("tg_user", JSON.stringify(user));
-
     if (user.photo_url) localStorage.setItem("tg_avatar", user.photo_url);
-
     try {
-
         await fetch("https://prankasapi.windowsnoutbook.workers.dev/auth", {
-
             method: "POST",
-
             headers: { "Content-Type": "application/json" },
-
             body: JSON.stringify(user)
-
         });
-
     } finally {
-
         window.location.reload();
-
     }
-
   }
-
-
 
   document.getElementById("telegram-login").onclick = () => {
-
     const s = document.createElement("script");
-
     s.src = "https://telegram.org/js/telegram-widget.js?22";
-
     s.setAttribute("data-telegram-login", "prank_as_bot");
-
     s.setAttribute("data-size", "large");
-
     s.setAttribute("data-onauth", "onTelegramAuth(user)");
-
     s.setAttribute("data-request-access", "write");
-
     document.body.appendChild(s);
-
-  }
-
-
-
-  // Chiqish
+  };
 
   document.getElementById("logout").onclick = async () => {
-
     await supabase.auth.signOut();
-
     localStorage.clear();
-
     window.location.reload();
-
   };
-
-
-
-  // HISOBNI O'CHIRISH LOGIKASI
 
   document.getElementById("deleteAccount").onclick = async () => {
-
-    const confirmDelete = confirm("Diqqat! Hisobingizni o'chirmoqchimisiz? Bu amalni ortga qaytarib bo'lmaydi.");
-
-    
-
-    if (confirmDelete) {
-
+    if (confirm("Diqqat! Hisobingizni o'chirmoqchimisiz?")) {
       const { data: { session } } = await supabase.auth.getSession();
-
-      
-
-      try {
-
-        // 1. Agar foydalanuvchi Supabase (Email/Google) orqali kirgan bo'lsa
-
-        if (session) {
-
-          // Supabase Client-side API foydalanuvchini o'zi o'chirishiga ruxsat bermaydi (xavfsizlik uchun)
-
-          // Shuning uchun biz Edge Function yoki API-ga so'rov yuborishimiz kerak.
-
-          // Hozircha seansni yopamiz va so'rov yuboramiz.
-
-          const { error } = await supabase.rpc('delete_user_own_account'); 
-
-          // Izoh: Supabase-da 'delete_user_own_account' nomli Postgres funksiyasi bo'lishi kerak.
-
-          
-
-          if (error) throw error;
-
-        }
-
-
-
-        // 2. Telegram ma'lumotlarini o'chirish
-
-        localStorage.clear();
-
-        await supabase.auth.signOut();
-
-        
-
-        alert("Hisobingiz muvaffaqiyatli o'chirildi.");
-
-        window.location.reload();
-
-        
-
-      } catch (err) {
-
-        console.error(err);
-
-        // Supabase-da maxsus RPC bo'lmasa, shunchaki Logout qilib ma'lumotlarni tozalaymiz
-
-        localStorage.clear();
-
-        await supabase.auth.signOut();
-
-        window.location.reload();
-
-      }
-
+      localStorage.clear();
+      await supabase.auth.signOut();
+      window.location.reload();
     }
-
   };
 
-
-
-  // Sessiyani tekshirish
-
+  // Инициализация
   (async () => {
-
     const { data: { session } } = await supabase.auth.getSession();
-
     const tgUserStr = localStorage.getItem("tg_user");
-
     const tgUser = tgUserStr ? JSON.parse(tgUserStr) : null;
 
-
-
     if (session || tgUser) {
-
       authContent.classList.add("hidden");
-
       accountBox.classList.remove("hidden");
-
-
-
       const userEmail = session?.user?.email || tgUser?.username || tgUser?.first_name || "Foydalanuvchi";
-
       document.getElementById("userEmailDisplay").innerText = userEmail;
-
-
-
       const avatarUrl = session?.user?.user_metadata?.avatar_url || session?.user?.user_metadata?.picture || localStorage.getItem("tg_avatar");
-
       if (avatarUrl) {
-
         userPreview.innerHTML = `<img src="${avatarUrl}" class="w-full h-full object-cover rounded-full">`;
-
       }
-
     }
-
   })();
-
 </script>
-
 </body>
-
 </html>
