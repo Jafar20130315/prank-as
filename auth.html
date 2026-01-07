@@ -3,73 +3,70 @@
 <head>
   <meta charset="UTF-8">
   <title>Prank-as — Avtorizatsiya</title>
-  <link rel="icon" type="image/x-icon" href="favicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
   <style>
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-    .animate-fade { animation: fadeIn 0.5s ease-out forwards; }
-    .tab-active { color: white; border-bottom: 2px solid #3b82f6; }
-    .tab-inactive { color: #64748b; }
-    input::placeholder { color: #475569; }
-    .status-msg { font-size: 11px; padding: 10px; border-radius: 8px; margin-top: 10px; display: none; }
-    .btn-disabled { opacity: 0.5; pointer-events: none; }
-    .otp-input { letter-spacing: 0.5rem; text-align: center; font-size: 1.5rem; font-weight: bold; }
+    @keyframes fadeIn {from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+    .animate-fade{animation:fadeIn .5s ease-out forwards}
+    .tab-active{color:#fff;border-bottom:2px solid #3b82f6}
+    .tab-inactive{color:#64748b}
+    .status-msg{font-size:11px;padding:10px;border-radius:8px;margin-top:10px;display:none}
+    .otp-input{letter-spacing:.5rem;text-align:center;font-size:1.5rem;font-weight:bold}
   </style>
 </head>
 
 <body class="min-h-screen flex items-center justify-center text-white p-4"
-      style="background: radial-gradient(circle at center, #1e293b 0%, #020617 100%)">
+      style="background:radial-gradient(circle at center,#1e293b 0%,#020617 100%)">
 
 <div class="rounded-3xl p-8 w-full max-w-md text-center shadow-2xl animate-fade"
-     style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1)">
+     style="background:rgba(255,255,255,.03);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1)">
 
   <h1 class="text-4xl font-black mb-2 tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-500">
     Prank-as
   </h1>
-  <p id="system-subtitle" class="text-slate-400 mb-8 text-sm font-medium">Xavfsiz avtorizatsiya tizimi</p>
+  <p class="text-slate-400 mb-8 text-sm font-medium">Xavfsiz avtorizatsiya tizimi</p>
 
+  <!-- AUTH CONTENT -->
   <div id="authContent">
-    <div id="tabs" class="flex justify-center gap-8 mb-6 border-b border-white/5">
-      <button id="tab-login" class="pb-2 text-sm font-bold transition-all tab-active">KIRISH</button>
-      <button id="tab-register" class="pb-2 text-sm font-bold transition-all tab-inactive">RO'YXATDAN O'TISH</button>
+
+    <!-- TABS -->
+    <div class="flex justify-center gap-8 mb-6 border-b border-white/5">
+      <button id="tab-login" class="pb-2 text-sm font-bold tab-active">KIRISH</button>
+      <button id="tab-register" class="pb-2 text-sm font-bold tab-inactive">RO'YXATDAN O'TISH</button>
     </div>
 
-    <!-- Основная форма -->
-    <div id="emailForm" class="space-y-3 mb-6 transition-all">
-      <div class="relative">
-        <input type="email" id="email-input" placeholder="Email manzilingiz" 
-               class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition-colors">
-      </div>
-      
-      <div id="password-container" class="relative">
-        <input type="password" id="password-input" placeholder="Parol (ixtiyoriy)" 
-               class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition-colors">
-        <p class="text-[9px] text-slate-500 mt-1 text-left px-1">Parol kiritmasangiz, kod yuboriladi</p>
+    <!-- EMAIL FORM -->
+    <div id="emailForm" class="space-y-3 mb-6">
+
+      <input id="email-input" type="email" placeholder="Email manzilingiz"
+             class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm">
+
+      <div id="password-box">
+        <input id="password-input" type="password" placeholder="Parol"
+               class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm">
       </div>
 
-      <!-- Поле для OTP -->
-      <div id="otp-container" class="hidden space-y-2">
-        <p class="text-[10px] text-blue-400 uppercase tracking-widest mb-1">Emailingizga yuborilgan kodni kiriting</p>
-        <input type="text" id="otp-input" maxlength="6" placeholder="000000" inputmode="numeric"
-               class="otp-input w-full bg-white/10 border border-blue-500/50 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-400 transition-colors text-blue-400">
+      <!-- OTP INPUT -->
+      <div id="otp-box" class="hidden">
+        <p class="text-[10px] text-blue-400 uppercase tracking-widest">Emailga yuborilgan kodni kiriting</p>
+        <input id="otp-input" maxlength="6" placeholder="000000"
+               class="otp-input w-full bg-white/10 border border-blue-500/50 rounded-xl px-4 py-3 text-blue-400">
       </div>
 
-      <button id="email-action-btn" 
-              class="w-full py-3 rounded-xl font-bold bg-blue-600 hover:bg-blue-500 active:scale-95 transition-all shadow-lg text-sm flex items-center justify-center">
+      <button id="email-action-btn"
+              class="w-full py-3 rounded-xl font-bold bg-blue-600 hover:bg-blue-500">
         <span id="btn-text">Kirish</span>
       </button>
 
-      <button id="resend-otp-btn" class="hidden text-[10px] text-slate-500 hover:text-white transition-colors uppercase mt-2">
-        Kodni qayta yuborish
-      </button>
-      
       <p id="error-msg" class="status-msg bg-red-500/10 text-red-400 border border-red-500/20"></p>
       <p id="success-msg" class="status-msg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"></p>
+
     </div>
 
-    <div id="social-divider" class="flex items-center gap-4 mb-6">
+    <!-- DIVIDER -->
+    <div class="flex items-center gap-4 mb-6">
       <div class="h-[1px] bg-white/10 flex-1"></div>
       <span class="text-[10px] text-slate-500 uppercase tracking-widest">Yoki</span>
       <div class="h-[1px] bg-white/10 flex-1"></div>
@@ -77,260 +74,194 @@
 
     <!-- CAPTCHA -->
     <div id="captchaBox" class="flex flex-col items-center mb-6">
-      <div class="g-recaptcha" 
-           data-sitekey="6LeOGjssAAAAAHnJBytIycrKEvDJHjMIcnjF7XN2" 
-           data-theme="dark" 
+      <div class="g-recaptcha"
+           data-sitekey="6LeOGjssAAAAAHnJBytIycrKEvDJHjMIcnjF7XN2"
+           data-theme="dark"
            data-callback="onCaptchaSuccess"></div>
     </div>
 
-    <!-- Кнопки соцсетей -->
-    <div id="loginBox" class="space-y-3 opacity-20 pointer-events-none transition-all duration-700 scale-95">
+    <!-- SOCIAL LOGIN -->
+    <div id="loginBox" class="space-y-3 opacity-20 pointer-events-none transition-all scale-95">
+
       <button id="google-login"
-              class="w-full py-3.5 rounded-2xl font-bold bg-white text-black hover:bg-slate-200 active:scale-95 transition-all flex items-center justify-center gap-3 shadow-lg text-sm">
-        <img src="https://www.google.com/favicon.ico" class="w-4 h-4" alt="G"> 
-        <span>Google bilan kirish</span>
+              class="w-full py-3.5 rounded-2xl font-bold bg-white text-black flex items-center justify-center gap-3">
+        <img src="https://www.google.com/favicon.ico" class="w-4 h-4"> Google bilan kirish
       </button>
 
       <button id="telegram-login"
-              class="w-full py-3.5 rounded-2xl font-bold text-white hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-3 shadow-lg text-sm"
-              style="background: linear-gradient(135deg, #37aee2 0%, #1e96c8 100%)">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
-        <span>Telegram bilan kirish</span>
+              class="w-full py-3.5 rounded-2xl font-bold text-white flex items-center justify-center gap-3"
+              style="background:linear-gradient(135deg,#37aee2,#1e96c8)">
+        Telegram bilan kirish
       </button>
+
     </div>
   </div>
 
-  <!-- Панель аккаунта -->
-  <div id="accountBox" class="hidden space-y-4 mt-6 border-t border-white/10 pt-8 animate-fade">
-    <div class="flex flex-col items-center justify-center mb-4">
-        <div id="userPreview" class="w-16 h-16 rounded-full border-2 border-blue-500 p-1 mb-2">
-            <div class="w-full h-full rounded-full bg-slate-800 flex items-center justify-center overflow-hidden">
-                <span class="text-2xl">👤</span>
-            </div>
-        </div>
-        <p id="userEmailDisplay" class="text-xs text-slate-400 font-mono"></p>
-    </div>
-    
+  <!-- ACCOUNT -->
+  <div id="accountBox" class="hidden mt-6 space-y-4 border-t border-white/10 pt-6">
+    <div id="userPreview"
+      class="w-16 h-16 mx-auto rounded-full border-2 border-blue-500 flex items-center justify-center">👤</div>
+
+    <p id="userEmailDisplay" class="text-xs text-slate-400 font-mono"></p>
+
     <button id="logout"
-            class="w-full py-3 rounded-xl font-bold bg-white/5 text-slate-300 hover:bg-white/10 transition-all border border-white/10">
+      class="w-full py-3 rounded-2xl bg-white/5 text-slate-300 border border-white/10">
       Chiqish
     </button>
-    
-    <button id="deleteAccount"
-            class="w-full py-3 rounded-xl font-bold bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-600 hover:text-white transition-all text-[10px] uppercase tracking-widest">
-      Hisobni butunlay o'chirish
-    </button>
   </div>
+
 </div>
 
 <script type="module">
-  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
-  const supabase = createClient(
-    "https://gefaqrfjzwemwuxuoadp.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg"
-  )
+const supabase = createClient(
+ "https://gefaqrfjzwemwuxuoadp.supabase.co",
+ "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg"
+)
 
-  const els = {
-    loginBox: document.getElementById("loginBox"),
-    accountBox: document.getElementById("accountBox"),
-    authContent: document.getElementById("authContent"),
-    captchaBox: document.getElementById("captchaBox"),
-    userPreview: document.getElementById("userPreview"),
-    emailInput: document.getElementById("email-input"),
-    passwordInput: document.getElementById("password-input"),
-    passwordContainer: document.getElementById("password-container"),
-    otpInput: document.getElementById("otp-input"),
-    otpContainer: document.getElementById("otp-container"),
-    emailActionBtn: document.getElementById("email-action-btn"),
-    resendOtpBtn: document.getElementById("resend-otp-btn"),
-    errorMsg: document.getElementById("error-msg"),
-    successMsg: document.getElementById("success-msg"),
-    btnText: document.getElementById("btn-text"),
-    tabLogin: document.getElementById("tab-login"),
-    tabRegister: document.getElementById("tab-register"),
-    userEmailDisplay: document.getElementById("userEmailDisplay"),
-    deleteBtn: document.getElementById("deleteAccount"),
-    tgBtn: document.getElementById("telegram-login"),
-    googleBtn: document.getElementById("google-login")
-  };
+const emailInput = document.getElementById("email-input")
+const passwordInput = document.getElementById("password-input")
+const otpInput = document.getElementById("otp-input")
 
-  let isLoginMode = true;
-  let isWaitingForOTP = false;
+const otpBox = document.getElementById("otp-box")
+const passwordBox = document.getElementById("password-box")
 
-  const translateError = (err) => {
-    const msg = err.message?.toLowerCase() || "";
-    if (msg.includes("invalid login credentials") || msg.includes("invalid grant")) return "Ma'lumotlar noto'g'ri!";
-    if (msg.includes("expired")) return "Kod muddati o'tgan yoki ishlatilgan. Yangisini so'rang.";
-    if (msg.includes("rate limit")) return "Juda ko'p urinish. 1 daqiqa kuting.";
-    return "Xatolik: " + err.message;
-  };
+const errorMsg = document.getElementById("error-msg")
+const successMsg = document.getElementById("success-msg")
 
-  function updateUI() {
-    els.errorMsg.style.display = "none";
-    els.successMsg.style.display = "none";
-    
-    if (isWaitingForOTP) {
-        els.passwordContainer.classList.add("hidden");
-        els.otpContainer.classList.remove("hidden");
-        els.resendOtpBtn.classList.remove("hidden");
-        els.btnText.innerText = "Tasdiqlash";
-        return;
-    }
+const emailBtn = document.getElementById("email-action-btn")
 
-    els.passwordContainer.classList.remove("hidden");
-    els.otpContainer.classList.add("hidden");
-    els.resendOtpBtn.classList.add("hidden");
-    els.btnText.innerText = isLoginMode ? "Kirish" : "Ro'yxatdan o'tish";
-    
-    els.tabLogin.className = isLoginMode ? "pb-2 text-sm font-bold transition-all tab-active" : "pb-2 text-sm font-bold transition-all tab-inactive";
-    els.tabRegister.className = isLoginMode ? "pb-2 text-sm font-bold transition-all tab-inactive" : "pb-2 text-sm font-bold transition-all tab-active";
-  }
+let isLoginMode = true
+let waitingOtp = false
+let tempEmail = null
 
-  els.tabLogin.onclick = () => { isLoginMode = true; isWaitingForOTP = false; updateUI(); };
-  els.tabRegister.onclick = () => { isLoginMode = false; isWaitingForOTP = false; updateUI(); };
+// tabs
+document.getElementById("tab-login").onclick = () => { isLoginMode = true; waitingOtp = false; refreshUI(); }
+document.getElementById("tab-register").onclick = () => { isLoginMode = false; waitingOtp = false; refreshUI(); }
 
-  window.onCaptchaSuccess = (token) => {
-    if(token) {
-      els.loginBox.classList.remove("opacity-20", "pointer-events-none", "scale-95");
-      els.captchaBox.classList.add("hidden");
-    }
-  }
+// captcha
+window.onCaptchaSuccess = () => {
+ document.getElementById("loginBox").classList.remove("opacity-20","pointer-events-none","scale-95")
+ document.getElementById("captchaBox").classList.add("hidden")
+}
 
-  // === TELEGRAM LOGIC RESTORED ===
-  window.onTelegramAuth = async function(user) {
-    localStorage.setItem("tg_user", JSON.stringify(user));
-    if (user.photo_url) localStorage.setItem("tg_avatar", user.photo_url);
-    try {
-        await fetch("https://prankasapi.windowsnoutbook.workers.dev/auth", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(user)
-        });
-    } catch(e) {
-        console.error("Auth Error", e);
-    } finally {
-        window.location.reload();
-    }
-  }
+// refresh UI
+function refreshUI(){
+ errorMsg.style.display="none"
+ successMsg.style.display="none"
 
-  els.tgBtn.onclick = () => {
-    if (document.querySelector('script[data-telegram-login]')) return; // Avoid duplicate
+ if(waitingOtp){
+   passwordBox.classList.add("hidden")
+   otpBox.classList.remove("hidden")
+   return
+ }
 
-    const s = document.createElement("script");
-    s.src = "https://telegram.org/js/telegram-widget.js?22";
-    s.setAttribute("data-telegram-login", "prank_as_bot");
-    s.setAttribute("data-size", "large");
-    s.setAttribute("data-onauth", "onTelegramAuth(user)");
-    s.setAttribute("data-request-access", "write");
-    document.body.appendChild(s);
-  }
-  // ===============================
+ passwordBox.classList.remove("hidden")
+ otpBox.classList.add("hidden")
+}
 
-  // Email/OTP Logika
-  els.emailActionBtn.onclick = async () => {
-    const email = els.emailInput.value.trim();
-    if(!email) return;
+// EMAIL + PASSWORD + OTP flow
+emailBtn.onclick = async () => {
 
-    els.emailActionBtn.classList.add("btn-disabled");
-    els.errorMsg.style.display = "none";
+ errorMsg.style.display="none"
+ successMsg.style.display="none"
 
-    try {
-        if (isWaitingForOTP) {
-            const token = els.otpInput.value.trim();
-            // ВАЖНО: используем magiclink для входа и signup для регистрации
-            const { error } = await supabase.auth.verifyOtp({
-                email,
-                token,
-                type: isLoginMode ? 'magiclink' : 'signup'
-            });
-            if (error) throw error;
-            window.location.reload();
-            return;
-        }
+ const email = emailInput.value.trim()
 
-        const password = els.passwordInput.value.trim();
-        if (isLoginMode) {
-            if (password) {
-                const { error } = await supabase.auth.signInWithPassword({ email, password });
-                if (error) throw error;
-                window.location.reload();
-            } else {
-                // Вход без пароля (OTP)
-                const { error } = await supabase.auth.signInWithOtp({ 
-                    email, 
-                    options: { 
-                        shouldCreateUser: false,
-                        emailRedirectTo: null // Отключаем автоматический редирект для стабильности кода
-                    } 
-                });
-                if (error) throw error;
-                isWaitingForOTP = true;
-                els.successMsg.innerText = "Kod yuborildi!";
-                els.successMsg.style.display = "block";
-                updateUI();
-            }
-        } else {
-            // Регистрация
-            const { error } = await supabase.auth.signUp({ email, password });
-            if (error) throw error;
-            isWaitingForOTP = true;
-            els.successMsg.innerText = "Ro'yxatdan o'tish kodi yuborildi!";
-            els.successMsg.style.display = "block";
-            updateUI();
-        }
-    } catch (err) {
-        els.errorMsg.innerText = translateError(err);
-        els.errorMsg.style.display = "block";
-    } finally {
-        els.emailActionBtn.classList.remove("btn-disabled");
-    }
-  };
+ if(waitingOtp){
+   const token = otpInput.value.trim()
 
-  els.resendOtpBtn.onclick = () => { 
-    isWaitingForOTP = false; 
-    els.otpInput.value = "";
-    els.emailActionBtn.click(); 
-  };
+   const { error } = await supabase.auth.verifyOtp({
+     email,
+     token,
+     type: "email" // <-- MUHIM! to‘g‘ri tur
+   })
 
-  // Google Logika
-  els.googleBtn.onclick = async () => {
-    await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.origin } });
-  };
+   if(error){
+     errorMsg.innerText="Kod noto‘g‘ri yoki muddati o‘tgan"
+     errorMsg.style.display="block"
+   } else location.reload()
 
-  // Logout
-  document.getElementById("logout").onclick = async () => {
-    await supabase.auth.signOut();
-    localStorage.clear();
-    window.location.reload();
-  };
+   return
+ }
 
-  // Удаление аккаунта
-  els.deleteBtn.onclick = async () => {
-    if(!confirm("Ishonchingiz komilmi?")) return;
-    await supabase.auth.signOut();
-    localStorage.clear();
-    window.location.reload();
-  };
+ const password = passwordInput.value.trim()
 
-  // Инициализация
-  (async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    const tgUser = JSON.parse(localStorage.getItem("tg_user") || "null");
+ let result
 
-    if (session || tgUser) {
-      els.authContent.classList.add("hidden");
-      els.accountBox.classList.remove("hidden");
+ if(isLoginMode)
+   result = await supabase.auth.signInWithPassword({ email,password })
+ else
+   result = await supabase.auth.signUp({ email,password })
 
-      const userEmail = session?.user?.email || tgUser?.username || "Foydalanuvchi";
-      els.userEmailDisplay.innerText = userEmail;
+ if(result.error){
+   errorMsg.innerText=result.error.message
+   errorMsg.style.display="block"
+   return
+ }
 
-      const avatarUrl = session?.user?.user_metadata?.avatar_url || localStorage.getItem("tg_avatar");
-      if (avatarUrl) {
-        els.userPreview.innerHTML = `<img src="${avatarUrl}" class="w-full h-full object-cover rounded-full">`;
-      }
-    }
-  })();
+ tempEmail = email
+
+ await supabase.auth.signInWithOtp({
+   email,
+   options:{ shouldCreateUser:false }
+ })
+
+ waitingOtp = true
+ successMsg.innerText="Kod emailingizga yuborildi"
+ successMsg.style.display="block"
+
+ refreshUI()
+}
+
+// GOOGLE
+document.getElementById("google-login").onclick = async () => {
+ await supabase.auth.signInWithOAuth({
+   provider:"google",
+   options:{ redirectTo: window.location.origin }
+ })
+}
+
+// TELEGRAM
+window.onTelegramAuth = async function(user){
+ localStorage.setItem("tg_user",JSON.stringify(user))
+ if(user.photo_url) localStorage.setItem("tg_avatar",user.photo_url)
+ location.reload()
+}
+
+document.getElementById("telegram-login").onclick = () => {
+ const s=document.createElement("script")
+ s.src="https://telegram.org/js/telegram-widget.js?22"
+ s.setAttribute("data-telegram-login","prank_as_bot")
+ s.setAttribute("data-size","large")
+ s.setAttribute("data-onauth","onTelegramAuth(user)")
+ document.body.appendChild(s)
+}
+
+// LOGOUT
+document.getElementById("logout").onclick = async()=>{
+ await supabase.auth.signOut()
+ localStorage.clear()
+ location.reload()
+}
+
+// SESSION INIT
+;(async()=>{
+ const { data:{ session } }=await supabase.auth.getSession()
+ const tg=JSON.parse(localStorage.getItem("tg_user")||"null")
+
+ if(session || tg){
+  authContent.classList.add("hidden")
+  accountBox.classList.remove("hidden")
+
+  userEmailDisplay.innerText=session?.user?.email || tg?.username
+
+  const avatar=session?.user?.user_metadata?.avatar_url || localStorage.getItem("tg_avatar")
+  if(avatar) userPreview.innerHTML=`<img src="${avatar}" class="w-full h-full rounded-full">`
+ }
+})();
 </script>
+
 </body>
 </html>
