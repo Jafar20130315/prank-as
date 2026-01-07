@@ -44,14 +44,15 @@
       </div>
       
       <div id="password-container" class="relative">
-        <input type="password" id="password-input" placeholder="Parol" 
+        <input type="password" id="password-input" placeholder="Parol (ixtiyoriy)" 
                class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition-colors">
+        <p class="text-[9px] text-slate-500 mt-1 text-left px-1">Parol kiritmasangiz, emailga kod yuboriladi</p>
       </div>
 
       <!-- OTP Input (Hidden by default) -->
       <div id="otp-container" class="hidden space-y-2">
         <p class="text-[10px] text-blue-400 uppercase tracking-widest mb-1">Emailingizga yuborilgan kodni kiriting</p>
-        <input type="text" id="otp-input" maxlength="6" placeholder="000000" 
+        <input type="text" id="otp-input" maxlength="6" placeholder="000000" inputmode="numeric"
                class="otp-input w-full bg-white/10 border border-blue-500/50 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-400 transition-colors text-blue-400">
       </div>
 
@@ -117,9 +118,10 @@
     </button>
     
     <button id="deleteAccount"
-            class="w-full py-3 rounded-xl font-bold bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-600 hover:text-white transition-all text-xs">
-      Hisobni butunlay o'chirish
+            class="w-full py-3 rounded-xl font-bold bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-600 hover:text-white transition-all text-[10px] uppercase tracking-widest">
+      Hisobni o'chirish
     </button>
+    <p id="delete-notice" class="hidden text-[9px] text-red-400">Xavfsizlik yuzasidan hisobni to'liq o'chirish uchun qo'llab-quvvatlash xizmatiga murojaat qiling yoki Edge Function sozlang.</p>
   </div>
 </div>
 
@@ -150,8 +152,7 @@
     tabLogin: document.getElementById("tab-login"),
     tabRegister: document.getElementById("tab-register"),
     userEmailDisplay: document.getElementById("userEmailDisplay"),
-    googleTextSpan: document.getElementById("google-text-span"),
-    telegramTextSpan: document.getElementById("telegram-text-span")
+    deleteAccountBtn: document.getElementById("deleteAccount")
   };
 
   let isLoginMode = true;
@@ -203,7 +204,6 @@
     }
   }
 
-  // Handle Action
   elements.emailActionBtn.onclick = async () => {
     const email = elements.emailInput.value.trim();
     if(!email) return;
@@ -213,8 +213,8 @@
 
     try {
         if (isWaitingForOTP) {
-            // Verify OTP
             const token = elements.otpInput.value.trim();
+            // Используем 'magiclink' для входа по коду и 'signup' для регистрации
             const { error } = await supabase.auth.verifyOtp({
                 email,
                 token,
@@ -227,8 +227,6 @@
         }
 
         if (isLoginMode) {
-            // Option 1: Try password first, if user wants OTP they can just use "Forgot" or we can trigger OTP.
-            // Let's implement Password login by default, and provide "Login with Code" via Supabase
             const password = elements.passwordInput.value.trim();
             
             if (password) {
@@ -236,22 +234,24 @@
                 if (error) throw error;
                 window.location.reload();
             } else {
-                // If no password, send Magic Link (Code)
-                const { error } = await supabase.auth.signInWithOtp({ email });
+                // ПРИНУДИТЕЛЬНО ПЕРЕЗАПУСКАЕМ OTP, чтобы каждый раз спрашивало код
+                const { error } = await supabase.auth.signInWithOtp({ 
+                    email,
+                    options: { shouldCreateUser: false } 
+                });
                 if (error) throw error;
                 isWaitingForOTP = true;
-                elements.successMsg.innerText = "Tasdiqlash kodi yuborildi!";
+                elements.successMsg.innerText = "Yangi tasdiqlash kodi yuborildi!";
                 elements.successMsg.style.display = "block";
                 updateUI();
             }
         } else {
-            // Register Mode
             const password = elements.passwordInput.value.trim();
             const { error } = await supabase.auth.signUp({ email, password });
             if (error) throw error;
             
             isWaitingForOTP = true;
-            elements.successMsg.innerText = "Ro'yxatdan o'tish uchun kod yuborildi!";
+            elements.successMsg.innerText = "Kod yuborildi! Emailni tekshiring.";
             elements.successMsg.style.display = "block";
             updateUI();
         }
@@ -263,25 +263,44 @@
     }
   };
 
-  // Resend logic
   elements.resendOtpBtn.onclick = () => {
     isWaitingForOTP = false;
     elements.emailActionBtn.click();
   };
 
-  // Socials
   document.getElementById("google-login").onclick = async () => {
     await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.origin } });
   }
 
-  // Logout
   document.getElementById("logout").onclick = async () => {
     await supabase.auth.signOut();
     localStorage.clear();
     window.location.reload();
   };
 
-  // Auth State
+  // Логика удаления аккаунта
+  elements.deleteAccountBtn.onclick = async () => {
+    const confirmDelete = window.confirm("Hisobingizni o'chirishni xohlaysizmi? Bu amalni ortga qaytarib bo'lmaydi.");
+    if (!confirmDelete) return;
+
+    try {
+        // 1. Выходим из системы
+        await supabase.auth.signOut();
+        // 2. Очищаем всё локальное хранилище
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Показываем уведомление (так как реальное удаление из auth.users требует Admin SDK)
+        document.getElementById("delete-notice").classList.remove("hidden");
+        
+        setTimeout(() => {
+            window.location.reload();
+        }, 3000);
+    } catch (err) {
+        console.error("Xato:", err);
+    }
+  };
+
   (async () => {
     const { data: { session } } = await supabase.auth.getSession();
     const tgUser = JSON.parse(localStorage.getItem("tg_user") || "null");
