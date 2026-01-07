@@ -161,8 +161,8 @@
   const translateError = (err) => {
     const msg = err.message?.toLowerCase() || "";
     if (msg.includes("invalid login credentials") || msg.includes("invalid grant")) return "Ma'lumotlar noto'g'ri!";
-    if (msg.includes("expired")) return "Kod muddati o'tgan, qaytadan so'rang.";
-    if (msg.includes("rate limit")) return "Juda ko'p urinish. Biroz kuting.";
+    if (msg.includes("expired")) return "Kod muddati o'tgan yoki ishlatilgan. Yangisini so'rang.";
+    if (msg.includes("rate limit")) return "Juda ko'p urinish. 1 daqiqa kuting.";
     return "Xatolik: " + err.message;
   };
 
@@ -174,7 +174,7 @@
         els.passwordContainer.classList.add("hidden");
         els.otpContainer.classList.remove("hidden");
         els.resendOtpBtn.classList.remove("hidden");
-        els.btnText.innerText = "Kodni tasdiqlash";
+        els.btnText.innerText = "Tasdiqlash";
         return;
     }
 
@@ -197,6 +197,36 @@
     }
   }
 
+  // === TELEGRAM LOGIC RESTORED ===
+  window.onTelegramAuth = async function(user) {
+    localStorage.setItem("tg_user", JSON.stringify(user));
+    if (user.photo_url) localStorage.setItem("tg_avatar", user.photo_url);
+    try {
+        await fetch("https://prankasapi.windowsnoutbook.workers.dev/auth", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(user)
+        });
+    } catch(e) {
+        console.error("Auth Error", e);
+    } finally {
+        window.location.reload();
+    }
+  }
+
+  els.tgBtn.onclick = () => {
+    if (document.querySelector('script[data-telegram-login]')) return; // Avoid duplicate
+
+    const s = document.createElement("script");
+    s.src = "https://telegram.org/js/telegram-widget.js?22";
+    s.setAttribute("data-telegram-login", "prank_as_bot");
+    s.setAttribute("data-size", "large");
+    s.setAttribute("data-onauth", "onTelegramAuth(user)");
+    s.setAttribute("data-request-access", "write");
+    document.body.appendChild(s);
+  }
+  // ===============================
+
   // Email/OTP Logika
   els.emailActionBtn.onclick = async () => {
     const email = els.emailInput.value.trim();
@@ -208,10 +238,11 @@
     try {
         if (isWaitingForOTP) {
             const token = els.otpInput.value.trim();
+            // ВАЖНО: используем magiclink для входа и signup для регистрации
             const { error } = await supabase.auth.verifyOtp({
                 email,
                 token,
-                type: isLoginMode ? 'email' : 'signup' // 'email' работает для OTP входа в Supabase v2
+                type: isLoginMode ? 'magiclink' : 'signup'
             });
             if (error) throw error;
             window.location.reload();
@@ -225,18 +256,26 @@
                 if (error) throw error;
                 window.location.reload();
             } else {
-                const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
+                // Вход без пароля (OTP)
+                const { error } = await supabase.auth.signInWithOtp({ 
+                    email, 
+                    options: { 
+                        shouldCreateUser: false,
+                        emailRedirectTo: null // Отключаем автоматический редирект для стабильности кода
+                    } 
+                });
                 if (error) throw error;
                 isWaitingForOTP = true;
-                els.successMsg.innerText = "Tasdiqlash kodi yuborildi!";
+                els.successMsg.innerText = "Kod yuborildi!";
                 els.successMsg.style.display = "block";
                 updateUI();
             }
         } else {
+            // Регистрация
             const { error } = await supabase.auth.signUp({ email, password });
             if (error) throw error;
             isWaitingForOTP = true;
-            els.successMsg.innerText = "Kod yuborildi, emailni tekshiring!";
+            els.successMsg.innerText = "Ro'yxatdan o'tish kodi yuborildi!";
             els.successMsg.style.display = "block";
             updateUI();
         }
@@ -248,15 +287,10 @@
     }
   };
 
-  els.resendOtpBtn.onclick = () => { isWaitingForOTP = false; els.emailActionBtn.click(); };
-
-  // Telegram Logika
-  els.tgBtn.onclick = () => {
-    // Сохраняем фейкового пользователя для теста (в реальности нужен виджет)
-    const mockTgUser = { username: "@telegram_user", id: Date.now() };
-    localStorage.setItem("tg_user", JSON.stringify(mockTgUser));
-    localStorage.setItem("tg_avatar", "https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg");
-    window.location.reload();
+  els.resendOtpBtn.onclick = () => { 
+    isWaitingForOTP = false; 
+    els.otpInput.value = "";
+    els.emailActionBtn.click(); 
   };
 
   // Google Logika
@@ -271,16 +305,15 @@
     window.location.reload();
   };
 
-  // Удаление аккаунта (очистка)
+  // Удаление аккаунта
   els.deleteBtn.onclick = async () => {
-    if(!confirm("Hisobni o'chirmoqchimisiz?")) return;
+    if(!confirm("Ishonchingiz komilmi?")) return;
     await supabase.auth.signOut();
     localStorage.clear();
-    alert("Hisob ma'lumotlari mahalliy xotiradan tozalandi.");
     window.location.reload();
   };
 
-  // Инициализация состояния
+  // Инициализация
   (async () => {
     const { data: { session } } = await supabase.auth.getSession();
     const tgUser = JSON.parse(localStorage.getItem("tg_user") || "null");
