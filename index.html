@@ -256,24 +256,48 @@ h1 {
 }
 
 
+/* Основной контейнер иконки (ссылка) */
 .user-icon {
-  font-size: 26px;
-  text-decoration: none;
-  background: #111;
-  color: #fff;
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  box-shadow: 0 4px 15px rgba(0,0,0,.3);
-  transition: 0.3s;
+    text-decoration: none;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    box-shadow: 0 4px 15px rgba(0,0,0,.3);
+    transition: 0.3s;
+    border: 1px solid rgba(255,255,255,0.2);
+    backdrop-filter: blur(5px);
+    overflow: hidden; /* Чтобы картинка не выходила за границы круга */
 }
 
+/* Эффект при наведении */
 .user-icon:hover {
-  transform: scale(1.1);
-  background: #2563eb;
+    transform: scale(1.1);
+    background: #2563eb;
+    border-color: #3b82f6;
+}
+
+/* Стили для SVG (иконка по умолчанию) */
+.user-icon svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* Стили для изображения (аватар пользователя) */
+.user-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
 }
 
  
@@ -317,7 +341,15 @@ h1 {
   <header class="top-bar">
   <div class="top-bar-right">
     <div class="desktop-clock" id="desktopClock">Hozir</div>
-    <a href="/auth" class="user-icon" id="userIcon" title="Kirish / Ro'yxatdan o'tish">👤</a>
+    
+    <a href="/auth" class="user-icon" id="userIcon" title="Kirish">
+    <svg viewBox="0 0 24 24">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+        <circle cx="12" cy="7" r="4"></circle>
+    
+    </svg>
+</a>
+
   </div>
 </header>
 
