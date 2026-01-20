@@ -6,15 +6,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-  <link rel="icon" href="favicon.png">
+  <link rel="icon" type="image/x-icon" href="favicon.png">
   <style>
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     .animate-fade { animation: fadeIn 0.5s ease-out forwards; }
     
-    /* Центрирование виджета Telegram */
+    /* Принудительное центрирование виджета Telegram */
     iframe[id^="telegram-login"] {
+        width: 100% !important;
         display: block !important;
-        margin: 0 auto !important;
     }
   </style>
 </head>
@@ -38,21 +38,24 @@
     <p id="captchaText" class="text-slate-500 text-[10px] mt-3 uppercase tracking-widest">Davom etish uchun tasdiqlang</p>
   </div>
 
-  <div id="loginBox" class="space-y-4 opacity-20 pointer-events-none transition-all duration-700 scale-95 flex flex-col items-center">
+  <div id="loginBox" class="opacity-20 pointer-events-none transition-all duration-700 scale-95 flex flex-col items-center gap-4">
     
-    <button id="google-login"
-            class="w-[240px] h-[40px] rounded-[20px] font-bold bg-white text-black hover:bg-slate-200 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-lg text-sm">
-      <img src="https://www.google.com/favicon.ico" class="w-4 h-4" alt="G"> 
-      <span id="googleText">Google bilan kirish</span>
-    </button>
+    <div class="w-[248px] flex flex-col gap-3">
+        
+        <button id="google-login"
+                class="w-full h-[40px] rounded-[20px] font-bold bg-white text-black hover:bg-slate-200 active:scale-95 transition-all flex items-center justify-center gap-3 shadow-lg text-[14px]">
+          <img src="https://www.google.com/favicon.ico" class="w-4 h-4" alt="G"> 
+          <span id="googleText">Google bilan kirish</span>
+        </button>
 
-    <div id="telegram-widget-container" class="w-full flex justify-center">
-        <script async src="https://telegram.org/js/telegram-widget.js?22" 
-                data-telegram-login="prank_as_bot" 
-                data-size="medium" 
-                data-radius="20" 
-                data-onauth="onTelegramAuth(user)" 
-                data-request-access="write"></script>
+        <div class="w-full flex justify-center">
+            <script async src="https://telegram.org/js/telegram-widget.js?22" 
+                    data-telegram-login="prank_as_bot" 
+                    data-size="large" 
+                    data-radius="20" 
+                    data-onauth="onTelegramAuth(user)" 
+                    data-request-access="write"></script>
+        </div>
     </div>
 
   </div>
@@ -98,29 +101,33 @@
           captcha: "ПОДТВЕРДИТЕ, ЧТОБЫ ПРОДОЛЖИТЬ",
           google: "Войти через Google",
           logout: "Выйти",
-          delete: "Удалить аккаунт навсегда"
+          delete: "Удалить аккаунт навсегда",
+          confirmDelete: "Вы уверены, что хотите удалить аккаунт? Это действие нельзя отменить."
       },
       uz: {
           subtitle: "Xavfsiz avtorizatsiya tizimi",
           captcha: "DAVOM ETISH UCHUN TASDIQLANG",
           google: "Google bilan kirish",
           logout: "Chiqish",
-          delete: "Hisobni butunlay o'chirish"
+          delete: "Hisobni butunlay o'chirish",
+          confirmDelete: "Hisobni o'chirishga ishonchingiz komilmi? Bu amalni bekor qilib bo'lmaydi."
       },
       en: {
           subtitle: "Secure authorization system",
           captcha: "VERIFY TO CONTINUE",
           google: "Sign in with Google",
           logout: "Log out",
-          delete: "Delete account permanently"
+          delete: "Delete account permanently",
+          confirmDelete: "Are you sure you want to delete your account? This cannot be undone."
       }
   };
 
+  let currentLang = 'uz'; // Default
+
   function setLanguage() {
-      // Получаем язык браузера (например, "ru-RU" -> "ru")
       const userLang = navigator.language.slice(0, 2); 
-      // Выбираем переводы или дефолтный (uz)
-      const t = translations[userLang] || translations['uz'];
+      currentLang = translations[userLang] ? userLang : 'uz';
+      const t = translations[currentLang];
 
       document.getElementById('subtitle').innerText = t.subtitle;
       document.getElementById('captchaText').innerText = t.captcha;
@@ -128,12 +135,10 @@
       document.getElementById('logout').innerText = t.logout;
       document.getElementById('deleteAccount').innerText = t.delete;
   }
-  // Запускаем перевод при загрузке
   setLanguage();
 
   // --- ЛОГИКА АВТОРИЗАЦИИ ---
 
-  // RECAPTCHA SUCCESS
   window.onCaptchaSuccess = function(token) {
     if(token) {
       loginBox.classList.remove("opacity-20", "pointer-events-none", "scale-95");
@@ -141,7 +146,6 @@
     }
   }
 
-  // GOOGLE LOGIN
   document.getElementById("google-login").onclick = async () => {
     await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -149,16 +153,11 @@
     });
   }
 
-  // TELEGRAM LOGIN CALLBACK (Глобальная функция, чтобы виджет её видел)
   window.onTelegramAuth = async function(user) {
-    // Сохраняем данные пользователя
     localStorage.setItem("tg_user", JSON.stringify(user));
-    
-    // Сохраняем фото
     if (user.photo_url) {
         localStorage.setItem("tg_avatar", user.photo_url);
     }
-
     try {
         await fetch("https://prankasapi.windowsnoutbook.workers.dev/auth", {
             method: "POST",
@@ -166,20 +165,35 @@
             body: JSON.stringify(user)
         });
     } finally {
-        // Редирект на главную
         window.location.href = "https://prank-as.site";
     }
   }
 
-  // LOGOUT
-  document.getElementById("logout").onclick = async () => {
+  // ЛОГИКА ВЫХОДА (LOGOUT)
+  async function performLogout() {
     await supabase.auth.signOut();
     localStorage.removeItem("tg_user");
     localStorage.removeItem("tg_avatar");
     window.location.reload();
   }
 
-  // INITIAL STATE CHECK
+  document.getElementById("logout").onclick = performLogout;
+
+  // ЛОГИКА УДАЛЕНИЯ (DELETE)
+  document.getElementById("deleteAccount").onclick = async () => {
+      const t = translations[currentLang];
+      
+      // 1. Спрашиваем подтверждение
+      if (confirm(t.confirmDelete)) {
+          // 2. Здесь можно добавить запрос к API для удаления из БД, если есть:
+          // await fetch('YOUR_DELETE_API_URL', { method: 'DELETE', ... });
+          
+          // 3. Выполняем выход и очистку
+          await performLogout();
+      }
+  }
+
+  // ПРОВЕРКА СТАТУСА
   (async () => {
     const { data: { session } } = await supabase.auth.getSession();
     const tgUser = localStorage.getItem("tg_user");
@@ -189,7 +203,6 @@
       captchaBox.classList.add("hidden");
       accountBox.classList.remove("hidden");
 
-      // Показ аватарки
       const avatarUrl = session?.user?.user_metadata?.picture || localStorage.getItem("tg_avatar");
       if (avatarUrl) {
         userPreview.innerHTML = `<img src="${avatarUrl}" class="w-full h-full object-cover rounded-full">`;
