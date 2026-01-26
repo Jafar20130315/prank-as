@@ -1,95 +1,121 @@
 (function() {
-    // 1. ПРОВЕРКА: Пропускаем главную
+    // 1. Проверка на главную страницу
     const path = window.location.pathname;
-    if (path === "/" || path === "/index.html" || path.endsWith("/index.html") || path === "") {
-        return;
+    if (path === "/" || path === "/index.html" || path.endsWith("/index.html")) return;
+
+    // 2. Создаем кастомный элемент (Web Component)
+    class AutoMenu extends HTMLElement {
+        constructor() {
+            super();
+            // Создаем закрытый Shadow Root — сюда никто не заглянет
+            this.attachShadow({ mode: 'closed' });
+        }
+
+        connectedCallback() {
+            this.render();
+        }
+
+        render() {
+            this.shadowRoot.innerHTML = `
+            <style>
+                /* Сбрасываем всё, что могло прийти извне */
+                :host {
+                    all: initial; 
+                    display: block;
+                    position: fixed;
+                    z-index: 2147483647;
+                }
+
+                .menu-wrapper {
+                    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+                }
+
+                /* Кнопка */
+                .btn {
+                    position: fixed; top: 20px; left: 20px;
+                    width: 50px; height: 50px;
+                    background: #1a1a1a; border: 1px solid rgba(255,255,255,0.2);
+                    border-radius: 12px; display: flex; align-items: center; justify-content: center;
+                    cursor: pointer; transition: 0.3s; opacity: 0.4;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+                }
+                .btn:hover { opacity: 1; transform: scale(1.05); background: #222; }
+                .btn svg { width: 26px; height: 26px; stroke: white; fill: none; stroke-width: 2; }
+
+                /* Навигация */
+                .nav {
+                    position: fixed; top: 80px; left: 20px; width: 240px;
+                    background: #111; border-radius: 16px; border: 1px solid #333;
+                    padding: 10px; display: none; flex-direction: column; gap: 5px;
+                    box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+                }
+                .nav.active { display: flex; }
+
+                .nav a {
+                    color: #fff; text-decoration: none; padding: 12px 15px;
+                    border-radius: 10px; font-size: 15px; font-weight: 500;
+                    transition: 0.2s;
+                }
+                .nav a:hover { background: rgba(255,255,255,0.1); }
+
+                /* Затемнение */
+                .overlay {
+                    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+                    display: none; z-index: -1; backdrop-filter: blur(3px);
+                }
+                .overlay.active { display: block; }
+
+                /* Мобилки */
+                @media (max-width: 768px) {
+                    .btn { top: auto; bottom: 25px; right: 20px; left: auto; opacity: 1; background: #007bff; border-radius: 50%; }
+                    .nav { top: auto; bottom: 85px; right: 20px; left: auto; }
+                }
+            </style>
+
+            <div class="menu-wrapper">
+                <div class="overlay" id="ovl"></div>
+                <div class="btn" id="trigger">
+                    <svg viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18" stroke-linecap="round"/></svg>
+                </div>
+                <nav class="nav" id="menu">
+                    <a href="/">🏠 Bosh sahifa</a>
+                    <a href="/disclaimer">Disclaimer</a>
+                    <a href="/baholash">Fikr qoldirish</a>
+                    <a href="/about">About</a>
+                    <a href="/contact">Contact</a>
+                    <a href="/privacypolicy">Privacy policy</a>
+                </nav>
+            </div>
+            `;
+
+            const trigger = this.shadowRoot.getElementById('trigger');
+            const menu = this.shadowRoot.getElementById('menu');
+            const ovl = this.shadowRoot.getElementById('ovl');
+
+            const toggle = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const isOpen = menu.classList.contains('active');
+                if (isOpen) {
+                    menu.classList.remove('active');
+                    ovl.classList.remove('active');
+                } else {
+                    menu.classList.add('active');
+                    ovl.classList.add('active');
+                }
+            };
+
+            trigger.addEventListener('click', toggle);
+            ovl.addEventListener('click', toggle);
+        }
     }
 
-    // 2. СТИЛИ
-    const style = document.createElement('style');
-    style.innerHTML = `
-        #am-btn {
-            position: fixed !important; top: 20px !important; left: 20px !important;
-            background: #1a1a1a !important; border: 1px solid rgba(255,255,255,0.2) !important;
-            border-radius: 12px !important; width: 50px !important; height: 50px !important;
-            display: flex !important; align-items: center !important; justify-content: center !important;
-            z-index: 2147483647 !important; cursor: pointer !important; opacity: 0.5; transition: 0.3s !important;
-        }
-        #am-btn:hover { opacity: 1 !important; transform: scale(1.1) !important; }
-        #am-btn svg { width: 24px !important; height: 24px !important; pointer-events: none !important; }
-
-        #am-nav {
-            position: fixed !important; top: 80px !important; left: 20px !important; width: 240px !important;
-            background: #111 !important; border-radius: 15px !important; border: 1px solid #333 !important;
-            padding: 10px !important; display: flex !important; flex-direction: column !important;
-            z-index: 2147483647 !important; transition: 0.3s !important;
-            /* Скрытое состояние */
-            opacity: 0 !important; visibility: hidden !important; transform: translateY(-10px) !important;
-        }
-        #am-nav.active {
-            opacity: 1 !important; visibility: visible !important; transform: translateY(0) !important;
-        }
-        
-        #am-nav a {
-            color: #fff !important; text-decoration: none !important; padding: 12px !important;
-            border-radius: 8px !important; font-family: sans-serif !important; font-size: 15px !important;
-        }
-        #am-nav a:hover { background: #222 !important; }
-
-        #am-overlay {
-            position: fixed !important; inset: 0 !important; background: rgba(0,0,0,0.5) !important;
-            z-index: 2147483646 !important; opacity: 0 !important; visibility: hidden !important; transition: 0.3s !important;
-        }
-        #am-overlay.active { opacity: 1 !important; visibility: visible !important; }
-
-        @media (max-width: 768px) {
-            #am-btn { top: auto !important; left: auto !important; bottom: 25px !important; right: 20px !important; opacity: 1 !important; background: #007bff !important; border-radius: 50% !important; }
-            #am-nav { top: auto !important; left: auto !important; bottom: 85px !important; right: 20px !important; }
-        }
-    `;
-    document.head.appendChild(style);
-
-    // 3. HTML
-    document.body.insertAdjacentHTML('beforeend', `
-        <div id="am-overlay"></div>
-        <div id="am-btn"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></div>
-        <nav id="am-nav">
-            <a href="/">🏠 Bosh sahifa</a>
-            <a href="/disclaimer">Disclaimer</a>
-            <a href="/about">About</a>
-            <a href="/contact">Contact</a>
-        </nav>
-    `);
-
-    // 4. ЛОГИКА (Глобальная прослушка кликов)
-    const btn = document.getElementById('am-btn');
-    const nav = document.getElementById('am-nav');
-    const overlay = document.getElementById('am-overlay');
-
-    document.addEventListener('click', function(e) {
-        // Если нажали на кнопку или внутри неё
-        if (btn.contains(e.target)) {
-            console.log("Клик по кнопке!");
-            nav.classList.toggle('active');
-            overlay.classList.toggle('active');
-        } 
-        // Если нажали на оверлей или мимо меню, когда оно открыто
-        else if (overlay.contains(e.target) || (nav.classList.contains('active') && !nav.contains(e.target))) {
-            nav.classList.remove('active');
-            overlay.classList.remove('active');
-        }
-    });
-
-    // Умный сдвиг под элементы (только для ПК)
-    if (window.innerWidth > 768) {
-        setTimeout(() => {
-            btn.style.visibility = 'hidden';
-            const item = document.elementFromPoint(25, 25);
-            btn.style.visibility = 'visible';
-            if (item && item !== document.body && item !== document.documentElement && item !== btn) {
-                btn.style.top = "85px";
-                nav.style.top = "145px";
-            }
-        }, 600);
+    // Регистрируем наш "бронированный" элемент
+    if (!customElements.get('auto-menu-element')) {
+        customElements.define('auto-menu-element', AutoMenu);
     }
+
+    // Вставляем его на страницу
+    const el = document.createElement('auto-menu-element');
+    document.body.appendChild(el);
 })();
