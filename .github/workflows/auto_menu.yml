@@ -1,26 +1,21 @@
 name: Auto Inject Menu
-
 on:
   push:
     branches: [ main, master ]
-
+permissions:
+  contents: write  # Даем права на запись файлов
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
-
       - name: Run injection script
         run: python inject_menu.py
-
       - name: Commit and Push
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "[ROBOT] Gamburger menyu qo'shildi."
+          commit_message: "🤖 Авто-вставка меню (кроме index.html)"
