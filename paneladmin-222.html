@@ -70,86 +70,141 @@
     </div>
 
     <script>
-        const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg';
-        const ADMIN_PASS = 'admin21100';
+  const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co';
+  const SUPABASE_ANON_KEY = 'PASTE_YOUR_ANON_KEY_HERE';
+  const ADMIN_PASS = 'admin21100';
 
-        let sb;
-        try {
-            sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        } catch(e) { console.error(e); }
+  function updateLog(m) {
+    const d = document.getElementById('debugInfo');
+    d.innerHTML += `<div>> ${m}</div>`;
+    d.scrollTop = d.scrollHeight;
+    console.log(m);
+  }
 
-        function updateLog(m) {
-            const d = document.getElementById('debugInfo');
-            d.innerHTML += `<div>> ${m}</div>`;
-            d.scrollTop = d.scrollHeight;
+  // 1) Supabase init - aniqroq va xato bo'lsa logga chiqaradi
+  let sb = null;
+  (function initSupabase() {
+    try {
+      if (!window.supabase) {
+        updateLog("Supabase kutubxonasi yuklanmadi. CDN ishlamayapti yoki bloklangan.");
+        return;
+      }
+      if (typeof window.supabase.createClient !== "function") {
+        // ba'zan createClient supabase ichida bo'ladi
+        if (window.supabase?.supabase?.createClient) {
+          sb = window.supabase.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          updateLog("Supabase client (supabase.supabase.createClient) yaratildi.");
+          return;
         }
+        updateLog("createClient topilmadi. console'da window.supabase ni tekshir.");
+        return;
+      }
+      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      updateLog("Supabase client yaratildi.");
+    } catch (e) {
+      updateLog("Supabase init xato: " + (e?.message || e));
+    }
+  })();
 
-        function checkPassword() {
-            if (document.getElementById('adminPassword').value === ADMIN_PASS) {
-                document.getElementById('passwordContainer').classList.add('hidden');
-                document.getElementById('adminContent').classList.remove('hidden');
-                loadActivity();
-            }
-        }
+  function checkPassword() {
+    if (document.getElementById('adminPassword').value === ADMIN_PASS) {
+      document.getElementById('passwordContainer').classList.add('hidden');
+      document.getElementById('adminContent').classList.remove('hidden');
+      loadActivity();
+    } else {
+      updateLog("Parol noto'g'ri.");
+    }
+  }
 
-        function handleLogout() {
-            location.reload();
-        }
+  function handleLogout() {
+    location.reload();
+  }
 
-        async function loadActivity() {
-            const icon = document.getElementById('refreshIcon');
-            icon.classList.add('animate-spin');
-            updateLog("Загрузка последних данных...");
+  function safeDate(val) {
+    if (!val) return "—";
+    const dt = new Date(val);
+    if (isNaN(dt.getTime())) return String(val);
+    return dt.toLocaleString('ru-RU', {
+      day: '2-digit', month: '2-digit',
+      hour: '2-digit', minute: '2-digit'
+    });
+  }
 
-            try {
-                // ВАЖНО: Тянем данные из таблицы user_activity
-                // Мы используем поле user_email или email (смотря как в базе)
-                const { data, error } = await sb
-                    .from('user_activity')
-                    .select('*')
-                    .order('opened_at', { ascending: false })
-                    .limit(50);
+  async function loadActivity() {
+    const icon = document.getElementById('refreshIcon');
+    icon.classList.add('animate-spin');
 
-                if (error) throw error;
+    try {
+      if (!sb) {
+        updateLog("Supabase client yo'q. CDN yoki init muammo.");
+        return;
+      }
 
-                const tbody = document.getElementById('activityTable');
-                tbody.innerHTML = '';
+      updateLog("Загрузка последних данных из user_activity...");
 
-                data.forEach(row => {
-                    // Убираем admin@example.com (если вдруг попал в выборку)
-                    if (row.user_email === 'admin@example.com' || row.email === 'admin@example.com') return;
+      const { data, error } = await sb
+        .from('user_activity')
+        .select('*')
+        .order('opened_at', { ascending: false })
+        .limit(50);
 
-                    const date = new Date(row.opened_at).toLocaleString('ru-RU', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'});
-                    
-                    const tr = document.createElement('tr');
-                    tr.className = "hover:bg-white/5 transition";
-                    tr.innerHTML = `
-                        <td class="p-4">
-                            <div class="font-bold text-blue-300 truncate">${row.user_email || row.email || 'Аноним'}</div>
-                            <div class="text-[10px] text-gray-500">${row.user_name || 'Guest'}</div>
-                        </td>
-                        <td class="p-4">
-                            <span class="bg-blue-500/10 text-blue-400 px-2 py-1 rounded text-xs border border-blue-500/20">
-                                /${row.prank_name || 'index'}
-                            </span>
-                        </td>
-                        <td class="p-4 text-gray-400 text-xs">${date}</td>
-                        <td class="p-4 text-center font-mono text-xs text-green-400">${row.duration || 0}s</td>
-                        <td class="p-4 text-right">
-                            <div class="text-xs text-gray-300">${row.ip_address || '0.0.0.0'}</div>
-                            <div class="text-[10px] text-gray-500">${row.city || ''} ${row.country || ''}</div>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-                updateLog("" + data.length + " ma'lumotlar yangilandi.");
-            } catch (e) {
-                updateLog("Xato yuz berdi" + e.message);
-            } finally {
-                icon.classList.remove('animate-spin');
-            }
-        }
-    </script>
-<script src="/auto-menu.js"></script><script src="auto-menu.js"></script></body>
+      if (error) {
+        // 2) RLS / permission muammosini ko'rsatib beradi
+        updateLog("Supabase error: " + error.message);
+        updateLog("Agar 'permission denied' bo'lsa — RLS policy kerak.");
+        return;
+      }
+
+      if (!data) {
+        updateLog("Data null qaytdi.");
+        return;
+      }
+
+      // 3) Ustun nomlarini tekshirish uchun birinchi row ni chiqarib qo'yamiz
+      if (data.length > 0) {
+        updateLog("First row keys: " + Object.keys(data[0]).join(", "));
+      }
+
+      const tbody = document.getElementById('activityTable');
+      tbody.innerHTML = '';
+
+      data.forEach(row => {
+        const email = row.user_email || row.email || 'Аноним';
+        if (email === 'admin@example.com') return;
+
+        const date = safeDate(row.opened_at || row.created_at || row.time);
+
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-white/5 transition";
+        tr.innerHTML = `
+          <td class="p-4">
+            <div class="font-bold text-blue-300 truncate">${email}</div>
+            <div class="text-[10px] text-gray-500">${row.user_name || row.name || 'Guest'}</div>
+          </td>
+          <td class="p-4">
+            <span class="bg-blue-500/10 text-blue-400 px-2 py-1 rounded text-xs border border-blue-500/20">
+              /${row.prank_name || row.page || 'index'}
+            </span>
+          </td>
+          <td class="p-4 text-gray-400 text-xs">${date}</td>
+          <td class="p-4 text-center font-mono text-xs text-green-400">${(row.duration ?? 0)}s</td>
+          <td class="p-4 text-right">
+            <div class="text-xs text-gray-300">${row.ip_address || row.ip || '0.0.0.0'}</div>
+            <div class="text-[10px] text-gray-500">${row.city || ''} ${row.country || ''}</div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      updateLog(data.length + " ta ma'lumot yangilandi.");
+    } catch (e) {
+      updateLog("Xato: " + (e?.message || e));
+    } finally {
+      icon.classList.remove('animate-spin');
+    }
+  }
+</script>
+
+<script src="/auto-menu.js"></script>
+</body>
 </html>
