@@ -97,10 +97,6 @@ OneSignalDeferred.push(async function(OneSignal){
 }
 </script>
 
-
-
-
-
 <style>
 /* ===== Global ===== */
 @keyframes gradientBG { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
@@ -113,27 +109,6 @@ body {
   overflow-x: hidden; /* Gorizontal skrollni oldini olish uchun */
 }
 
-/* ===== 2026 Doodle Style (YANGI QO'SHILDI) ===== */
-.doodle-year {
-  position: absolute;
-  top: 120px; /* H1 sarlavha orqasida */
-  left: 50%;
-  transform: translateX(-50%) rotate(-8deg);
-  font-size: clamp(6rem, 20vw, 12rem); /* Katta o'lcham, moslashuvchan */
-  font-weight: 900;
-  /* Google Doodle ranglari */
-  background: linear-gradient(90deg, #4285F4 20%, #EA4335 40%, #FBBC05 60%, #34A853 80%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  opacity: 0.12; /* Juda xira, xalaqit bermaydi */
-  z-index: 1; /* Kontentdan orqada */
-  pointer-events: none; /* Bosib bo'lmaydi, o'tkazib yuboradi */
-  user-select: none;
-  white-space: nowrap;
-  filter: blur(1px); /* Yumshoqlik uchun */
-  animation: doodleFloat 6s ease-in-out infinite;
-}
 
 @keyframes doodleFloat {
   0%, 100% { transform: translateX(-50%) rotate(-8deg) scale(1); }
@@ -239,10 +214,7 @@ h1 {
 @media (min-width: 768px) { .desktop-clock { display: block; } }
 
 
-/* ===== Minimal qor ===== */
-.snow { pointer-events: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: 5000; }
-.snowflake { position: absolute; top: -10px; color: #fff; opacity: 0.7; font-size: 8px; animation: fall linear infinite; }
-@keyframes fall { to { transform: translateY(105vh); } }
+
 
   .subtitle {
   font-size: 16px;      /* kichikroq matn */
@@ -317,16 +289,81 @@ h1 {
   transform:scale(1.05);
 }
 
+/* =========================================================
+   SEASON FX ONLY (AUTUMN / WINTER / SUMMER) — NO GROUND
+   Удалить: этот CSS + <div class="season-fx snow"></div> + JS "SEASON FX SCRIPT" (внизу)
+========================================================= */
 
+/* общий контейнер (оставил также класс .snow, чтобы твой код работал как есть) */
+.season-fx,
+.snow{
+  pointer-events: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 1; /* фон, не мешает тексту/кнопкам */
+}
 
+/* ===== WINTER: Minimal qor (твой стиль) ===== */
+.snowflake{
+  position: absolute;
+  top: -10px;
+  color: #fff;
+  opacity: 0.7;
+  font-size: 8px;
+  animation: fall linear infinite;
+}
+@keyframes fall { to { transform: translateY(105vh); } }
 
+/* ===== AUTUMN: Leaves ===== */
+.season-leaf{
+  position:absolute;
+  top:-40px;
+  width:14px;
+  height:10px;
+  border-radius:80% 20% 80% 20%;
+  opacity:.85;
+  filter: blur(.15px);
+  transform: rotate(0deg);
+  animation: leafFall linear forwards;
+}
+.season-leaf::after{
+  content:"";
+  position:absolute;
+  inset:2px 4px;
+  border-left:1px solid rgba(255,255,255,.35);
+  transform:rotate(18deg);
+  border-radius:8px;
+}
+@keyframes leafFall{
+  from { transform: translate3d(var(--x0), -40px, 0) rotate(var(--r0)); }
+  to   { transform: translate3d(var(--x1), 110vh, 0) rotate(var(--r1)); }
+}
+
+/* ===== SUMMER: Pollen particles ===== */
+.summer-pollen{
+  position:absolute;
+  top:-30px;
+  width:10px;
+  height:10px;
+  border-radius:999px;
+  opacity:.35;
+  filter: blur(.6px);
+  animation: pollenFall linear forwards;
+}
+@keyframes pollenFall{
+  from { transform: translate3d(var(--x0), -30px, 0); }
+  to   { transform: translate3d(var(--x1), 110vh, 0); }
+}
 </style>
   
 </head>
 <body>
   
- <button id="notifyBtn" class="notify-btn" style="display:none">
-  🔔 Yangiliklardan xabardor bo‘lish
+  <button id="notifyBtn" class="notify-btn" style="display:none">
+   🔔 Yangiliklardan xabardor bo‘lish
 </button>
 
 
@@ -352,15 +389,6 @@ h1 {
 
   </div>
 </header>
-
-
-<div class="snow"></div>
-
-<div class="doodle-year">2026</div>
-
-
-<div class="overlay"></div>
-
 <h1>Prank-as orqali do‘stlaringiz bilan hazillashing!</h1>
   
   <p class="subtitle">
@@ -570,22 +598,7 @@ Array.from(container.children).forEach((btn, i) => {
 });
 
 
-// ❄ Minimal qor funksiyasi
-function createSnow() {
-  const container = document.querySelector('.snow');
-  for (let i = 0; i < 10; i++) {
-    let flake = document.createElement("div");
-    flake.className = "snowflake";
-    flake.textContent = "❄";
-    flake.style.left = Math.random() * 100 + "vw";
-    flake.style.fontSize = (6 + Math.random() * 6) + "px";
-    flake.style.animationDuration = (6 + Math.random() * 8) + "s";
-    container.appendChild(flake);
-    setTimeout(() => flake.remove(), 15000);
-  }
-}
-createSnow();
-setInterval(createSnow, 5000);
+
   
   // SUPABASE UCHUN! O'CHIB KETMASIN
 </script>
@@ -729,7 +742,160 @@ fetch("https://prankasapi.windowsnoutbook.workers.dev/visit");
   }
 </script>
 
- 
+<!-- =======================================================
+     SEASON FX CONTAINER (NO GROUND)
+     Удалить: этот div + CSS блок SEASON FX + JS блок SEASON FX SCRIPT
+======================================================= -->
+<div class="season-fx snow"></div>
+
+<script>
+/* =========================================================
+   SEASON FX SCRIPT (AUTUMN / WINTER / SUMMER) — NO GROUND
+
+   КАК ВКЛЮЧИТЬ СЕЗОН:
+   ВОТ ТУТ поменяй значение season:
+   "winter" | "autumn" | "summer"
+
+   УДАЛИТЬ:
+   1) этот script
+   2) <div class="season-fx snow"></div>
+   3) CSS блок "SEASON FX ONLY"
+========================================================= */
+
+(() => {
+  const ENABLE_SEASON_FX = true;
+  if (!ENABLE_SEASON_FX) return;
+
+  const season = "winter"; // <-- поменяй тут: winter / autumn / summer
+
+  const container = document.querySelector('.snow'); // оставил как у тебя
+  if (!container) return;
+
+  const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const rand = (a,b)=>Math.random()*(b-a)+a;
+
+  // =========================
+  // ❄ Minimal qor funksiyasi (твой код, логика сохранена)
+  // =========================
+  function createSnow() {
+    const container = document.querySelector('.snow');
+    const count = reduced ? 5 : 10;
+
+    for (let i = 0; i < count; i++) {
+      let flake = document.createElement("div");
+      flake.className = "snowflake";
+      flake.textContent = "❄";
+      flake.style.left = Math.random() * 100 + "vw";
+      flake.style.fontSize = (6 + Math.random() * 6) + "px";
+      flake.style.animationDuration = (6 + Math.random() * 8) + "s";
+      container.appendChild(flake);
+      setTimeout(() => flake.remove(), 15000);
+    }
+  }
+
+  // =========================
+  // 🍂 AUTUMN: leaves
+  // =========================
+  function spawnLeaf(){
+    const leaf = document.createElement("div");
+    leaf.className = "season-leaf";
+
+    const xStart = rand(-10, 110);
+    const drift = rand(-14, 14);
+    const r0 = rand(-180, 180);
+    const r1 = r0 + rand(180, 720);
+
+    leaf.style.setProperty("--x0", `${xStart}vw`);
+    leaf.style.setProperty("--x1", `${xStart + drift}vw`);
+    leaf.style.setProperty("--r0", `${r0}deg`);
+    leaf.style.setProperty("--r1", `${r1}deg`);
+
+    const dur = rand(6500, 12000);
+    leaf.style.animationDuration = `${dur}ms`;
+    leaf.style.animationDelay = `${rand(0, 600)}ms`;
+
+    const hue = rand(15, 45);
+    leaf.style.background =
+      `radial-gradient(circle at 30% 30%, rgba(255,255,255,.35), rgba(255,255,255,0) 45%),
+       linear-gradient(135deg, hsla(${hue}, 80%, 65%, .95), hsla(${hue-10}, 80%, 35%, .95))`;
+
+    leaf.style.opacity = String(rand(0.35, 0.95));
+    leaf.style.filter = `blur(${rand(0.05, 0.3)}px)`;
+
+    const scale = rand(0.8, 1.5);
+    leaf.style.width = `${14 * scale}px`;
+    leaf.style.height = `${10 * scale}px`;
+
+    container.appendChild(leaf);
+    setTimeout(() => leaf.remove(), dur + 1200);
+  }
+
+  // =========================
+  // ☀️ SUMMER: pollen
+  // =========================
+  function spawnPollen(){
+    const p = document.createElement("div");
+    p.className = "summer-pollen";
+
+    const xStart = rand(-10, 110);
+    const drift = rand(-8, 8);
+    p.style.setProperty("--x0", `${xStart}vw`);
+    p.style.setProperty("--x1", `${xStart + drift}vw`);
+
+    const dur = rand(9000, 16000);
+    p.style.animationDuration = `${dur}ms`;
+    p.style.animationDelay = `${rand(0, 700)}ms`;
+
+    const hue = rand(70, 120);
+    p.style.background =
+      `radial-gradient(circle at 35% 35%, rgba(255,255,255,.35), rgba(255,255,255,0) 55%),
+       radial-gradient(circle at 50% 60%, hsla(${hue}, 80%, 70%, .55), hsla(${hue}, 80%, 45%, .2))`;
+
+    const scale = rand(0.5, 1.1);
+    p.style.width = `${10 * scale}px`;
+    p.style.height = `${10 * scale}px`;
+    p.style.opacity = String(rand(0.18, 0.55));
+
+    container.appendChild(p);
+    setTimeout(() => p.remove(), dur + 1200);
+  }
+
+  // =========================
+  // RUN выбранного сезона
+  // =========================
+  let timer = null;
+
+  if (season === "winter") {
+    createSnow();
+    timer = setInterval(createSnow, 5000);
+  } else if (season === "autumn") {
+    const maxLeaves = reduced ? 10 : 28;
+    const every = reduced ? 900 : 480;
+    for (let i = 0; i < Math.min(10, maxLeaves); i++) spawnLeaf();
+    timer = setInterval(() => {
+      if (container.childElementCount < maxLeaves) spawnLeaf();
+    }, every);
+  } else if (season === "summer") {
+    const max = reduced ? 8 : 18;
+    const every = reduced ? 1000 : 650;
+    for (let i=0;i<Math.min(8,max);i++) spawnPollen();
+    timer = setInterval(() => {
+      if (container.childElementCount < max) spawnPollen();
+    }, every);
+  }
+
+  // пауза на скрытой вкладке
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) container.innerHTML = "";
+  });
+
+  // остановка из консоли
+  window.__stopSeasonFX = () => {
+    if (timer) clearInterval(timer);
+    container.innerHTML = "";
+  };
+})();
+</script>
 
 </body>
 </html>
