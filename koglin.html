@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Sentinel OS 3.0</title>
+
+  <link rel="icon" type="image/png" href="/media/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/media/favicon.svg" />
+  <link rel="shortcut icon" href="/media/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/media/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="Kolgin" />
+  <link rel="manifest" href="/media/site.webmanifest" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root { --bg-dark:#050507; --accent:#3b82f6; --danger:#ef4444; }
+    body{
+      background-color:var(--bg-dark);
+      color:#fff;
+      font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+      overflow:hidden;
+    }
+    .glass{
+      background:rgba(15,15,20,.9);
+      backdrop-filter:blur(15px);
+      border:1px solid rgba(255,255,255,.08);
+    }
+    #alarm-overlay{
+      position:fixed; inset:0;
+      background-color:red;
+      z-index:1000;
+      display:none;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+    }
+    .flashing{ animation:flash-bg .3s infinite alternate; }
+    @keyframes flash-bg{ from{background-color:#ff0000} to{background-color:#220000} }
+
+    /* Range slider */
+    input[type="range"]{
+      -webkit-appearance:none;
+      width:100%;
+      height:6px;
+      border-radius:999px;
+      background:rgba(255,255,255,.10);
+      outline:none;
+      cursor:pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb{
+      -webkit-appearance:none;
+      width:16px; height:16px;
+      border-radius:50%;
+      background:var(--accent);
+      box-shadow:0 0 12px rgba(59,130,246,.6);
+      border:2px solid rgba(255,255,255,.2);
+    }
+    input[type="range"]::-moz-range-thumb{
+      width:16px; height:16px;
+      border-radius:50%;
+      background:var(--accent);
+      border:2px solid rgba(255,255,255,.2);
+    }
+
+    .monitor-frame{
+      position:relative;
+      background:#000;
+      border-radius:20px;
+      box-shadow:inset 0 0 50px rgba(0,0,0,1), 0 0 30px rgba(59,130,246,.1);
+    }
+  </style>
+</head>
+
+<body class="h-screen flex flex-col p-4">
+
+  <!-- Header -->
+  <header class="flex justify-between items-center mb-4 px-2">
+    <div class="flex items-center gap-3">
+      <div id="status-led" class="w-4 h-4 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.8)]"></div>
+      <h1 class="text-xl font-black tracking-tighter text-blue-500">SENTINEL OS <span class="text-white/30 font-light">3.0</span></h1>
+    </div>
+    <div id="clock" class="font-mono text-sm opacity-50 uppercase tracking-widest">00:00:00</div>
+  </header>
+
+  <div class="flex-1 grid grid-cols-12 gap-4 min-h-0">
+
+    <!-- Viewport -->
+    <div class="col-span-12 lg:col-span-9 flex flex-col gap-4 min-h-0">
+      <div class="monitor-frame flex-1 overflow-hidden flex items-center justify-center">
+        <video id="v" autoplay playsinline muted class="absolute w-full h-full object-cover opacity-30 pointer-events-none"></video>
+        <canvas id="motion-view" class="absolute w-full h-full object-cover"></canvas>
+
+        <div class="absolute top-4 left-4 flex gap-2">
+          <div class="bg-black/80 px-3 py-1 rounded text-[10px] font-bold border border-white/10 uppercase">KANAL_01</div>
+          <div id="live-indicator" class="bg-blue-600 px-3 py-1 rounded text-[10px] font-bold uppercase animate-pulse">JONLI</div>
+        </div>
+
+        <!-- Activation Overlay -->
+        <div id="countdown-screen" class="absolute inset-0 bg-black/90 hidden flex flex-col items-center justify-center z-50">
+          <span class="text-white/40 text-sm tracking-widest uppercase mb-2">Sensorlar barqarorlashtirilmoqda</span>
+          <span id="countdown-val" class="text-9xl font-black text-blue-500 italic">5</span>
+        </div>
+      </div>
+
+      <!-- Fast Metrics -->
+      <div class="grid grid-cols-4 gap-4">
+        <div class="glass p-3 rounded-xl">
+          <div class="text-[10px] text-white/40 mb-1 uppercase">Harakat darajasi</div>
+          <div class="h-2 bg-white/5 rounded-full overflow-hidden">
+            <div id="motion-bar" class="h-full bg-blue-500 transition-all duration-75" style="width:0%"></div>
+          </div>
+        </div>
+        <div class="glass p-3 rounded-xl flex items-center justify-between">
+          <span class="text-[10px] text-white/40 uppercase">Sensorlar</span>
+          <span id="sensor-dot" class="w-2 h-2 rounded-full bg-green-500"></span>
+        </div>
+        <div class="glass p-3 rounded-xl flex items-center justify-between">
+          <span class="text-[10px] text-white/40 uppercase">Kursor</span>
+          <span class="w-2 h-2 rounded-full bg-green-500"></span>
+        </div>
+        <div class="glass p-3 rounded-xl flex items-center justify-between">
+          <span class="text-[10px] text-white/40 uppercase">Giroskop</span>
+          <span id="gyro-dot" class="w-2 h-2 rounded-full bg-white/10"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Panel -->
+    <aside class="col-span-12 lg:col-span-3 flex flex-col gap-4 min-h-0">
+      <div class="glass p-5 rounded-2xl flex flex-col h-full overflow-y-auto">
+        <h2 class="text-sm font-bold mb-6 tracking-widest text-white/60">SOZLAMALAR</h2>
+
+        <div class="space-y-6 flex-1">
+
+          <div>
+            <label class="flex justify-between text-xs mb-3 uppercase opacity-50">
+              Sezgirlik <span id="val-sens">15</span>
+            </label>
+            <input type="range" id="sens" class="w-full" min="1" max="50" value="15" />
+          </div>
+
+          <div>
+            <label class="flex justify-between text-xs mb-3 uppercase opacity-50">
+              Shovqin chegarasi <span id="val-noise">30</span>
+            </label>
+            <input type="range" id="noise" class="w-full" min="5" max="120" value="30" />
+          </div>
+
+          <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 cursor-pointer hover:bg-white/10 transition-colors" onclick="toggleDebug()">
+            <span class="text-xs uppercase font-bold">Diagnostika rejimi</span>
+            <div id="debug-toggle" class="w-8 h-4 bg-white/10 rounded-full relative">
+              <div class="absolute left-1 top-1 w-2 h-2 bg-white rounded-full transition-all"></div>
+            </div>
+          </div>
+
+          <!-- Background Music (URL/path kodda) -->
+          <div class="p-4 bg-white/5 rounded-xl border border-white/5 space-y-3">
+            <div class="text-[10px] text-white/40 uppercase tracking-widest">Fon musiqasi</div>
+            <div class="text-[11px] text-white/60">
+              Manzil kod ichida: <span class="text-blue-300 font-mono">BGM_URL</span>
+            </div>
+
+            <div class="flex gap-2">
+              <button id="bgm-toggle"
+                class="flex-1 bg-blue-600/80 hover:bg-blue-600 py-2 rounded-lg text-[11px] font-black uppercase tracking-widest active:scale-95 transition">
+                Ijro etish
+              </button>
+              <button id="bgm-stop"
+                class="px-4 bg-white/10 hover:bg-white/15 py-2 rounded-lg text-[11px] font-black uppercase tracking-widest active:scale-95 transition">
+                To‘xtat
+              </button>
+            </div>
+
+            <div>
+              <label class="flex justify-between text-[11px] mb-2 uppercase opacity-50">
+                Ovoz <span id="val-vol">70</span>
+              </label>
+              <input type="range" id="bgm-vol" min="0" max="100" value="70" />
+            </div>
+          </div>
+
+          <div class="p-4 bg-blue-500/5 rounded-xl border border-blue-500/20">
+            <p class="text-[10px] text-blue-300 leading-relaxed italic">
+              * “Qo‘riqlashni yoqish” bosilgach, 5 soniya ichida kameradan uzoqlash va sichqonchani qimirlatma.
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-6 space-y-3">
+          <button id="arm-btn" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-black text-sm tracking-widest transition-all shadow-lg active:scale-95 uppercase">
+            Qo‘riqlashni yoqish
+          </button>
+
+          <div id="log" class="bg-black/50 p-3 rounded-lg h-32 font-mono text-[9px] overflow-y-auto border border-white/5 text-blue-400">
+            <div>> Tizim tayyor</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Alarm Overlay -->
+  <div id="alarm-overlay">
+    <h1 class="text-7xl md:text-[10rem] font-black italic tracking-tighter leading-none mb-4">XAVF!</h1>
+    <p id="alarm-src" class="text-xl font-mono tracking-widest bg-white text-red-600 px-4 mb-12">HARAKAT_ANIQLANDI</p>
+    <button id="stop-btn" class="bg-white text-black px-16 py-6 rounded-full text-2xl font-black hover:scale-105 transition-transform active:scale-90">
+      To‘xtatish
+    </button>
+  </div>
+
+  <audio id="bgm" loop></audio>
+
+  <script>
+    // =========================
+    // FON MUSIQASI MANZILI
+    // =========================
+    // Shu joyni o'zing o'zgartirasan:
+    const BGM_URL = "media/bgm.mp3"; // masalan: "/media/bgm.mp3" yoki "https://site.com/bgm.mp3"
+
+    const video = document.getElementById('v');
+    const motionCanvas = document.getElementById('motion-view');
+    const mctx = motionCanvas.getContext('2d', { willReadFrequently: true });
+
+    // Processing canvas
+    const processingCanvas = document.createElement('canvas');
+    const pctx = processingCanvas.getContext('2d', { willReadFrequently: true });
+
+    const armBtn = document.getElementById('arm-btn');
+    const stopBtn = document.getElementById('stop-btn');
+    const overlay = document.getElementById('alarm-overlay');
+    const logBox = document.getElementById('log');
+    const countdownScreen = document.getElementById('countdown-screen');
+    const countdownVal = document.getElementById('countdown-val');
+    const motionBar = document.getElementById('motion-bar');
+
+    // Music
+    const bgm = document.getElementById('bgm');
+    const bgmToggle = document.getElementById('bgm-toggle');
+    const bgmStop = document.getElementById('bgm-stop');
+    const bgmVol = document.getElementById('bgm-vol');
+    const valVol = document.getElementById('val-vol');
+
+    let bgmReady = false;
+    let bgmPlaying = false;
+
+    let isArmed = false;
+    let isActivating = false;
+    let isDebug = false;
+
+    // Motion state
+    let prevData = null;
+    let prevMean = 0;
+    let motionEMA = 0;
+
+    // Siren
+    let audioCtx, sirenOsc, sirenInterval;
+
+    function nowTime() {
+      try { return new Date().toLocaleTimeString('uz-UZ'); }
+      catch { return new Date().toLocaleTimeString(); }
+    }
+
+    function log(msg) {
+      const div = document.createElement('div');
+      div.textContent = `> ${nowTime()}: ${msg}`;
+      logBox.prepend(div);
+    }
+
+    function toggleDebug() {
+      isDebug = !isDebug;
+      const knob = document.getElementById('debug-toggle').querySelector('div');
+      knob.style.left = isDebug ? '20px' : '4px';
+      document.getElementById('debug-toggle').style.backgroundColor = isDebug ? '#3b82f6' : 'rgba(255,255,255,0.1)';
+      log(isDebug ? "Diagnostika yoqildi" : "Diagnostika o‘chirildi");
+      prevData = null; // debug almashtirganda false trigger bo‘lmasin
+    }
+
+    setInterval(() => {
+      document.getElementById('clock').innerText = nowTime();
+    }, 1000);
+
+    // ===== Background Music (URL) =====
+    function loadBgmFromUrl() {
+      if (!BGM_URL || BGM_URL.trim() === "") {
+        bgmReady = false;
+        log("Fon musiqasi manzili kiritilmagan (BGM_URL bo‘sh)");
+        return;
+      }
+      bgm.src = BGM_URL;
+      bgm.load();
+      bgmReady = true;
+      bgmPlaying = false;
+      bgmToggle.textContent = "Ijro etish";
+      log("Fon musiqasi manzili o‘rnatildi");
+    }
+
+    bgmVol.addEventListener('input', () => {
+      valVol.textContent = bgmVol.value;
+      bgm.volume = Math.max(0, Math.min(1, Number(bgmVol.value) / 100));
+    });
+    bgm.volume = Number(bgmVol.value) / 100;
+
+    bgmToggle.addEventListener('click', async () => {
+      if (!bgmReady) { log("Fon musiqasi tayyor emas (BGM_URL ni tekshir)"); return; }
+      try {
+        if (!bgmPlaying) {
+          await bgm.play();
+          bgmPlaying = true;
+          bgmToggle.textContent = "Pauza";
+          log("Fon musiqasi ijro etilmoqda");
+        } else {
+          bgm.pause();
+          bgmPlaying = false;
+          bgmToggle.textContent = "Ijro etish";
+          log("Fon musiqasi pauzada");
+        }
+      } catch {
+        log("Musiqa ijrosi bloklangan. Yana bir marta bosib ko‘r.");
+      }
+    });
+
+    bgmStop.addEventListener('click', () => {
+      bgm.pause();
+      bgm.currentTime = 0;
+      bgmPlaying = false;
+      bgmToggle.textContent = "Ijro etish";
+      log("Fon musiqasi to‘xtatildi");
+    });
+
+    // ===== Siren =====
+    function startSiren() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      sirenOsc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      sirenOsc.type = 'square';
+      gain.gain.setValueAtTime(0.11, audioCtx.currentTime);
+      sirenOsc.connect(gain);
+      gain.connect(audioCtx.destination);
+      sirenOsc.start();
+      sirenInterval = setInterval(() => {
+        if (!sirenOsc) return;
+        sirenOsc.frequency.linearRampToValueAtTime(950, audioCtx.currentTime + 0.18);
+        setTimeout(() => {
+          if (sirenOsc) sirenOsc.frequency.linearRampToValueAtTime(420, audioCtx.currentTime + 0.18);
+        }, 220);
+      }, 450);
+    }
+
+    function stopSiren() {
+      if (sirenOsc) { try { sirenOsc.stop(); } catch {} sirenOsc = null; }
+      if (sirenInterval) clearInterval(sirenInterval);
+    }
+
+    // ===== Device motion permission (iOS uchun) =====
+    async function requestMotionPermission() {
+      try {
+        if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
+          const res = await DeviceMotionEvent.requestPermission();
+          if (res === "granted") {
+            document.getElementById('gyro-dot').classList.replace('bg-white/10', 'bg-green-500');
+            log("Giroskop ruxsati berildi");
+          } else {
+            log("Giroskop ruxsati berilmadi");
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    // ===== Camera =====
+    async function setupCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            frameRate: { ideal: 30, max: 60 },
+            facingMode: { ideal: "environment" }
+          },
+          audio: false
+        });
+
+        video.srcObject = stream;
+        log("Kamera ulandi");
+        startLoop();
+      } catch (e) {
+        log("Xato: Kamera topilmadi yoki ruxsat berilmadi");
+      }
+    }
+
+    function startLoop() {
+      if (video.requestVideoFrameCallback) {
+        const cb = () => { analyzeMotion(); video.requestVideoFrameCallback(cb); };
+        video.requestVideoFrameCallback(cb);
+      } else {
+        const raf = () => { analyzeMotion(); requestAnimationFrame(raf); };
+        requestAnimationFrame(raf);
+      }
+    }
+
+    function analyzeMotion() {
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        const w = 192;
+        const h = 144;
+        processingCanvas.width = w;
+        processingCanvas.height = h;
+
+        pctx.filter = 'grayscale(100%) blur(1.2px) contrast(1.1)';
+        pctx.drawImage(video, 0, 0, w, h);
+        const currentData = pctx.getImageData(0, 0, w, h);
+
+        motionCanvas.width = video.videoWidth || 1280;
+        motionCanvas.height = video.videoHeight || 720;
+
+        if (isDebug) {
+          mctx.clearRect(0, 0, motionCanvas.width, motionCanvas.height);
+        } else {
+          mctx.filter = 'contrast(1.25) brightness(0.85) sepia(0.45) hue-rotate(180deg)';
+          mctx.drawImage(video, 0, 0, motionCanvas.width, motionCanvas.height);
+        }
+
+        if (prevData && isArmed && !isActivating) {
+          const noiseThreshold = parseInt(document.getElementById('noise').value, 10);
+          const sensitivity = parseInt(document.getElementById('sens').value, 10);
+
+          let sum = 0;
+          for (let i = 0; i < currentData.data.length; i += 4) sum += currentData.data[i];
+          const mean = sum / (w * h);
+          const globalDiff = Math.abs(mean - prevMean);
+
+          let diffPixels = 0;
+          const baseThr = noiseThreshold + (globalDiff * 0.65);
+
+          const debugData = isDebug ? mctx.createImageData(w, h) : null;
+
+          for (let i = 0; i < currentData.data.length; i += 4) {
+            const c = currentData.data[i];
+            const p = prevData.data[i];
+            const dn = Math.abs((c - mean) - (p - prevMean));
+
+            if (dn > baseThr) {
+              diffPixels++;
+              if (isDebug) {
+                debugData.data[i] = 255;
+                debugData.data[i + 1] = 255;
+                debugData.data[i + 2] = 255;
+                debugData.data[i + 3] = 255;
+              }
+            }
+          }
+
+          const motionScore = (diffPixels / (w * h)) * 100;
+          motionEMA = (motionEMA * 0.80) + (motionScore * 0.20);
+
+          motionBar.style.width = Math.min(motionEMA * 6, 100) + '%';
+
+          if (isDebug) {
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = w;
+            tempCanvas.height = h;
+            tempCanvas.getContext('2d').putImageData(debugData, 0, 0);
+            mctx.imageSmoothingEnabled = false;
+            mctx.drawImage(tempCanvas, 0, 0, motionCanvas.width, motionCanvas.height);
+          }
+
+          const triggerLevel = Math.max(0.6, 24 / sensitivity);
+          if (motionEMA > triggerLevel) {
+            triggerAlarm("Kadrda harakat");
+          }
+
+          prevMean = mean;
+        } else {
+          let sum = 0;
+          for (let i = 0; i < currentData.data.length; i += 4) sum += currentData.data[i];
+          prevMean = sum / (w * h);
+        }
+
+        prevData = currentData;
+      }
+    }
+
+    function triggerAlarm(src) {
+      if (!isArmed || isActivating) return;
+      isArmed = false;
+
+      log(`XAVF: ${src}`);
+      document.getElementById('alarm-src').innerText = src;
+
+      document.getElementById('status-led').className =
+        "w-4 h-4 rounded-full bg-red-600 shadow-[0_0_15px_rgba(255,0,0,1)] animate-pulse";
+
+      overlay.style.display = 'flex';
+      overlay.classList.add('flashing');
+
+      // fon musiqasini biroz pasaytirish (xohlasang o‘chirib tashla)
+      if (bgmPlaying) bgm.volume = Math.max(0, bgm.volume * 0.35);
+
+      startSiren();
+    }
+
+    // Events
+    window.addEventListener('mousemove', () => {
+      if (isArmed && !isActivating) triggerAlarm("Sichqoncha qimirlatildi");
+    });
+
+    window.addEventListener('devicemotion', (e) => {
+      if (!isArmed || isActivating) return;
+      const acc = e.accelerationIncludingGravity;
+      if (!acc) return;
+
+      const magnitude = Math.abs(acc.x || 0) + Math.abs(acc.y || 0) + Math.abs(acc.z || 0);
+      if (magnitude > 12) triggerAlarm("Qurilma siljidi");
+    });
+
+    armBtn.addEventListener('click', async () => {
+      if (isArmed || isActivating) return;
+
+      await requestMotionPermission();
+
+      try {
+        if (audioCtx && audioCtx.state === "suspended") await audioCtx.resume();
+      } catch {}
+
+      isActivating = true;
+      countdownScreen.style.display = 'flex';
+      let count = 5;
+      countdownVal.innerText = count;
+      log("Protokol ishga tushdi... Kameradan uzoqlash");
+
+      const timer = setInterval(() => {
+        count--;
+        countdownVal.innerText = count;
+        if (count <= 0) {
+          clearInterval(timer);
+          isArmed = true;
+          isActivating = false;
+          countdownScreen.style.display = 'none';
+
+          armBtn.innerText = "Qo‘riqlash yoqildi";
+          armBtn.classList.replace('bg-blue-600', 'bg-red-600/20');
+          document.getElementById('status-led').classList.replace('bg-blue-500', 'bg-red-500');
+
+          log("Tizim faollashtirildi");
+          prevData = null;
+          motionEMA = 0;
+        }
+      }, 1000);
+    });
+
+    stopBtn.addEventListener('click', () => {
+      isArmed = false;
+
+      stopSiren();
+      overlay.style.display = 'none';
+      overlay.classList.remove('flashing');
+
+      // fon musiqasini qaytarish
+      bgm.volume = Number(bgmVol.value) / 100;
+
+      armBtn.innerText = "Qo‘riqlashni yoqish";
+      armBtn.classList.replace('bg-red-600/20', 'bg-blue-600');
+
+      document.getElementById('status-led').className =
+        "w-4 h-4 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.8)]";
+
+      log("Tizim foydalanuvchi tomonidan to‘xtatildi");
+    });
+
+    // Settings feedback
+    ['sens', 'noise'].forEach(id => {
+      const input = document.getElementById(id);
+      input.oninput = () => document.getElementById('val-' + id).innerText = input.value;
+    });
+
+    // Gyro status (oddiy brauzerlar)
+    if (window.DeviceMotionEvent && !DeviceMotionEvent.requestPermission) {
+      document.getElementById('gyro-dot').classList.replace('bg-white/10', 'bg-green-500');
+    }
+
+    // Init
+    loadBgmFromUrl();
+    setupCamera();
+  </script>
+</body>
+</html>
