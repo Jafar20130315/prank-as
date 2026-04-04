@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mening Honam</title>
+  <link rel="icon" href="favicon.png">
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #000; transition: opacity 1s; touch-action: none; }
+        canvas { display: block; }
+        
+        #crosshair {
+            position: absolute; top: 50%; left: 50%; width: 6px; height: 6px;
+            background-color: rgba(255, 255, 255, 0.8); border-radius: 50%;
+            transform: translate(-50%, -50%); pointer-events: none; z-index: 10;
+            box-shadow: 0 0 4px rgba(0,0,0,0.5);
+        }
+        #blocker {
+            position: absolute; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.8); z-index: 60; /* Поверх всего */
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; transition: opacity 0.5s; flex-direction: column; color: white;
+            font-family: 'Segoe UI', sans-serif; text-align: center;
+        }
+
+        /* Кнопка звука */
+        #mute-btn {
+            position: absolute; top: 20px; left: 20px; width: 45px; height: 45px;
+            background: rgba(0, 0, 0, 0.6); color: white; border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.5); z-index: 1000; cursor: pointer;
+            display: flex; justify-content: center; align-items: center; font-size: 22px;
+            user-select: none; transition: 0.2s;
+        }
+        #mute-btn:hover { background: rgba(0,0,0,0.8); border-color: white; }
+
+        /* --- OS UI (Windows 11 Style) --- */
+        #os-ui {
+            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop') center/cover;
+            z-index: 100; font-family: 'Segoe UI Variable', 'Segoe UI', Tahoma, sans-serif;
+            color: white; overflow: hidden; user-select: none;
+        }
+        
+        #os-desktop { padding: 10px; display: flex; flex-direction: column; gap: 10px; height: calc(100% - 60px); flex-wrap: wrap; align-content: flex-start; }
+        .os-icon { width: 74px; height: 74px; text-align: center; cursor: pointer; border-radius: 4px; transition: background 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+        .os-icon:hover { background: rgba(255,255,255,0.1); }
+        .os-icon .icon-img { font-size: 32px; margin-bottom: 4px; }
+
+        #os-taskbar { position: absolute; bottom: 0; width: 100%; height: 48px; background: rgba(32, 32, 32, 0.85); backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: center; gap: 15px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .tb-icon { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; font-size: 20px; transition: 0.2s; }
+        .tb-icon:hover { background: rgba(255,255,255,0.1); }
+        .tb-start { font-size: 24px; color: #00A4EF; }
+        .tb-right { position: absolute; right: 15px; display: flex; gap: 10px; font-size: 14px; align-items: center; }
+
+        .os-window { display: none; position: absolute; top: 10%; left: 15%; width: 70%; height: 75%; background: #202020; border-radius: 8px; overflow: hidden; box-shadow: 0 14px 28px rgba(0,0,0,0.5), 0 10px 10px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); flex-direction: column; }
+        .window-header { background: rgba(32, 32, 32, 0.95); height: 32px; display: flex; justify-content: space-between; align-items: center; cursor: grab; padding-left: 15px; font-size: 12px; user-select: none; }
+        .window-header:active { cursor: grabbing; }
+        .window-controls { display: flex; height: 100%; }
+        .w-btn { width: 46px; height: 100%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-family: sans-serif; font-size: 14px; transition: 0.2s; }
+        .w-btn:hover { background: rgba(255,255,255,0.1); }
+        .w-btn.close:hover { background: #E81123; }
+        .window-content { flex-grow: 1; background: #fff; color: #000; display: flex; flex-direction: column; position: relative; }
+        
+        .chrome-bar { background: #F7F7F7; padding: 8px; display: flex; gap: 10px; border-bottom: 1px solid #ddd; align-items: center; }
+        .chrome-bar input { flex-grow: 1; padding: 6px 15px; border-radius: 20px; border: 1px solid #ccc; outline: none; background: #fff; font-size: 13px; }
+        .chrome-bar button { background: none; border: none; cursor: pointer; border-radius: 50%; width: 28px; height: 28px; transition: 0.2s; }
+        .chrome-bar button:hover { background: #EAEAEA; }
+        #browser-frame { width: 100%; height: 100%; border: none; background: white; }
+
+        .explorer-ui { display: flex; height: 100%; background: #202020; color: white; }
+        .explorer-side { width: 220px; background: rgba(255,255,255,0.03); padding: 10px; border-right: 1px solid rgba(255,255,255,0.1); }
+        .explorer-main { padding: 20px; display: flex; gap: 20px; flex-wrap: wrap; align-content: flex-start; flex-grow: 1; background: #191919; }
+        .folder-item { width: 90px; text-align: center; cursor: pointer; padding: 10px; border-radius: 5px; }
+        .folder-item:hover { background: rgba(255,255,255,0.1); }
+        .folder-item .icon { font-size: 48px; margin-bottom: 5px; }
+
+        #exit-pc-btn { position: absolute; top: 20px; right: 20px; z-index: 1000; padding: 10px 20px; background: #ff4444; color: white; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        #exit-pc-btn:hover { background: #ff2222; }
+
+        /* --- Мобильное управление --- */
+        #mobile-controls { display: none; position: absolute; width: 100%; height: 100%; z-index: 50; pointer-events: none; }
+        #joystick-zone { position: absolute; bottom: 30px; left: 30px; width: 120px; height: 120px; pointer-events: auto; }
+        #touch-look-zone { position: absolute; top: 0; right: 0; width: 50%; height: 100%; pointer-events: auto; }
+        #mobile-btn-container { position: absolute; bottom: 30px; right: 30px; display: flex; gap: 15px; pointer-events: auto; }
+        .mob-btn { width: 65px; height: 65px; border-radius: 50%; background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.6); font-size: 11px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        .mob-btn:active { background: rgba(255,255,255,0.5); }
+    </style>
+</head>
+<body>
+    <div id="mute-btn">🔊</div>
+
+    <div id="blocker">
+        <h1 style="margin-bottom: 10px;">Mening honam</h1>
+        <p id="start-instructions">Boshlash uchun ekranni bosing.</p>
+        <p style="color:#aaa; font-size:14px;">WASD- Yurish</p>
+        <p id="mobile-warning" style="display: none; color: #ff6666; font-weight: bold; max-width: 80%; margin-top: 20px;">
+            Diqqat, ushbu sahifa telefonlarda qotishi mumkin.
+        </p>
+    </div>
+
+    <!-- Контейнер мобильного управления -->
+    <div id="mobile-controls">
+        <div id="joystick-zone"></div>
+        <div id="touch-look-zone"></div>
+        <div id="mobile-btn-container">
+            <button class="mob-btn" id="mobile-jump">Sakrash</button>
+            <button class="mob-btn" id="mobile-interact">Bosish</button>
+        </div>
+    </div>
+
+    <div id="crosshair"></div>
+
+    <div id="os-ui">
+        <button id="exit-pc-btn" onclick="exitPC()">Komyuterdan turish</button>
+        <div id="os-desktop">
+            <div class="os-icon" ondblclick="openApp('chrome')"><div class="icon-img">🌐</div>Edge Browser</div>
+            <div class="os-icon" ondblclick="openApp('explorer')"><div class="icon-img">📁</div>Проводник</div>
+            <div class="os-icon"><div class="icon-img">🗑️</div>Корзина</div>
+        </div>
+
+        <div id="app-chrome" class="os-window" style="display: none;">
+            <div class="window-header">
+                <span style="color:white; display:flex; align-items:center; gap:5px;"><span style="font-size:14px">🌐</span> Web Browser</span>
+                <div class="window-controls">
+                    <div class="w-btn" onclick="closeApp('chrome')">—</div>
+                    <div class="w-btn" onclick="maximizeApp('chrome')">☐</div>
+                    <div class="w-btn close" onclick="closeApp('chrome')">✕</div>
+                </div>
+            </div>
+            <div class="window-content">
+                <div class="chrome-bar">
+                    <button onclick="document.getElementById('browser-frame').contentWindow.history.back()">⬅️</button>
+                    <button onclick="document.getElementById('browser-frame').contentWindow.history.forward()">➡️</button>
+                    <button onclick="document.getElementById('browser-frame').src = document.getElementById('browser-frame').src">🔄</button>
+                    <input type="text" id="url-input" value="https://ru.wikipedia.org" onkeydown="if(event.key === 'Enter') navigateBrowser()">
+                </div>
+                <iframe id="browser-frame" src="https://ru.wikipedia.org"></iframe>
+            </div>
+        </div>
+
+        <div id="app-explorer" class="os-window" style="display: none;">
+            <div class="window-header">
+                <span style="color:white; display:flex; align-items:center; gap:5px;"><span style="font-size:14px">📁</span> Проводник</span>
+                <div class="window-controls">
+                    <div class="w-btn" onclick="closeApp('explorer')">—</div>
+                    <div class="w-btn" onclick="maximizeApp('explorer')">☐</div>
+                    <div class="w-btn close" onclick="closeApp('explorer')">✕</div>
+                </div>
+            </div>
+            <div class="window-content explorer-ui">
+                <div class="explorer-side">
+                    <p style="padding: 5px; border-radius: 4px; cursor: pointer; background: rgba(255,255,255,0.1);">🏠 Главная</p>
+                    <p style="padding: 5px; border-radius: 4px; cursor: pointer;">💻 Этот компьютер</p>
+                    <p style="padding: 5px; border-radius: 4px; cursor: pointer;">⬇️ Загрузки</p>
+                    <p style="padding: 5px; border-radius: 4px; cursor: pointer;">📄 Документы</p>
+                </div>
+                <div class="explorer-main" id="explorer-content">
+                    <div class="folder-item" onclick="openFolder('Games')"><div class="icon">📁</div>Игры</div>
+                    <div class="folder-item" onclick="openFolder('Work')"><div class="icon">📁</div>Работа</div>
+                    <div class="folder-item"><div class="icon">🎵</div>Music.mp3</div>
+                    <div class="folder-item"><div class="icon">🖼️</div>Photo.png</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="os-taskbar">
+            <div class="tb-icon tb-start" onclick="alert('Меню Пуск')">🪟</div>
+            <div class="tb-icon" onclick="openApp('chrome')">🌐</div>
+            <div class="tb-icon" onclick="openApp('explorer')">📁</div>
+            <div class="tb-right">
+                <span>🔊</span><span>ENG</span><span id="os-time">12:00</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Подключаем Three.js, PointerLock и NippleJS (для мобильного джойстика) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.10.0/nipplejs.min.js"></script>
+
+    <script>
+        // --- Настройка окружения и звука ---
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        let isMuted = false;
+        let listener, streetSound;
+        const volumeClosed = 0.15; // Громкость при закрытом окне
+        const volumeOpen = 1.0;    // Громкость при открытом окне
+
+        // Инициализация звуковой системы
+        function initAudio(camera) {
+            listener = new THREE.AudioListener();
+            camera.add(listener);
+            streetSound = new THREE.Audio(listener);
+            const audioLoader = new THREE.AudioLoader();
+            
+            
+            const streetSoundURL = 'https://prank-as.site/docs/other/traffic_sound.wav'; 
+
+            audioLoader.load(streetSoundURL, function(buffer) {
+                streetSound.setBuffer(buffer);
+                streetSound.setLoop(true);
+                streetSound.setVolume(volumeClosed);
+            }, undefined, function(e) {
+                console.warn('Аудиофайл не найден или заблокирован политикой CORS.');
+            });
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            document.getElementById('mute-btn').innerText = isMuted ? '🔇' : '🔊';
+            updateSoundVolume();
+        }
+
+        function updateSoundVolume() {
+            if (!streetSound) return;
+            if (isMuted) {
+                streetSound.setVolume(0);
+            } else {
+                streetSound.setVolume(windowsOpen ? volumeOpen : volumeClosed);
+            }
+        }
+
+        function resumeAudio() {
+            if (THREE.AudioContext.getContext().state === 'suspended') {
+                THREE.AudioContext.getContext().resume();
+            }
+            if (streetSound && streetSound.buffer && !streetSound.isPlaying) {
+                streetSound.play();
+            }
+        }
+
+        // --- Обработчик кнопки звука ---
+        document.getElementById('mute-btn').addEventListener('click', (e) => {
+            e.stopPropagation(); // Не запускать вход в игру по клику на кнопку
+            toggleMute();
+        });
+
+        // --- Логика OS ---
+        setInterval(() => {
+            const d = new Date();
+            document.getElementById('os-time').innerText = d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+        }, 1000);
+
+        function navigateBrowser() {
+            let url = document.getElementById('url-input').value;
+            if (!url.startsWith('http')) url = 'https://' + url;
+            document.getElementById('browser-frame').src = url;
+            document.getElementById('url-input').value = url;
+        }
+
+        function openApp(id) {
+            const app = document.getElementById('app-' + id);
+            app.style.display = 'flex';
+            app.style.zIndex = getHighestZ() + 1;
+        }
+
+        function closeApp(id) { document.getElementById('app-' + id).style.display = 'none'; }
+        
+        function maximizeApp(id) {
+            const app = document.getElementById('app-' + id);
+            if(app.style.width === '100%') {
+                app.style.width = '70%'; app.style.height = '75%';
+                app.style.top = '10%'; app.style.left = '15%';
+            } else {
+                app.style.width = '100%'; app.style.height = 'calc(100% - 48px)';
+                app.style.top = '0'; app.style.left = '0';
+            }
+        }
+
+        function openFolder(name) {
+            const content = document.getElementById('explorer-content');
+            if (name === 'Games') content.innerHTML = '<div class="folder-item" onclick="openFolder(\'back\')"><div class="icon">⬅️</div>Назад</div><div class="folder-item"><div class="icon">🎮</div>CS2.exe</div><div class="folder-item"><div class="icon">🎮</div>Minecraft</div>';
+            else if (name === 'back') content.innerHTML = '<div class="folder-item" onclick="openFolder(\'Games\')"><div class="icon">📁</div>Игры</div><div class="folder-item"><div class="icon">📁</div>Работа</div><div class="folder-item"><div class="icon">🎵</div>Music.mp3</div>';
+        }
+
+        let isDragging = false, dragTarget = null, offsetX, offsetY;
+        document.querySelectorAll('.window-header').forEach(header => {
+            header.addEventListener('mousedown', e => {
+                if(e.target.classList.contains('w-btn')) return;
+                isDragging = true; dragTarget = header.parentElement;
+                dragTarget.style.zIndex = getHighestZ() + 1;
+                offsetX = e.clientX - dragTarget.offsetLeft;
+                offsetY = e.clientY - dragTarget.offsetTop;
+            });
+        });
+        document.addEventListener('mousemove', e => {
+            if(isDragging && dragTarget && dragTarget.style.width !== '100%') {
+                dragTarget.style.left = (e.clientX - offsetX) + 'px';
+                dragTarget.style.top = (e.clientY - offsetY) + 'px';
+            }
+        });
+        document.addEventListener('mouseup', () => isDragging = false);
+        function getHighestZ() {
+            let max = 100;
+            document.querySelectorAll('.os-window').forEach(w => {
+                let z = parseInt(window.getComputedStyle(w).zIndex) || 100;
+                if(z > max) max = z;
+            });
+            return max;
+        }
+
+        // --- Логика 3D ---
+        let camera, scene, renderer, controls;
+        let mainLight, ambientLight;
+        
+        const velocity = new THREE.Vector3();
+        const direction = new THREE.Vector3();
+        let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false, canJump = false;
+        
+        // Переменные для мобильного управления
+        let isMobileActive = false;
+        let fwdValue = 0, rightValue = 0;
+
+        let prevTime = performance.now();
+
+        let interactables = [];
+        let roomLightOn = true, isUsingPC = false;
+        
+        let leftCurtainObj, rightCurtainObj, windowLeftObj, windowRightObj, door;
+        let curtainsOpen = false, windowsOpen = false;
+
+        const obstacles = [];
+        const carsData = [];
+
+        const monitorCanvas = document.createElement('canvas');
+        monitorCanvas.width = 512; monitorCanvas.height = 256;
+        const ctx = monitorCanvas.getContext('2d');
+        const monitorTexture = new THREE.CanvasTexture(monitorCanvas);
+
+        init();
+        animate();
+
+        function exitPC() {
+            isUsingPC = false;
+            document.getElementById('os-ui').style.display = 'none';
+            if (!isMobile) controls.lock(); 
+        }
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x020205); 
+            scene.fog = new THREE.FogExp2(0x020205, 0.008);
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+            camera.position.set(0, 5, 0); 
+
+            initAudio(camera);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            document.body.appendChild(renderer.domElement);
+
+            controls = new THREE.PointerLockControls(camera, document.body);
+            const blocker = document.getElementById('blocker');
+
+            // Адаптация стартового экрана для мобильных
+            if (isMobile) {
+                document.getElementById('start-instructions').innerHTML = 'Коснитесь экрана для начала.<br>Используйте джойстик и свайпы для управления.';
+                document.getElementById('mobile-warning').style.display = 'block';
+            }
+
+            blocker.addEventListener('click', () => { 
+                if (!isUsingPC) {
+                    resumeAudio(); // Запуск звука после взаимодействия
+                    if (isMobile) {
+                        blocker.style.display = 'none';
+                        document.getElementById('mobile-controls').style.display = 'block';
+                        isMobileActive = true;
+                    } else {
+                        controls.lock(); 
+                    }
+                }
+            });
+
+            controls.addEventListener('lock', () => {
+                blocker.style.opacity = '0';
+                setTimeout(() => blocker.style.display = 'none', 500);
+            });
+
+            controls.addEventListener('unlock', () => {
+                if (!isUsingPC && !isMobile) {
+                    blocker.style.display = 'flex';
+                    setTimeout(() => blocker.style.opacity = '1', 10);
+                }
+            });
+
+            scene.add(controls.getObject());
+
+            // Подключение клавиатуры
+            document.addEventListener('keydown', e => {
+                // Горячая клавиша для звука (М или Ь на русской раскладке)
+                if (e.code === 'KeyM' || e.key === 'm' || e.key === 'м' || e.key === 'Ь' || e.key === 'ь') {
+                    toggleMute();
+                }
+
+                switch (e.code) {
+                    case 'ArrowUp': case 'KeyW': moveForward = true; break;
+                    case 'ArrowLeft': case 'KeyA': moveLeft = true; break;
+                    case 'ArrowDown': case 'KeyS': moveBackward = true; break;
+                    case 'ArrowRight': case 'KeyD': moveRight = true; break;
+                    case 'Space': if (canJump) velocity.y += 20; canJump = false; break;
+                }
+            });
+            
+            document.addEventListener('keyup', e => {
+                switch (e.code) {
+                    case 'ArrowUp': case 'KeyW': moveForward = false; break;
+                    case 'ArrowLeft': case 'KeyA': moveLeft = false; break;
+                    case 'ArrowDown': case 'KeyS': moveBackward = false; break;
+                    case 'ArrowRight': case 'KeyD': moveRight = false; break;
+                }
+            });
+
+            document.addEventListener('mousedown', onMouseClick);
+            window.addEventListener('resize', onWindowResize);
+
+            // Инициализация мобильного управления, если нужно
+            if (isMobile) initMobileControls();
+
+            buildRoom();
+            buildInteractiveWindows();
+            buildFurniture();
+            buildDecorations(); 
+            buildDetails();
+            buildCityAndSky();
+            setupLighting();
+        }
+
+        // --- Настройка мобильного джойстика и свайпа ---
+        function initMobileControls() {
+            // Джойстик передвижения
+            let joystick = nipplejs.create({
+                zone: document.getElementById('joystick-zone'),
+                mode: 'static',
+                position: { left: '60px', bottom: '60px' },
+                color: 'white'
+            });
+
+            joystick.on('move', (evt, data) => {
+                fwdValue = Math.sin(data.angle.radian) * data.distance;
+                rightValue = Math.cos(data.angle.radian) * data.distance;
+            });
+
+            joystick.on('end', () => {
+                fwdValue = 0; rightValue = 0;
+            });
+
+            // Свайп для осмотра
+            let touchLookZone = document.getElementById('touch-look-zone');
+            let prevTouch = null;
+            
+            touchLookZone.addEventListener('touchstart', e => { prevTouch = e.touches[0]; }, {passive: false});
+            touchLookZone.addEventListener('touchmove', e => {
+                e.preventDefault(); // Запрет прокрутки страницы
+                if (!prevTouch) return;
+                let touch = e.touches[0];
+                let mvX = touch.pageX - prevTouch.pageX;
+                let mvY = touch.pageY - prevTouch.pageY;
+                prevTouch = touch;
+
+                let euler = new THREE.Euler(0, 0, 0, 'YXZ');
+                euler.setFromQuaternion(camera.quaternion);
+                euler.y -= mvX * 0.005;
+                euler.x -= mvY * 0.005;
+                euler.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, euler.x));
+                camera.quaternion.setFromEuler(euler);
+            }, {passive: false});
+            touchLookZone.addEventListener('touchend', () => { prevTouch = null; });
+
+            // Кнопки
+            document.getElementById('mobile-jump').addEventListener('touchstart', (e) => {
+                e.preventDefault(); e.stopPropagation();
+                if (canJump) velocity.y += 20; canJump = false;
+            });
+
+            document.getElementById('mobile-interact').addEventListener('touchstart', (e) => {
+                e.preventDefault(); e.stopPropagation();
+                // Эмуляция клика в центре экрана
+                onMouseClick();
+            });
+        }
+
+        function buildRoom() {
+            const floorMat = new THREE.MeshStandardMaterial({ color: 0x6e5c4f, roughness: 0.9 }); 
+            const wallMat = new THREE.MeshStandardMaterial({ color: 0xf5f5dc, roughness: 0.9 }); 
+            const ceilingMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1.0 });
+
+            const floor = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), floorMat);
+            floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+            
+            const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), ceilingMat);
+            ceiling.rotation.x = Math.PI / 2; ceiling.position.y = 10; ceiling.receiveShadow = true; scene.add(ceiling);
+
+            const wallGeo = new THREE.PlaneGeometry(20, 10);
+            const wallBack = new THREE.Mesh(wallGeo, wallMat); wallBack.position.set(0, 5, 10); wallBack.rotation.y = Math.PI; wallBack.receiveShadow = true; scene.add(wallBack);
+            const wallLeft = new THREE.Mesh(wallGeo, wallMat); wallLeft.position.set(10, 5, 0); wallLeft.rotation.y = -Math.PI / 2; wallLeft.receiveShadow = true; scene.add(wallLeft);
+            const wallRight = new THREE.Mesh(wallGeo, wallMat); wallRight.position.set(-10, 5, 0); wallRight.rotation.y = Math.PI / 2; wallRight.receiveShadow = true; scene.add(wallRight);
+
+            const wBot = new THREE.Mesh(new THREE.BoxGeometry(20, 1.5, 0.5), wallMat); wBot.position.set(0, 0.75, -10); wBot.receiveShadow=true; wBot.castShadow=true; scene.add(wBot);
+            const wTop = new THREE.Mesh(new THREE.BoxGeometry(20, 2.5, 0.5), wallMat); wTop.position.set(0, 8.75, -10); wTop.receiveShadow=true; wTop.castShadow=true; scene.add(wTop);
+            
+            const wL = new THREE.Mesh(new THREE.BoxGeometry(6, 6, 0.5), wallMat); wL.position.set(-7, 4.5, -10); wL.receiveShadow=true; wL.castShadow=true; scene.add(wL);
+            const wR = new THREE.Mesh(new THREE.BoxGeometry(6, 6, 0.5), wallMat); wR.position.set(7, 4.5, -10); wR.receiveShadow=true; wR.castShadow=true; scene.add(wR);
+        }
+
+        function buildInteractiveWindows() {
+            const frameMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4 });
+            const glassMat = new THREE.MeshPhysicalMaterial({ color: 0x88ccff, transparent: true, opacity: 0.2, roughness: 0.1, transmission: 0.8, side: THREE.DoubleSide });
+            const curtainMat = new THREE.MeshStandardMaterial({ color: 0xa84a32, roughness: 0.9, side: THREE.DoubleSide }); 
+
+            const topRail = new THREE.Mesh(new THREE.BoxGeometry(8, 0.2, 0.6), frameMat); topRail.position.set(0, 7.4, -10); scene.add(topRail);
+            const botRail = new THREE.Mesh(new THREE.BoxGeometry(8, 0.2, 0.6), frameMat); botRail.position.set(0, 1.6, -10); scene.add(botRail);
+            const midRail = new THREE.Mesh(new THREE.BoxGeometry(0.2, 5.6, 0.6), frameMat); midRail.position.set(0, 4.5, -10); scene.add(midRail);
+            const leftRail = new THREE.Mesh(new THREE.BoxGeometry(0.2, 6, 0.6), frameMat); leftRail.position.set(-3.9, 4.5, -10); scene.add(leftRail);
+            const rightRail = new THREE.Mesh(new THREE.BoxGeometry(0.2, 6, 0.6), frameMat); rightRail.position.set(3.9, 4.5, -10); scene.add(rightRail);
+
+            windowLeftObj = new THREE.Group(); windowLeftObj.position.set(-3.8, 4.5, -9.8);
+            const sashL = new THREE.Mesh(new THREE.BoxGeometry(3.6, 5.6, 0.05), glassMat); sashL.position.set(1.8, 0, 0);
+            const frameL = new THREE.Mesh(new THREE.BoxGeometry(3.8, 5.8, 0.1), frameMat); frameL.position.set(1.8, 0, 0);
+            windowLeftObj.add(sashL); windowLeftObj.add(frameL);
+            windowLeftObj.userData = { isWindowToggle: true }; scene.add(windowLeftObj); interactables.push(windowLeftObj);
+
+            windowRightObj = new THREE.Group(); windowRightObj.position.set(3.8, 4.5, -9.8);
+            const sashR = new THREE.Mesh(new THREE.BoxGeometry(3.6, 5.6, 0.05), glassMat); sashR.position.set(-1.8, 0, 0);
+            const frameR = new THREE.Mesh(new THREE.BoxGeometry(3.8, 5.8, 0.1), frameMat); frameR.position.set(-1.8, 0, 0);
+            windowRightObj.add(sashR); windowRightObj.add(frameR);
+            windowRightObj.userData = { isWindowToggle: true }; scene.add(windowRightObj); interactables.push(windowRightObj);
+
+            const curtainGeo = new THREE.PlaneGeometry(3.5, 8.5, 10, 1);
+            const pos = curtainGeo.attributes.position;
+            for(let i=0; i<pos.count; i++) pos.setZ(i, Math.sin(pos.getX(i) * 15) * 0.15);
+            curtainGeo.computeVertexNormals();
+
+            leftCurtainObj = new THREE.Mesh(curtainGeo, curtainMat); leftCurtainObj.position.set(-2.5, 4.5, -9.5);
+            leftCurtainObj.userData = { isCurtain: true }; leftCurtainObj.castShadow = true; scene.add(leftCurtainObj); interactables.push(leftCurtainObj);
+
+            rightCurtainObj = new THREE.Mesh(curtainGeo, curtainMat); rightCurtainObj.position.set(2.5, 4.5, -9.5);
+            rightCurtainObj.userData = { isCurtain: true }; rightCurtainObj.castShadow = true; scene.add(rightCurtainObj); interactables.push(rightCurtainObj);
+        }
+
+        function buildFurniture() {
+            const darkWood = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.6 }); 
+            const metal = new THREE.MeshStandardMaterial({ color: 0x555555, metalness: 0.7, roughness: 0.3 });
+            const bedWood = new THREE.MeshStandardMaterial({ color: 0x4a3c31, roughness: 0.8 });
+
+            // Стол
+            const deskGroup = new THREE.Group();
+            const deskTop = new THREE.Mesh(new THREE.BoxGeometry(6, 0.2, 3), darkWood);
+            deskTop.position.set(0, 3, 0); deskTop.castShadow = true; deskTop.receiveShadow = true; deskGroup.add(deskTop);
+            
+            const legGeo = new THREE.BoxGeometry(0.15, 3, 0.15);
+            [[-2.8, 1.5, -1.3], [2.8, 1.5, -1.3], [-2.8, 1.5, 1.3], [2.8, 1.5, 1.3]].forEach(p => {
+                const leg = new THREE.Mesh(legGeo, metal); leg.position.set(...p); leg.castShadow = true; deskGroup.add(leg);
+            });
+            deskGroup.position.set(-6.5, 0, -5); scene.add(deskGroup);
+            obstacles.push({ xMin: -9.5, xMax: -3.5, zMin: -6.5, zMax: -3.5 });
+
+            // ПК Блок
+            const pcGroup = new THREE.Group();
+            const pcCase = new THREE.Mesh(new THREE.BoxGeometry(1.2, 2.4, 2.4), darkWood); pcCase.castShadow=true; pcGroup.add(pcCase);
+            const pcGlass = new THREE.Mesh(new THREE.PlaneGeometry(2.3, 2.3), new THREE.MeshPhysicalMaterial({ color: 0x111111, transmission: 0.8, opacity: 0.8, transparent: true }));
+            pcGlass.rotation.y = Math.PI/2; pcGlass.position.set(0.61, 0, 0); pcGroup.add(pcGlass);
+            const fan1 = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.1, 16), new THREE.MeshBasicMaterial({ color: 0xff0055 })); 
+            fan1.rotation.z = Math.PI/2; fan1.position.set(0.5, 0.6, 1.1); pcGroup.add(fan1);
+            const fan2 = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.1, 16), new THREE.MeshBasicMaterial({ color: 0x00dfff })); 
+            fan2.rotation.z = Math.PI/2; fan2.position.set(0.5, -0.6, 1.1); pcGroup.add(fan2);
+            pcGroup.position.set(-4, 4.3, -5); scene.add(pcGroup);
+
+            // Монитор
+            const monitorStand = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.6, 0.4), metal);
+            monitorStand.position.set(-7, 3.3, -5.5); scene.add(monitorStand);
+            
+            const monitorScreen = new THREE.Mesh(new THREE.BoxGeometry(3.6, 1.6, 0.1), darkWood);
+            monitorScreen.position.set(-7, 4.2, -5.4); monitorScreen.castShadow = true; scene.add(monitorScreen);
+            
+            const screen = new THREE.Mesh(new THREE.PlaneGeometry(3.5, 1.5), new THREE.MeshBasicMaterial({ map: monitorTexture }));
+            screen.position.set(-7, 4.2, -5.34); screen.userData = { isPC: true };
+            scene.add(screen); interactables.push(screen);
+
+            // Кровать
+            const bedGroup = new THREE.Group();
+            const bedFrame = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.8, 8), bedWood);
+            bedFrame.position.set(0, 0.4, 0); bedFrame.castShadow = true; bedGroup.add(bedFrame);
+            
+            const mattress = new THREE.Mesh(new THREE.BoxGeometry(4, 0.4, 7.8), new THREE.MeshStandardMaterial({ color: 0xeaeaea }));
+            mattress.position.set(0, 1.0, 0); mattress.castShadow = true; bedGroup.add(mattress);
+            
+            const blanket = new THREE.Mesh(new THREE.BoxGeometry(4.1, 0.45, 5), new THREE.MeshStandardMaterial({ color: 0x3b5998 }));
+            blanket.position.set(0, 1.02, 1.4); blanket.castShadow = true; bedGroup.add(blanket);
+
+            const pillow = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.2, 1.5), new THREE.MeshStandardMaterial({ color: 0xffffff }));
+            pillow.position.set(0, 1.3, -2.8); pillow.castShadow = true; bedGroup.add(pillow);
+
+            bedGroup.position.set(7.5, 0, 4); scene.add(bedGroup);
+            obstacles.push({ xMin: 5.0, xMax: 10.0, zMin: 0.0, zMax: 8.0 });
+
+            // Геймерское кресло
+            const chairGroup = new THREE.Group();
+            const leather = new THREE.MeshStandardMaterial({color: 0x222222, roughness: 0.6});
+            const chairBase = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.8), metal); chairBase.position.y = 0.4; chairGroup.add(chairBase);
+            const seat = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.2, 1.8), leather); seat.position.y = 0.9; chairGroup.add(seat);
+            const back = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2.2, 0.2), leather); back.position.set(0, 2.1, 0.8); chairGroup.add(back);
+            
+            for(let i=0; i<5; i++) {
+                const angle = (i/5) * Math.PI * 2;
+                const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.8), metal);
+                leg.rotation.x = Math.PI/2; leg.rotation.z = angle; leg.position.y = 0.1; chairGroup.add(leg);
+            }
+            chairGroup.position.set(-7, 0, -2.5); chairGroup.rotation.y = Math.PI;
+            scene.add(chairGroup);
+            obstacles.push({ xMin:-8.5, xMax:-5.5, zMin:-3.5, zMax:-1.5 });
+        }
+
+        function buildDecorations() {
+            const rug = new THREE.Mesh(new THREE.PlaneGeometry(8, 6), new THREE.MeshStandardMaterial({ color: 0x8b3a3a, roughness: 1.0 }));
+            rug.rotation.x = -Math.PI / 2; rug.position.set(0, 0.01, 1); rug.receiveShadow = true;
+            scene.add(rug);
+
+            const shelfGroup = new THREE.Group();
+            const wood = new THREE.MeshStandardMaterial({color: 0x4a3c31, roughness: 0.9});
+            const back = new THREE.Mesh(new THREE.BoxGeometry(3, 7, 0.1), wood);
+            back.position.set(0, 3.5, 0); shelfGroup.add(back);
+            const sideL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 7, 1), wood); sideL.position.set(-1.45, 3.5, 0.45); shelfGroup.add(sideL);
+            const sideR = new THREE.Mesh(new THREE.BoxGeometry(0.1, 7, 1), wood); sideR.position.set(1.45, 3.5, 0.45); shelfGroup.add(sideR);
+
+            for(let i=0; i<4; i++) {
+                const shelf = new THREE.Mesh(new THREE.BoxGeometry(3, 0.1, 1), wood);
+                shelf.position.set(0, 1 + i*1.8, 0.45); shelfGroup.add(shelf);
+                
+                const booksCount = Math.floor(Math.random() * 8) + 4;
+                for(let j=0; j<booksCount; j++) {
+                    const bColor = new THREE.Color().setHSL(Math.random(), 0.6, 0.4);
+                    const book = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.8 + Math.random()*0.3, 0.6), new THREE.MeshStandardMaterial({color: bColor}));
+                    book.position.set(-1.2 + j*0.18 + Math.random()*0.05, 1 + i*1.8 + 0.5, 0.5);
+                    book.rotation.z = (Math.random() - 0.5) * 0.15; 
+                    shelfGroup.add(book);
+                }
+            }
+            shelfGroup.position.set(9.9, 0, 0); shelfGroup.rotation.y = -Math.PI/2; shelfGroup.castShadow = true;
+            scene.add(shelfGroup);
+            obstacles.push({ xMin: 8.5, xMax: 10, zMin: -1.5, zMax: 1.5 });
+
+            const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.3, 0.8, 16), new THREE.MeshStandardMaterial({color: 0xdddddd}));
+            pot.position.set(8.5, 0.4, -8.5); pot.castShadow = true;
+            const leaves = new THREE.Mesh(new THREE.DodecahedronGeometry(0.7), new THREE.MeshStandardMaterial({color: 0x2e7d32, roughness: 0.9}));
+            leaves.position.set(8.5, 1.2, -8.5); leaves.castShadow = true;
+            scene.add(pot); scene.add(leaves);
+            obstacles.push({ xMin: 7.5, xMax: 9.5, zMin: -9.5, zMax: -7.5 });
+
+            function addPoster(x, y, z, rotY, w, h, color) {
+                const poster = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.05), new THREE.MeshStandardMaterial({color: color}));
+                poster.position.set(x, y, z); poster.rotation.y = rotY; scene.add(poster);
+            }
+            addPoster(-9.9, 6, 2, Math.PI/2, 3, 2, 0xffaa00); 
+            addPoster(9.9, 5.5, 6, -Math.PI/2, 1.5, 2, 0x4488ff); 
+
+            const mug = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.25, 16), new THREE.MeshStandardMaterial({color: 0xffffff}));
+            mug.position.set(-5, 3.2, -4); mug.castShadow = true; scene.add(mug);
+
+            const lampGroup = new THREE.Group();
+            const lBase = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.05, 16), new THREE.MeshStandardMaterial({color: 0x222})); lBase.position.set(-8, 3.125, -4); lampGroup.add(lBase);
+            const lNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.8), new THREE.MeshStandardMaterial({color: 0x222})); lNeck.position.set(-8, 3.5, -4); lNeck.rotation.z = Math.PI/6; lampGroup.add(lNeck);
+            const lHead = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.3, 16), new THREE.MeshStandardMaterial({color: 0x111})); lHead.position.set(-7.8, 3.8, -4); lHead.rotation.z = -Math.PI/4; lampGroup.add(lHead);
+            
+            const deskLight = new THREE.SpotLight(0xffb84d, 0.8, 6, Math.PI/4, 0.5, 1);
+            deskLight.position.set(-7.8, 3.8, -4); deskLight.target.position.set(-6, 3, -4); deskLight.castShadow = true;
+            lampGroup.add(deskLight); lampGroup.add(deskLight.target);
+            scene.add(lampGroup);
+        }
+
+        function buildDetails() {
+            const doorGeo = new THREE.BoxGeometry(4, 8, 0.2);
+            const doorMat = new THREE.MeshStandardMaterial({ color: 0x4a3c31, roughness: 0.7 });
+            door = new THREE.Mesh(doorGeo, doorMat);
+            door.position.set(-4, 4, 9.9); door.receiveShadow = true; door.castShadow = true;
+            door.userData = { isDoor: true }; scene.add(door); interactables.push(door);
+
+            const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.6), new THREE.MeshStandardMaterial({color: 0xaaaaaa, metalness: 0.8}));
+            handle.rotation.z = Math.PI / 2; handle.position.set(-2.5, 4, 9.7); handle.castShadow = true; scene.add(handle);
+
+            const plasticMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee, roughness: 0.3 });
+            const blackMat = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.8 });
+            
+            const swBase = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.5, 0.05), plasticMat);
+            swBase.position.set(-1.5, 4.5, 9.95); swBase.rotation.y = Math.PI;
+            swBase.userData = { isSwitch: true }; scene.add(swBase); interactables.push(swBase);
+
+            const switchButton = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.15, 0.04), blackMat);
+            switchButton.position.set(0, 0, 0.02); swBase.add(switchButton); 
+        }
+
+        function buildCityAndSky() {
+            const starsGeo = new THREE.BufferGeometry();
+            const starsPos = [];
+            for(let i=0; i<1500; i++) starsPos.push((Math.random()-0.5)*1000, Math.random()*300 + 50, (Math.random()-0.5)*1000 - 100);
+            starsGeo.setAttribute('position', new THREE.Float32BufferAttribute(starsPos, 3));
+            const starsMat = new THREE.PointsMaterial({color: 0xffffff, size: 0.8, transparent:true, opacity:0.8});
+            scene.add(new THREE.Points(starsGeo, starsMat));
+
+            const cityGroup = new THREE.Group();
+            const bMat = new THREE.MeshStandardMaterial({ color: 0x0a0a0f, roughness: 0.9 });
+            const winMat = new THREE.MeshBasicMaterial({ color: 0xffeeaa }); 
+            
+            for(let i=0; i<150; i++) {
+                const w = 5+Math.random()*15, h = 30+Math.random()*150, d = 5+Math.random()*15;
+                const building = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), bMat);
+                const x = (Math.random()-0.5)*400; const z = -60 - Math.random()*300;
+                building.position.set(x, h/2 - 40, z); cityGroup.add(building);
+
+                for(let j=0; j<20; j++) {
+                    if(Math.random()>0.5) {
+                        const win = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), winMat);
+                        win.position.set(x + (Math.random()-0.5)*w*0.8, (Math.random()*h)-40, z + d/2 + 0.1); cityGroup.add(win);
+                    }
+                }
+            }
+            scene.add(cityGroup);
+
+            const road = new THREE.Mesh(new THREE.PlaneGeometry(400, 30), new THREE.MeshStandardMaterial({color:0x111}));
+            road.rotation.x = -Math.PI/2; road.position.set(0, -38, -35); scene.add(road);
+
+            for(let i=0; i<15; i++) createCar();
+        }
+
+        function createCar() {
+            const carGroup = new THREE.Group();
+            const bodyMat = new THREE.MeshStandardMaterial({color: Math.random()*0xffffff, roughness:0.2});
+            const body = new THREE.Mesh(new THREE.BoxGeometry(2, 1, 4), bodyMat); body.position.y = 0.5; carGroup.add(body);
+            
+            const hlGeo = new THREE.PlaneGeometry(0.4, 0.4); const hlMat = new THREE.MeshBasicMaterial({color: 0xffffee});
+            const hlL = new THREE.Mesh(hlGeo, hlMat); hlL.position.set(-0.6, 0.5, 2.01); carGroup.add(hlL);
+            const hlR = new THREE.Mesh(hlGeo, hlMat); hlR.position.set(0.6, 0.5, 2.01); carGroup.add(hlR);
+            
+            const spotLight = new THREE.SpotLight(0xffffee, 2, 40, Math.PI/6, 0.5, 1);
+            spotLight.position.set(0, 0.5, 2); spotLight.target.position.set(0, 0, 10);
+            carGroup.add(spotLight); carGroup.add(spotLight.target);
+
+            const tlMat = new THREE.MeshBasicMaterial({color: 0xff0000});
+            const tl = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 0.3), tlMat);
+            tl.position.set(0, 0.5, -2.01); tl.rotation.y = Math.PI; carGroup.add(tl);
+
+            const isRightLane = Math.random() > 0.5;
+            const xOffset = isRightLane ? (Math.random()*8 + 2) : -(Math.random()*8 + 2);
+            const speed = (Math.random()*20 + 30) * (isRightLane ? 1 : -1);
+            
+            carGroup.position.set(xOffset, -38, (Math.random()-0.5)*400);
+            if(!isRightLane) carGroup.rotation.y = Math.PI;
+
+            scene.add(carGroup); carsData.push({ mesh: carGroup, speed: speed });
+        }
+
+        function setupLighting() {
+            ambientLight = new THREE.HemisphereLight(0x4a4a5a, 0x111115, 0.5); 
+            scene.add(ambientLight);
+
+            const moonLight = new THREE.DirectionalLight(0x88aaff, 0.6);
+            moonLight.position.set(20, 30, -50); moonLight.target.position.set(0, 0, 0);
+            moonLight.castShadow = true;
+            moonLight.shadow.mapSize.width = 2048; moonLight.shadow.mapSize.height = 2048;
+            moonLight.shadow.bias = -0.001;
+            scene.add(moonLight); scene.add(moonLight.target);
+
+            mainLight = new THREE.PointLight(0xffeacc, 1.2, 30);
+            mainLight.position.set(0, 9.5, 0); mainLight.castShadow = true;
+            mainLight.shadow.bias = -0.002; 
+            scene.add(mainLight);
+            
+            const pcLight = new THREE.PointLight(0x0078D7, 0.6, 8);
+            pcLight.position.set(-7, 4.4, -4.5); scene.add(pcLight);
+
+            const rgbLight = new THREE.PointLight(0xff0055, 0.6, 5);
+            rgbLight.position.set(-7, 2.8, -5); scene.add(rgbLight);
+        }
+
+        function onMouseClick() {
+            if (!controls.isLocked && !isMobileActive) return;
+
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+            
+            const intersects = raycaster.intersectObjects(interactables, true);
+
+            if (intersects.length > 0) {
+                let obj = intersects[0].object;
+                let target = obj;
+                while(target && !target.userData.isSwitch && !target.userData.isDoor && !target.userData.isPC && !target.userData.isCurtain && !target.userData.isWindowToggle) {
+                    target = target.parent;
+                }
+
+                if (target && intersects[0].distance < 6) {
+                    if (target.userData.isSwitch) {
+                        roomLightOn = !roomLightOn;
+                        mainLight.intensity = roomLightOn ? 1.2 : 0;
+                        if (target.children.length > 0) target.children[0].position.y = roomLightOn ? 0 : -0.05;
+                    } 
+                    else if (target.userData.isDoor) {
+                        if (!isMobile) controls.unlock();
+                        document.getElementById('blocker').innerHTML = '<h1 style="color:white;">Выход...</h1>';
+                        document.getElementById('blocker').style.display = 'flex';
+                        document.getElementById('blocker').style.opacity = '1';
+                        
+                        setTimeout(() => {
+                            let resetText = isMobile ? 'Коснитесь экрана для начала.<br>Используйте джойстик и свайпы для управления.' : 'Кликните для начала. WASD - Движение, ПРОБЕЛ - Прыжок, Мышь - Осмотр.';
+                            document.getElementById('blocker').innerHTML = `<h1 style="margin-bottom: 10px;">Уютная Комната</h1><p>${resetText}</p>`;
+                            isMobileActive = false; // Сброс состояния для телефона
+                        }, 1000);
+                    }
+                    else if (target.userData.isPC) {
+                        isUsingPC = true;
+                        if (!isMobile) controls.unlock();
+                        document.getElementById('os-ui').style.display = 'block';
+                    }
+                    else if (target.userData.isCurtain) {
+                        curtainsOpen = !curtainsOpen;
+                    }
+                    else if (target.userData.isWindowToggle) {
+                        windowsOpen = !windowsOpen;
+                        updateSoundVolume(); // Меняем громкость улицы!
+                    }
+                }
+            }
+        }
+
+        function drawMonitor() {
+            ctx.fillStyle = '#1e3c72'; ctx.fillRect(0, 0, 512, 256);
+            const gradient = ctx.createLinearGradient(0,0, 512, 256);
+            gradient.addColorStop(0, 'rgba(255,255,255,0.2)'); gradient.addColorStop(1, 'transparent');
+            ctx.fillStyle = gradient; ctx.fillRect(0,0,512,256);
+            ctx.fillStyle = 'rgba(0,0,0,0.8)'; ctx.fillRect(0, 230, 512, 26);
+            ctx.fillStyle = '#00A4EF'; ctx.fillRect(240, 234, 16, 16);
+            ctx.fillStyle = '#fff'; ctx.fillRect(265, 234, 16, 16);
+            monitorTexture.needsUpdate = true;
+        }
+
+        function checkCollisions(pos) {
+            if (pos.x < -9) pos.x = -9; if (pos.x > 9) pos.x = 9;
+            if (pos.z < -9.4) pos.z = -9.4; if (pos.z > 9) pos.z = 9;
+
+            for (let obs of obstacles) {
+                const pRad = 1.0;
+                if (pos.x + pRad > obs.xMin && pos.x - pRad < obs.xMax && pos.z + pRad > obs.zMin && pos.z - pRad < obs.zMax) {
+                    const distLeft = (pos.x + pRad) - obs.xMin;
+                    const distRight = obs.xMax - (pos.x - pRad);
+                    const distTop = (pos.z + pRad) - obs.zMin;
+                    const distBot = obs.zMax - (pos.z - pRad);
+                    const minD = Math.min(distLeft, distRight, distTop, distBot);
+
+                    if (minD === distLeft) pos.x -= distLeft;
+                    else if (minD === distRight) pos.x += distRight;
+                    else if (minD === distTop) pos.z -= distTop;
+                    else if (minD === distBot) pos.z += distBot;
+                }
+            }
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const time = performance.now();
+            const delta = Math.min((time - prevTime) / 1000, 0.1); 
+
+            if (controls.isLocked === true || isMobileActive === true) {
+                velocity.x -= velocity.x * 10.0 * delta;
+                velocity.z -= velocity.z * 10.0 * delta;
+                velocity.y -= 9.8 * 10.0 * delta; 
+
+                const speed = 50.0;
+
+                if (isMobile) {
+                    // Адаптация данных джойстика под физику
+                    let normFwd = fwdValue / 50.0;
+                    let normRight = rightValue / 50.0;
+                    
+                    direction.z = normFwd;  
+                    direction.x = normRight; 
+                    
+                    velocity.z -= direction.z * speed * delta;
+                    velocity.x -= direction.x * speed * delta;
+                } else {
+                    direction.z = Number(moveForward) - Number(moveBackward);
+                    direction.x = Number(moveRight) - Number(moveLeft);
+                    direction.normalize(); 
+
+                    if (moveForward || moveBackward) velocity.z -= direction.z * speed * delta;
+                    if (moveLeft || moveRight) velocity.x -= direction.x * speed * delta;
+                }
+
+                controls.moveRight(-velocity.x * delta);
+                controls.moveForward(-velocity.z * delta);
+                controls.getObject().position.y += (velocity.y * delta);
+
+                if (controls.getObject().position.y < 5) {
+                    velocity.y = 0; controls.getObject().position.y = 5; canJump = true;
+                }
+                checkCollisions(controls.getObject().position);
+            }
+
+            const tCurtainL = curtainsOpen ? -4.5 : -2.5;
+            const tCurtainR = curtainsOpen ? 4.5 : 2.5;
+            leftCurtainObj.position.x += (tCurtainL - leftCurtainObj.position.x) * delta * 5;
+            leftCurtainObj.scale.x = curtainsOpen ? 0.3 : 1;
+            rightCurtainObj.position.x += (tCurtainR - rightCurtainObj.position.x) * delta * 5;
+            rightCurtainObj.scale.x = curtainsOpen ? 0.3 : 1;
+
+            const tWindowL = windowsOpen ? Math.PI/2 : 0;
+            const tWindowR = windowsOpen ? -Math.PI/2 : 0;
+            windowLeftObj.rotation.y += (tWindowL - windowLeftObj.rotation.y) * delta * 5;
+            windowRightObj.rotation.y += (tWindowR - windowRightObj.rotation.y) * delta * 5;
+
+            carsData.forEach(car => {
+                car.mesh.position.z += car.speed * delta;
+                if(car.mesh.position.z > 200) car.mesh.position.z = -200;
+                if(car.mesh.position.z < -200) car.mesh.position.z = 200;
+            });
+
+            if (time % 100 < 20) drawMonitor();
+
+            prevTime = time;
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>
