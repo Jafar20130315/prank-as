@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mening Honam</title>
-  <link rel="icon" href="favicon.png">
+    <title>Mening honam</title>
     <style>
         body { margin: 0; overflow: hidden; background-color: #000; transition: opacity 1s; touch-action: none; }
         canvas { display: block; }
@@ -91,10 +90,10 @@
 
     <div id="blocker">
         <h1 style="margin-bottom: 10px;">Mening honam</h1>
-        <p id="start-instructions">Boshlash uchun ekranni bosing.</p>
-        <p style="color:#aaa; font-size:14px;">WASD- Yurish</p>
+        <p id="start-instructions">Boshlash uchun - ekranga bosing</p>
+        <p style="color:#aaa; font-size:14px;">Qotishlar bo'lishi mumkin</p>
         <p id="mobile-warning" style="display: none; color: #ff6666; font-weight: bold; max-width: 80%; margin-top: 20px;">
-            Diqqat, ushbu sahifa telefonlarda qotishi mumkin.
+            Diqqat! Telefonlarda qotishi mumkin.
         </p>
     </div>
 
@@ -194,15 +193,15 @@
             streetSound = new THREE.Audio(listener);
             const audioLoader = new THREE.AudioLoader();
             
-            
-            const streetSoundURL = 'https://prank-as.site/docs/other/traffic_sound.wav'; 
+            // Использован валидный абсолютный URL для песочницы, чтобы избежать ошибки XMLHttpRequest "Invalid URL"
+            const streetSoundURL = 'https://actions.google.com/sounds/v1/transportation/traffic_highway.ogg'; 
 
             audioLoader.load(streetSoundURL, function(buffer) {
                 streetSound.setBuffer(buffer);
                 streetSound.setLoop(true);
                 streetSound.setVolume(volumeClosed);
             }, undefined, function(e) {
-                console.warn('Аудиофайл не найден или заблокирован политикой CORS.');
+                console.warn('Ovozni olishda xatolik yuz berdi.');
             });
         }
 
@@ -364,7 +363,7 @@
 
             blocker.addEventListener('click', () => { 
                 if (!isUsingPC) {
-                    resumeAudio(); // Запуск звука после взаимодействия
+                    resumeAudio();
                     if (isMobile) {
                         blocker.style.display = 'none';
                         document.getElementById('mobile-controls').style.display = 'block';
@@ -391,7 +390,7 @@
 
             // Подключение клавиатуры
             document.addEventListener('keydown', e => {
-                // Горячая клавиша для звука (М или Ь на русской раскладке)
+                
                 if (e.code === 'KeyM' || e.key === 'm' || e.key === 'м' || e.key === 'Ь' || e.key === 'ь') {
                     toggleMute();
                 }
@@ -435,7 +434,7 @@
             let joystick = nipplejs.create({
                 zone: document.getElementById('joystick-zone'),
                 mode: 'static',
-                position: { left: '60px', bottom: '60px' },
+                position: { left: '60px', top: '60px' },
                 color: 'white'
             });
 
@@ -448,39 +447,74 @@
                 fwdValue = 0; rightValue = 0;
             });
 
-            // Свайп для осмотра
+            // Свайп для осмотра (Истинный мультитач)
             let touchLookZone = document.getElementById('touch-look-zone');
-            let prevTouch = null;
+            let activeTouchId = null;
+            let prevTouchX = 0;
+            let prevTouchY = 0;
             
-            touchLookZone.addEventListener('touchstart', e => { prevTouch = e.touches[0]; }, {passive: false});
+            touchLookZone.addEventListener('touchstart', e => { 
+                e.preventDefault(); 
+                if (activeTouchId === null) {
+                    // Берем первый новый палец в этой зоне
+                    const touch = e.changedTouches[0];
+                    activeTouchId = touch.identifier;
+                    prevTouchX = touch.pageX;
+                    prevTouchY = touch.pageY;
+                }
+            }, {passive: false});
+            
             touchLookZone.addEventListener('touchmove', e => {
                 e.preventDefault(); // Запрет прокрутки страницы
-                if (!prevTouch) return;
-                let touch = e.touches[0];
-                let mvX = touch.pageX - prevTouch.pageX;
-                let mvY = touch.pageY - prevTouch.pageY;
-                prevTouch = touch;
+                if (activeTouchId === null) return;
+                
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    if (e.changedTouches[i].identifier === activeTouchId) {
+                        let touch = e.changedTouches[i];
+                        let mvX = touch.pageX - prevTouchX;
+                        let mvY = touch.pageY - prevTouchY;
+                        prevTouchX = touch.pageX;
+                        prevTouchY = touch.pageY;
 
-                let euler = new THREE.Euler(0, 0, 0, 'YXZ');
-                euler.setFromQuaternion(camera.quaternion);
-                euler.y -= mvX * 0.005;
-                euler.x -= mvY * 0.005;
-                euler.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, euler.x));
-                camera.quaternion.setFromEuler(euler);
+                        let euler = new THREE.Euler(0, 0, 0, 'YXZ');
+                        euler.setFromQuaternion(camera.quaternion);
+                        euler.y -= mvX * 0.005;
+                        euler.x -= mvY * 0.005;
+                        euler.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, euler.x));
+                        camera.quaternion.setFromEuler(euler);
+                        break;
+                    }
+                }
             }, {passive: false});
-            touchLookZone.addEventListener('touchend', () => { prevTouch = null; });
+            
+            touchLookZone.addEventListener('touchend', e => { 
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    if (e.changedTouches[i].identifier === activeTouchId) {
+                        activeTouchId = null;
+                        break;
+                    }
+                }
+            });
+            touchLookZone.addEventListener('touchcancel', e => { 
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    if (e.changedTouches[i].identifier === activeTouchId) {
+                        activeTouchId = null;
+                        break;
+                    }
+                }
+            });
 
-            // Кнопки
+            // Кнопки (изолируем от зоны осмотра)
             document.getElementById('mobile-jump').addEventListener('touchstart', (e) => {
                 e.preventDefault(); e.stopPropagation();
                 if (canJump) velocity.y += 20; canJump = false;
-            });
+            }, {passive: false});
 
             document.getElementById('mobile-interact').addEventListener('touchstart', (e) => {
                 e.preventDefault(); e.stopPropagation();
                 // Эмуляция клика в центре экрана
                 onMouseClick();
-            });
+            }, {passive: false});
         }
 
         function buildRoom() {
@@ -927,5 +961,5 @@
             renderer.render(scene, camera);
         }
     </script>
-<script src="auto-menu.js"></script></body>
+</body>
 </html>
