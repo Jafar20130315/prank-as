@@ -72,7 +72,7 @@ document.addEventListener("DOMContentLoaded", function() {
     banner.innerHTML = `
         <div class="banner-text-container">
             <span class="banner-scrolling-text">
-                Внимание! Вскоре наш сайт переезжает на новый адрес: prank-as.uz. Сохраните новую ссылку!
+                2026-yilning sentabr oyida, ushbu sayt to'liq prank-as.uz ga ko'chadi.Xech qanday noqulayliklar yo'q, be'malol Prank-as dan foydalaning.
             </span>
         </div>
         <button class="banner-close-btn" id="banner-close-btn" title="Закрыть">&#10005;</button>
