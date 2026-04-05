@@ -1,0 +1,53 @@
+name: Manage Banner Lifecycle
+
+on:
+  push:
+    branches:
+      - main # Замени на master, если твоя основная ветка называется так
+  schedule:
+    # Запуск 10 сентября 2026 года в 00:00 (по UTC), чтобы удалить баннер автоматически
+    - cron: '0 0 10 9 *'
+  workflow_dispatch:
+
+jobs:
+  banner_manager:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Inject or Remove Banner
+        run: |
+          # Получаем текущую дату и дату дедлайна в секундах
+          CURRENT_DATE=$(date +%s)
+          TARGET_DATE=$(date -d "2026-09-10 00:00:00" +%s)
+
+          if [ $CURRENT_DATE -le $TARGET_DATE ]; then
+            echo "До 10 сентября 2026. Проверяем и встраиваем баннер..."
+            # Ищем все HTML-файлы в проекте
+            find . -name "*.html" -type f | while read -r file; do
+              # Если скрипта внутри ещё нет, добавляем его
+              if ! grep -q '<script src="/new-domain-banner.js"></script>' "$file"; then
+                # Вставляем строго перед закрывающим тегом </body>
+                sed -i 's/<\/body>/<script src="\/new-domain-banner.js"><\/script>\n<\/body>/i' "$file"
+                echo "Баннер добавлен в $file"
+              fi
+            done
+          else
+            echo "Наступило 10 сентября 2026 или позже. Очищаем сайт..."
+            # Удаляем сам файл со скриптом
+            rm -f banner.js
+            # Вырезаем строчку подключения из всех HTML-файлов
+            find . -name "*.html" -type f -exec sed -i '/<script src="\/new-domain-banner.js"><\/script>/d' {} +
+          fi
+
+      - name: Commit and Push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          
+          # Коммитим только если были реальные изменения
+          # [skip ci] в сообщении ОБЯЗАТЕЛЕН, чтобы пуш от бота не запустил процесс заново по кругу
+          git diff --quiet && git diff --staged --quiet || git commit -m "chore: Авто-встраивание/удаление баннера переезда [skip ci]"
+          git push
