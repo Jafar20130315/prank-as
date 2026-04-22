@@ -1,675 +1,213 @@
 <!DOCTYPE html>
-
 <html lang="ru-uz">
-
-
-
 <head>
-
-  <meta charset="UTF-8" />
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title>Avtoraqam rasm geeratori</title>
-
-  <link rel="icon" type="image/x-icon" href="favicon.png">
-
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
-  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&display=swap" rel="stylesheet" />
-
-  <style>
-
-    body {
-
-      font-family: 'Inter', sans-serif;
-
-    }
-
-
-
-    .license-plate {
-
-      font-family: 'Oswald', sans-serif;
-
-      width: 100%;
-
-      max-width: 520px;
-
-      height: 112px;
-
-      background: white;
-
-      border: 3px solid black;
-
-      border-radius: 10px;
-
-      display: flex;
-
-      align-items: center;
-
-      justify-content: space-between;
-
-      padding: 8px;
-
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-
-      user-select: none;
-
-      box-sizing: border-box;
-
-    }
-
-
-
-    .plate-region {
-
-      display: flex;
-
-      flex-direction: column;
-
-      align-items: center;
-
-      justify-content: center;
-
-      height: 100%;
-
-      padding: 0 5px;
-
-      min-width: 60px;
-
-    }
-
-
-
-    .plate-region svg {
-
-      width: 50px;
-
-      height: 25px;
-
-    }
-
-
-
-    .plate-uz {
-
-      font-weight: 600;
-
-      font-size: 24px;
-
-      margin-top: 4px;
-
-    }
-
-
-
-    .plate-main {
-
-      flex-grow: 1;
-
-      display: flex;
-
-      align-items: center;
-
-      justify-content: center;
-
-      font-size: 80px;
-
-      letter-spacing: 2px;
-
-      color: black;
-
-      line-height: 1;
-
-      --offset-y: 0px;
-
-      transform: translateY(var(--offset-y));
-
-      transition: transform 0.1s ease-out;
-
-      padding: 0 5px;
-
-    }
-
-
-
-    .plate-divider {
-
-      width: 3px;
-
-      height: 80%;
-
-      background: black;
-
-      margin: 0 10px;
-
-    }
-
-
-
-    .editable {
-
-      padding: 0 5px;
-
-      outline: none;
-
-      cursor: pointer;
-
-      border-radius: 5px;
-
-      transition: background-color 0.2s;
-
-    }
-
-
-
-    .editable:hover,
-
-    .editable:focus {
-
-      background-color: #e0f2fe;
-
-    }
-
-
-
-    .tab {
-
-      transition: all 0.2s;
-
-    }
-
-
-
-    .tab.active {
-
-      background-color: #1d4ed8;
-
-      color: white;
-
-    }
-
-
-
-    @media (max-width: 600px) {
-
-      .license-plate {
-
-        height: 80px;
-
-        padding: 5px;
-
-        border-width: 2px;
-
-      }
-
-
-
-      .plate-region {
-
-        min-width: 45px;
-
-      }
-
-
-
-      .plate-region svg {
-
-        width: 35px;
-
-        height: 17px;
-
-      }
-
-
-
-      .plate-uz {
-
-        font-size: 16px;
-
-        margin-top: 2px;
-
-      }
-
-
-
-      .plate-main {
-
-        font-size: 55px;
-
-        padding: 0 3px;
-
-      }
-
-
-
-      .plate-divider {
-
-        width: 2px;
-
-        height: 70%;
-
-        margin: 0 6px;
-
-      }
-
-
-
-      .editable {
-
-        padding: 0 2px;
-
-      }
-
-    }
-
-
-
-    @media (max-width: 400px) {
-
-      .license-plate {
-
-        height: 70px;
-
-        padding: 4px;
-
-      }
-
-
-
-      .plate-region svg {
-
-        width: 30px;
-
-        height: 15px;
-
-      }
-
-
-
-      .plate-uz {
-
-        font-size: 14px;
-
-      }
-
-
-
-      .plate-main {
-
-        font-size: 45px;
-
-      }
-
-
-
-      .top-left-menu-toggle {
-
-        position: fixed;
-
-        top: 15px;
-
-        left: 15px;
-
-        background: rgba(255, 255, 255, 0.15);
-
-        border: none;
-
-        border-radius: 12px;
-
-        padding: 10px 12px;
-
-        cursor: pointer;
-
-        z-index: 2000;
-
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-
-        backdrop-filter: blur(6px);
-
-        transition: background 0.3s, transform 0.2s;
-
-        display: flex;
-
-        align-items: center;
-
-        justify-content: center;
-
-        width: 48px;
-
-        height: 48px;
-
-      }
-
-
-
-      .top-left-menu-toggle:hover {
-
-        background: rgba(255, 255, 255, 0.35);
-
-        transform: scale(1.1);
-
-      }
-
-
-
-      .top-left-menu-toggle svg {
-
-        fill: #fff;
-
-        width: 26px;
-
-        height: 26px;
-
-      }
-
-    }
-
-  </style>
-
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Avtoraqam rasm generatori</title>
+<link rel="icon" type="image/x-icon" href="favicon.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&display=swap" rel="stylesheet"/>
+<style>
+@font-face {
+  font-family: 'PlateFont'; 
+  src: url('https://prank-as.uz/docs/FE-Font-uzbek-plate-avtoraqam.uz.woff2') format('woff2'); 
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap; 
+}
+
+body { font-family: 'Inter', sans-serif; }
+
+.license-plate {
+    font-family: 'PlateFont';
+    width: 100%;
+    max-width: 520px;
+    height: 112px;
+    background: white;
+    border: 3px solid black;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    user-select: none;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.plate-region {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-width: 70px;
+    /* УДАЛЕНО: border-left: 3px solid black; */
+    padding-left: 5px;
+}
+
+.plate-region svg { width: 55px; height: 30px; }
+.plate-uz { font-weight: 600; font-size: 24px; margin-top: 4px; font-family: sans-serif; line-height: 1; }
+
+.plate-main {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 64px;
+    letter-spacing: 1px;
+    color: black;
+    line-height: 1;
+    white-space: nowrap;
+    --offset-y: 0px;
+    transform: translateY(var(--offset-y));
+    transition: transform 0.1s ease-out;
+}
+
+.plate-divider { width: 3px; height: 70px; background: black; margin: 0 10px; flex-shrink: 0; }
+
+.editable { outline: none; cursor: pointer; border-radius: 5px; transition: background-color 0.2s; }
+.editable:hover, .editable:focus { background-color: #e0f2fe; }
+
+.tab { transition: all 0.2s; }
+.tab.active { background-color: #1d4ed8; color: white; }
+
+@media(max-width:600px){
+    .license-plate { height: 80px; padding: 0 5px; border-width: 2px; }
+    .plate-region { min-width: 55px; }
+    .plate-region svg { width: 35px; height: 17px; }
+    .plate-uz { font-size: 16px; }
+    .plate-main { font-size: 44px; }
+    .plate-divider { width: 2px; height: 50px; margin: 0 5px; }
+}
+</style>
 </head>
+<body class="bg-gray-100 py-10">
 
-
-
-<body>
-
-  <div class="hidden sm:block text-center text-red-600 font-bold text-lg mt-4">Beta</div>
-
-  <div class="w-full max-w-lg mx-auto bg-white p-6 rounded-xl shadow-lg">
-
+<div class="w-full max-w-lg mx-auto bg-white p-6 rounded-xl shadow-lg">
     <h1 class="text-2xl font-bold text-center text-gray-800 mb-4">Avtoraqam rasm generatori</h1>
-
-    <div class="flex justify-center border border-gray-300 rounded-lg p-1 mb-6 bg-gray-50"> <button id="tab-individual" class="tab active w-1/2 p-2 rounded-md font-semibold">Jismoniy shaxs</button> <button id="tab-legal" class="tab w-1/2 p-2 rounded-md font-semibold">Yuridik shaxs</button> </div>
+    
+    <div class="flex justify-center border border-gray-300 rounded-lg p-1 mb-6 bg-gray-50">
+        <button id="tab-individual" class="tab active w-1/2 p-2 rounded-md font-semibold">Jismoniy shaxs</button>
+        <button id="tab-legal" class="tab w-1/2 p-2 rounded-md font-semibold">Yuridik shaxs</button>
+    </div>
 
     <div id="plate-container" class="flex justify-center mb-6">
-
-      <div id="individual-plate" class="license-plate">
-
-        <div class="plate-main"> <span class="editable" contenteditable="true" data-type="number" data-length="2">01</span>
-
-          <div class="plate-divider"></div> <span class="editable" contenteditable="true" data-type="letter" data-length="1">A</span> <span class="editable ml-3" contenteditable="true" data-type="number" data-length="3">123</span> <span class="editable ml-3" contenteditable="true" data-type="letter" data-length="2">BC</span>
-
+        <div id="individual-plate" class="license-plate">
+            <div class="plate-main">
+                <span class="editable" contenteditable="true" data-type="number" data-length="2">01</span>
+                <div class="plate-divider"></div>
+                <span class="editable" contenteditable="true" data-type="letter" data-length="1">A</span>
+                <span class="editable ml-2" contenteditable="true" data-type="number" data-length="3">123</span>
+                <span class="editable ml-2" contenteditable="true" data-type="letter" data-length="2">BC</span>
+            </div>
+            <div class="plate-region">
+                <svg viewBox="0 0 1600 800" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="#00CC00" d="M1601 545c0 85.3 0 170.6 0 256-533.2 0-1066.4 0-1600 0 0-85 0-170 0.5-255.5 533.5-.5 1066.5-.5 1600-.5z"/>
+                    <path fill="#FFFFFF" d="M1601 273c0 85 0 170-0.5 255.5-533.5.5-1066.5.5-1600.5.5 0-85 0-170 0.5-255.5 533.5-.5 1066.5-.5 1600-.5z"/>
+                    <path fill="#3399FF" d="M1 257c0-85.3 0-170.6 0-256 533.2 0 1066.4 0 1600 0 0 85 0 170-0.5 255.5-533.5.5-1066.5.5-1600.5.5zm522.1-113.5c.2 0 .4 0 .7 0-.2-.2-.4-.4-.5-1.4-1-3.6-2-7.2-3-10.7 3.5-2.7 6.7-5.1 10.9-8.3-5.4 0-9.5 0-13.7 0-1.4-4-2.7-7.8-4-11.6-.4-.3-.8-.6-1.3-.8-.2 11.1-6 14.3-15.4 12.5-.2 0-.5.3-1 .7 1.8 1.3 3.5 2.6 5.2 3.8 1.7 1.3 3.4 2.6 4.8 3.7-1.1 4.2-2 7.8-3.3 11.7 0 .3.1.5.1.8.2-.2.4-.4 1.2-.7 6-6.3 12.1-6.9 18.2-.1.2.2.6.2 1 .7zM198.1 49.5c12.1-8 25.5-12.8 41.3-15.1-50.5-6.6-85.3 21.8-100.2 51.5-19 37.9-10.7 81.2 17.2 110.1 23.5 24.5 60.8 33.3 80.7 27.5-3.4-.8-7.4-1.6-11.4-2.6-47.9-12.7-77-60.5-69.5-105.8 4.5-27.6 18.3-49.2 41.9-65.6zm149.6 73.5c-1.7 0-3.4 0-5.1 0 2.1 2.6 4.2 4.4 6.6 5.9 2.6 1.6 3.3 3.3 2 6.2-1.1 2.4-1.6 5-2.3 7.6.2.5.4 1 .6 1.4 6.4-8.5 12.8-7.6 19.2-1.2.1.1.5-.1 1.7-.3-6-8.5-2.9-14.3 5.4-18.5.1-.1.1-.6.1-.9-4-.3-9.1.8-11.8-1.3-2.8-2.1-3.2-7.3-4.7-11.2-3.8 4-.7 14.1-11.8 12.2zm96.5 19.2c.8.5 1.6 1 2.3 1.4-5.1-9-2.3-15 6.3-19.3.2-.1.2-.6.4-1.3-2.7 0-5.3-.2-7.9.1-3.6.4-5.5-.9-6.2-4.5-.5-2.3-1.6-4.5-2.8-7.8-2 4.8-2.5 9.7-5.2 11.6-2.7 1.9-7.5.8-13.3 1.2 10.3 4.3 13.5 10.3 7.3 19.4 1.8-.4 3-.8 4-1.5 7.4-4.9 7.4-4.9 15.2.7zm137.9-8.8c-1 3.3-2 6.6-3.3 10.7 4.2-2.7 7.6-6.6 11-6.6s6.5 3.9 10.7 6.6c-1-3.5-1.6-6.4-2.7-9.1-1.1-2.6-.6-4.2 1.8-5.7 2.5-1.5 4.7-3.4 8.2-6-3.3 0-5.1-.2-6.8.1-5.3.9-8.4-.9-9.2-6.5-.2-1.5-1.4-2.9-2.5-5.2-1 2.9-1.9 4.7-2.2 6.6-.7 3.9-2.6 5.7-6.8 5.1-2.5-.4-5.1-.1-7.7-.1 3.4 3.5 6.4 6.5 9.3 10.3zm-154.2 79c-.7 2.4-1.4 4.8-2.2 7.6 4.2-2.3 7.7-5.7 11.1-5.5s6.6 3.8 9.8 5.9c-5-8.9-2.4-15 6.2-19.3.2-.1.2-.5.2-.8-4-.3-9.1.8-11.9-1.3-2.8-2-3.2-7.2-4.9-11.7-1.1 3.3-2.3 6-2.9 8.9-.7 2.9-2.1 4.2-5.2 3.9-2.8-.3-5.7-.1-8.5-.1 2.2 2.7 4.4 4.5 6.8 5.9 2.5 1.5 3 3.3 1.5 6.5zm153.4.2c-.7 2.5-1.5 5-2.4 8.1 3.9-2.5 7.2-6.2 10.5-6.3s6.9 3.3 11.2 5.6c-1-3.2-1.5-5.6-2.5-7.8-1.4-3.1-.9-5.2 2.2-6.9 2.3-1.2 4.3-3 6.4-4.6-2.9-.9-5.3-1.1-7.6-.8-3.7.5-5.9-.6-6.6-4.6-.5-2.6-1.7-5-2.8-8.3-4.4 12.6-4.4 12.6-16.1 13-.2 0-.4.3-.8.7 2.3 1.7 4.4 3.6 6.8 5 2.6 1.6 3.3 3.5 1.7 6.9zm-295.4 2.8c2.2 1.6 4.4 3.2 7.7 5.6-1.5-5.2-4.1-9.4-3.1-12.3 1.1-3.2 5.6-5.2 8.6-7.8.2-.1.1-.5.2-1.5-10.2 3.4-14.7-1.7-16.2-10.9 0-.3-.4-.5-1.3-1.5-.2 10.8-5.6 14.8-15.5 13-.1 0-.3.4-.6.8.9.7 1.8 1.4 2.7 2.1 7 5.1 7 5.1 4.5 13.3-.4 1.2-.6 2.4-1.1 4.7 3.3-2.4 5.6-4.4 8.2-5.7 1.4-.7 3.4-.2 5.8.2zm60.2-15.5c-1.1 0-2.2 0-4.4 0 4 3.2 8.7 5.1 9.7 8.2 1.1 3.3-1.3 7.7-2.4 12.6 4-2.8 7.2-5.1 10.5-7.4 3.4 2.4 6.6 4.7 11 7.7-1.2-3.9-1.7-6.6-2.8-9.1-1.3-2.9-.6-4.6 2-6.2 2.4-1.5 4.5-3.4 7.3-5.5-5-.3-10 0.8-12.6-1.2-2.7-2-3-7.1-4.4-10.8-.1-.2-.4-.3-.8-.5-.5 1.5-1 2.9-1.5 4.3-2.6 7.8-2.6 7.8-11.6 7.8zm180.7 3.2c1-.9 2-1.7 4.1-3.5-5.3 0-10 1.4-12.6-.4-2.7-1.8-3.3-6.7-5.3-11.5-1.7 4.6-2 9.4-4.5 11.2-2.6 1.8-7.3.7-11.1.9-.2 0-.4.3-1.4 1 9.7 3.7 11.9 10.1 6.1 19.6 7.3-7.1 14-8.9 21.4 1s-6.4-14.4 3.4-18.4zm-76-154.2c-.2-.7-.3-2-.5-2-3.1-.1-6.3 0-9.4 0-1.5-4.3-2.9-8.2-4.6-13.1-2 4.9-2.5 9.8-5.2 11.8-2.7 2.1-7.5 1.3-11.5 1.8 3.3 2.4 6.4 4.6 9.6 6.9-1.3 3.9-2.5 7.6-3.8 11.6 1-.2 1.9-.1 2.2-.5 6.5-7.4 12.5-4.7 18.4.8.1.1.5 0 1 0-.4-1.4-.7-2.7-1.1-4-2.6-8.2-2.6-8.2 4.8-13.6zm66 -5c-1.1-3.2-2.2-6.4-3.7-10.8-1.3 4-2.4 6.6-3 9.3-.8 3.5-2.7 5-6.4 4.5-2.3-.3-4.6-.1-7.8-.1 4.1 3 7.2 5.3 10.3 7.5-1.3 4.2-2.5 8.1-3.7 12 7.4-8.7 14.3-5.9 21.8.6-1.4-4.6-2.6-8.6-3.8-12.5 3.1-2.4 5.9-4.5 9.8-7.5-4.3 0-7.1.2-9.9-.1-1.1-.1-2.1-1.3-3.4-2.9zm76.1-2.1c-.9-2.2-1.8-4.5-2.7-6.7-1.9 9.4-6.4 14.5-18.1 11.1 10.3 8.3 10.3 8.3 7.3 19.1-.1.4.1.8.4 2.2 6.4-8.2 12.9-8.7 19.5-1.2.1.1.5 0 1.4 0-1.2-4.1-2.3-8-3.4-12 3.1-2.3 5.9-4.4 9.8-7.3-5 0-8.6 0-12.3 0-.5-1.6-1-3-1.7-5.2z"/>
+                    <path fill="#FF0000" d="M1 529.5c533-.5 1066-.5 1599.5-.5.5 5 0.5 10 0.5 15.5-533 .5-1066 .5-1599.5.5-0.5-5-0.5-10-0.5-15.5z"/>
+                    <path fill="#FF0000" d="M1 257.5c533-.5 1066-.5 1599.5-.5.5 5 0.5 10 0.5 15.5-533 .5-1066 .5-1599.5.5-0.5-5-0.5-10-0.5-15.5z"/>
+                </svg>
+                <div class="plate-uz">UZ</div>
+            </div>
         </div>
 
-        <div class="plate-region">
-
-          <!-- SVG FLAG --> <svg viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg">
-
-            <rect fill="#1EB53A" width="1000" height="500" />
-
-            <rect fill="#FFFFFF" width="1000" height="180" y="160" />
-
-            <rect fill="#0099FF" width="1000" height="160" />
-
-            <rect fill="#CE1126" width="1000" height="20" y="150" />
-
-            <rect fill="#CE1126" width="1000" height="20" y="330" />
-
-            <g fill="#FFFFFF">
-
-              <path d="M150 40 a60 60 0 1 0 0 120 a50 50 0 1 1 0 -120" />
-
-              <circle cx="280" cy="80" r="8" />
-
-              <circle cx="300" cy="80" r="8" />
-
-              <circle cx="320" cy="80" r="8" />
-
-              <circle cx="340" cy="80" r="8" />
-
-              <circle cx="290" cy="100" r="8" />
-
-              <circle cx="310" cy="100" r="8" />
-
-              <circle cx="330" cy="100" r="8" />
-
-              <circle cx="350" cy="100" r="8" />
-
-              <circle cx="300" cy="120" r="8" />
-
-              <circle cx="320" cy="120" r="8" />
-
-              <circle cx="340" cy="120" r="8" />
-
-              <circle cx="360" cy="120" r="8" />
-
-              <circle cx="380" cy="120" r="8" />
-
-            </g>
-
-          </svg>
-
-          <div class="plate-uz">UZ</div>
-
+        <div id="legal-plate" class="license-plate hidden">
+            <div class="plate-main">
+                <span class="editable" contenteditable="true" data-type="number" data-length="2">01</span>
+                <div class="plate-divider"></div>
+                <span class="editable" contenteditable="true" data-type="number" data-length="3">123</span>
+                <span class="editable ml-2" contenteditable="true" data-type="letter" data-length="3">ABC</span>
+            </div>
+            <div class="plate-region">
+                <svg viewBox="0 0 1600 800" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="#00CC00" d="M1601 545c0 85.3 0 170.6 0 256-533.2 0-1066.4 0-1600 0 0-85 0-170 0.5-255.5 533.5-.5 1066.5-.5 1600-.5z"/>
+                    <path fill="#FFFFFF" d="M1601 273c0 85 0 170-0.5 255.5-533.5.5-1066.5.5-1600.5.5 0-85 0-170 0.5-255.5 533.5-.5 1066.5-.5 1600-.5z"/>
+                    <path fill="#3399FF" d="M1 257c0-85.3 0-170.6 0-256 533.2 0 1066.4 0 1600 0 0 85 0 170-0.5 255.5-533.5.5-1066.5.5-1600.5.5zm522.1-113.5c.2 0 .4 0 .7 0-.2-.2-.4-.4-.5-1.4-1-3.6-2-7.2-3-10.7 3.5-2.7 6.7-5.1 10.9-8.3-5.4 0-9.5 0-13.7 0-1.4-4-2.7-7.8-4-11.6-.4-.3-.8-.6-1.3-.8-.2 11.1-6 14.3-15.4 12.5-.2 0-.5.3-1 .7 1.8 1.3 3.5 2.6 5.2 3.8 1.7 1.3 3.4 2.6 4.8 3.7-1.1 4.2-2 7.8-3.3 11.7 0 .3.1.5.1.8.2-.2.4-.4 1.2-.7 6-6.3 12.1-6.9 18.2-.1.2.2.6.2 1 .7zM198.1 49.5c12.1-8 25.5-12.8 41.3-15.1-50.5-6.6-85.3 21.8-100.2 51.5-19 37.9-10.7 81.2 17.2 110.1 23.5 24.5 60.8 33.3 80.7 27.5-3.4-.8-7.4-1.6-11.4-2.6-47.9-12.7-77-60.5-69.5-105.8 4.5-27.6 18.3-49.2 41.9-65.6zm149.6 73.5c-1.7 0-3.4 0-5.1 0 2.1 2.6 4.2 4.4 6.6 5.9 2.6 1.6 3.3 3.3 2 6.2-1.1 2.4-1.6 5-2.3 7.6.2.5.4 1 .6 1.4 6.4-8.5 12.8-7.6 19.2-1.2.1.1.5-.1 1.7-.3-6-8.5-2.9-14.3 5.4-18.5.1-.1.1-.6.1-.9-4-.3-9.1.8-11.8-1.3-2.8-2.1-3.2-7.3-4.7-11.2-3.8 4-.7 14.1-11.8 12.2zm96.5 19.2c.8.5 1.6 1 2.3 1.4-5.1-9-2.3-15 6.3-19.3.2-.1.2-.6.4-1.3-2.7 0-5.3-.2-7.9.1-3.6.4-5.5-.9-6.2-4.5-.5-2.3-1.6-4.5-2.8-7.8-2 4.8-2.5 9.7-5.2 11.6-2.7 1.9-7.5.8-13.3 1.2 10.3 4.3 13.5 10.3 7.3 19.4 1.8-.4 3-.8 4-1.5 7.4-4.9 7.4-4.9 15.2.7zm137.9-8.8c-1 3.3-2 6.6-3.3 10.7 4.2-2.7 7.6-6.6 11-6.6s6.5 3.9 10.7 6.6c-1-3.5-1.6-6.4-2.7-9.1-1.1-2.6-.6-4.2 1.8-5.7 2.5-1.5 4.7-3.4 8.2-6-3.3 0-5.1-.2-6.8.1-5.3.9-8.4-.9-9.2-6.5-.2-1.5-1.4-2.9-2.5-5.2-1 2.9-1.9 4.7-2.2 6.6-.7 3.9-2.6 5.7-6.8 5.1-2.5-.4-5.1-.1-7.7-.1 3.4 3.5 6.4 6.5 9.3 10.3zm-154.2 79c-.7 2.4-1.4 4.8-2.2 7.6 4.2-2.3 7.7-5.7 11.1-5.5s6.6 3.8 9.8 5.9c-5-8.9-2.4-15 6.2-19.3.2-.1.2-.5.2-.8-4-.3-9.1.8-11.9-1.3-2.8-2-3.2-7.2-4.9-11.7-1.1 3.3-2.3 6-2.9 8.9-.7 2.9-2.1 4.2-5.2 3.9-2.8-.3-5.7-.1-8.5-.1 2.2 2.7 4.4 4.5 6.8 5.9 2.5 1.5 3 3.3 1.5 6.5zm153.4.2c-.7 2.5-1.5 5-2.4 8.1 3.9-2.5 7.2-6.2 10.5-6.3s6.9 3.3 11.2 5.6c-1-3.2-1.5-5.6-2.5-7.8-1.4-3.1-.9-5.2 2.2-6.9 2.3-1.2 4.3-3 6.4-4.6-2.9-.9-5.3-1.1-7.6-.8-3.7.5-5.9-.6-6.6-4.6-.5-2.6-1.7-5-2.8-8.3-4.4 12.6-4.4 12.6-16.1 13-.2 0-.4.3-.8.7 2.3 1.7 4.4 3.6 6.8 5 2.6 1.6 3.3 3.5 1.7 6.9zm-295.4 2.8c2.2 1.6 4.4 3.2 7.7 5.6-1.5-5.2-4.1-9.4-3.1-12.3 1.1-3.2 5.6-5.2 8.6-7.8.2-.1.1-.5.2-1.5-10.2 3.4-14.7-1.7-16.2-10.9 0-.3-.4-.5-1.3-1.5-.2 10.8-5.6 14.8-15.5 13-.1 0-.3.4-.6.8.9.7 1.8 1.4 2.7 2.1 7 5.1 7 5.1 4.5 13.3-.4 1.2-.6 2.4-1.1 4.7 3.3-2.4 5.6-4.4 8.2-5.7 1.4-.7 3.4-.2 5.8.2zm60.2-15.5c-1.1 0-2.2 0-4.4 0 4 3.2 8.7 5.1 9.7 8.2 1.1 3.3-1.3 7.7-2.4 12.6 4-2.8 7.2-5.1 10.5-7.4 3.4 2.4 6.6 4.7 11 7.7-1.2-3.9-1.7-6.6-2.8-9.1-1.3-2.9-.6-4.6 2-6.2 2.4-1.5 4.5-3.4 7.3-5.5-5-.3-10 0.8-12.6-1.2-2.7-2-3-7.1-4.4-10.8-.1-.2-.4-.3-.8-.5-.5 1.5-1 2.9-1.5 4.3-2.6 7.8-2.6 7.8-11.6 7.8zm180.7 3.2c1-.9 2-1.7 4.1-3.5-5.3 0-10 1.4-12.6-.4-2.7-1.8-3.3-6.7-5.3-11.5-1.7 4.6-2 9.4-4.5 11.2-2.6 1.8-7.3.7-11.1.9-.2 0-.4.3-1.4 1 9.7 3.7 11.9 10.1 6.1 19.6 7.3-7.1 14-8.9 21.4 1s-6.4-14.4 3.4-18.4zm-76-154.2c-.2-.7-.3-2-.5-2-3.1-.1-6.3 0-9.4 0-1.5-4.3-2.9-8.2-4.6-13.1-2 4.9-2.5 9.8-5.2 11.8-2.7 2.1-7.5 1.3-11.5 1.8 3.3 2.4 6.4 4.6 9.6 6.9-1.3 3.9-2.5 7.6-3.8 11.6 1-.2 1.9-.1 2.2-.5 6.5-7.4 12.5-4.7 18.4.8.1.1.5 0 1 0-.4-1.4-.7-2.7-1.1-4-2.6-8.2-2.6-8.2 4.8-13.6zm66 -5c-1.1-3.2-2.2-6.4-3.7-10.8-1.3 4-2.4 6.6-3 9.3-.8 3.5-2.7 5-6.4 4.5-2.3-.3-4.6-.1-7.8-.1 4.1 3 7.2 5.3 10.3 7.5-1.3 4.2-2.5 8.1-3.7 12 7.4-8.7 14.3-5.9 21.8.6-1.4-4.6-2.6-8.6-3.8-12.5 3.1-2.4 5.9-4.5 9.8-7.5-4.3 0-7.1.2-9.9-.1-1.1-.1-2.1-1.3-3.4-2.9zm76.1-2.1c-.9-2.2-1.8-4.5-2.7-6.7-1.9 9.4-6.4 14.5-18.1 11.1 10.3 8.3 10.3 8.3 7.3 19.1-.1.4.1.8.4 2.2 6.4-8.2 12.9-8.7 19.5-1.2.1.1.5 0 1.4 0-1.2-4.1-2.3-8-3.4-12 3.1-2.3 5.9-4.4 9.8-7.3-5 0-8.6 0-12.3 0-.5-1.6-1-3-1.7-5.2z"/>
+                    <path fill="#FF0000" d="M1 529.5c533-.5 1066-.5 1599.5-.5.5 5 0.5 10 0.5 15.5-533 .5-1066 .5-1599.5.5-0.5-5-0.5-10-0.5-15.5z"/>
+                    <path fill="#FF0000" d="M1 257.5c533-.5 1066-.5 1599.5-.5.5 5 0.5 10 0.5 15.5-533 .5-1066 .5-1599.5.5-0.5-5-0.5-10-0.5-15.5z"/>
+                </svg>
+                <div class="plate-uz">UZ</div>
+            </div>
         </div>
+    </div>
 
-      </div>
+    <button id="download-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-all flex items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        </svg>
+        Rasm sifatida yuklash
+    </button>
+</div>
 
-      <div id="legal-plate" class="license-plate hidden">
+<script>
+const tabIndividual=document.getElementById('tab-individual');
+const tabLegal=document.getElementById('tab-legal');
+const individualPlate=document.getElementById('individual-plate');
+const legalPlate=document.getElementById('legal-plate');
+const downloadBtn=document.getElementById('download-btn');
+const editableElements=document.querySelectorAll('.editable');
 
-        <div class="plate-main"> <span class="editable" contenteditable="true" data-type="number" data-length="2">01</span>
-
-          <div class="plate-divider"></div> <span class="editable" contenteditable="true" data-type="number" data-length="3">123</span> <span class="editable ml-3" contenteditable="true" data-type="letter" data-length="3">ABC</span>
-
-        </div>
-
-        <div class="plate-region"> <svg viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg">
-
-            <rect fill="#1EB53A" width="1000" height="500" />
-
-            <rect fill="#FFFFFF" width="1000" height="180" y="160" />
-
-            <rect fill="#0099FF" width="1000" height="160" />
-
-            <rect fill="#CE1126" width="1000" height="20" y="150" />
-
-            <rect fill="#CE1126" width="1000" height="20" y="330" />
-
-            <g fill="#FFFFFF">
-
-              <path d="M150 40 a60 60 0 1 0 0 120 a50 50 0 1 1 0 -120" />
-
-              <circle cx="280" cy="80" r="8" />
-
-              <circle cx="300" cy="80" r="8" />
-
-              <circle cx="320" cy="80" r="8" />
-
-              <circle cx="340" cy="80" r="8" />
-
-              <circle cx="290" cy="100" r="8" />
-
-              <circle cx="310" cy="100" r="8" />
-
-              <circle cx="330" cy="100" r="8" />
-
-              <circle cx="350" cy="100" r="8" />
-
-              <circle cx="300" cy="120" r="8" />
-
-              <circle cx="320" cy="120" r="8" />
-
-              <circle cx="340" cy="120" r="8" />
-
-              <circle cx="360" cy="120" r="8" />
-
-              <circle cx="380" cy="120" r="8" />
-
-            </g>
-
-          </svg>
-
-          <div class="plate-uz">UZ</div>
-
-        </div>
-
-      </div>
-
-    </div> <button class="top-left-menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="dropdown-menu"> <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-
-        <path d="M3 6h18M3 12h18M3 18h18" stroke="white" stroke-width="2" stroke-linecap="round" />
-
-      </svg> <button id="download-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 ease-in-out flex items-center justify-center"> <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-
-        </svg> Rasm sifatida yuklash </button>
-
-  </div>
-
-  <script>
-
-    const tabIndividual = document.getElementById('tab-individual');
-
-    const tabLegal = document.getElementById('tab-legal');
-
-    const individualPlate = document.getElementById('individual-plate');
-
-    const legalPlate = document.getElementById('legal-plate');
-
-    const downloadBtn = document.getElementById('download-btn');
-
-    const editableElements = document.querySelectorAll('.editable');
-
-
-
-    function switchTab(activeTab) {
-
-      if (activeTab === 'individual') {
-
+function switchTab(activeTab){
+    if(activeTab==='individual'){
         tabIndividual.classList.add('active');
-
         tabLegal.classList.remove('active');
-
         individualPlate.classList.remove('hidden');
-
         legalPlate.classList.add('hidden');
-
-      } else {
-
+    } else {
         tabLegal.classList.add('active');
-
         tabIndividual.classList.remove('active');
-
         legalPlate.classList.remove('hidden');
-
         individualPlate.classList.add('hidden');
-
-      }
-
     }
+}
 
-    tabIndividual.addEventListener('click', () => switchTab('individual'));
+tabIndividual.addEventListener('click',()=>switchTab('individual'));
+tabLegal.addEventListener('click',()=>switchTab('legal'));
 
-    tabLegal.addEventListener('click', () => switchTab('legal'));
-
-    downloadBtn.addEventListener('click', () => {
-
-      const activePlate = individualPlate.classList.contains('hidden') ? legalPlate : individualPlate;
-
-      const activePlateMain = activePlate.querySelector('.plate-main');
-
-      const isMobile = window.innerWidth <= 600;
-
-      const offsetY = isMobile ? '-18px' : '-25px';
-
-      activePlateMain.style.setProperty('--offset-y', offsetY);
-
-      html2canvas(activePlate, {
-
-        backgroundColor: null,
-
-        scale: 3,
-
-      }).then((canvas) => {
-
-        activePlateMain.style.setProperty('--offset-y', '0px');
-
-        const link = document.createElement('a');
-
-        link.download = 'avtoraqam-shunchaki-rasm.png';
-
-        link.href = canvas.toDataURL('image/png');
-
+downloadBtn.addEventListener('click',()=>{
+    const activePlate = individualPlate.classList.contains('hidden') ? legalPlate : individualPlate;
+    
+    html2canvas(activePlate,{backgroundColor:null,scale:3}).then((canvas)=>{
+        const link=document.createElement('a');
+        link.download='avtoraqam.png';
+        link.href=canvas.toDataURL('image/png');
         link.click();
-
-      });
-
     });
+});
 
-    editableElements.forEach((el) => {
-
-      el.addEventListener('keydown', (e) => {
-
-        const type = el.dataset.type;
-
-        const maxLength = parseInt(el.dataset.length, 10);
-
-        const currentLength = el.textContent.length;
-
-        const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
-
-        if (allowedKeys.includes(e.key)) return;
-
-        if (currentLength >= maxLength) {
-
-          e.preventDefault();
-
-          return;
-
-        }
-
-        if (type === 'number' && !/^[0-9]$/.test(e.key)) e.preventDefault();
-
-        if (type === 'letter' && !/^[a-zA-Z]$/.test(e.key)) e.preventDefault();
-
-      });
-
-      el.addEventListener('input', () => {
-
-        if (el.dataset.type === 'letter') {
-
-          const selection = window.getSelection();
-
-          const range = selection.getRangeAt(0);
-
-          const offset = range.startOffset;
-
-          el.textContent = el.textContent.toUpperCase();
-
-          const newRange = document.createRange();
-
-          if (el.childNodes.length > 0) {
-
-            newRange.setStart(el.childNodes[0], Math.min(offset, el.textContent.length));
-
-            newRange.collapse(true);
-
-            selection.removeAllRanges();
-
-            selection.addRange(newRange);
-
-          }
-
-        }
-
-      });
-
+editableElements.forEach((el)=>{
+    el.addEventListener('keydown',(e)=>{
+        const type=el.dataset.type;
+        const maxLength=parseInt(el.dataset.length,10);
+        const currentLength=el.textContent.length;
+        const allowedKeys=['Backspace','Delete','ArrowLeft','ArrowRight','Tab'];
+        if(allowedKeys.includes(e.key))return;
+        if(currentLength>=maxLength){e.preventDefault();return;}
+        if(type==='number'&&!/^[0-9]$/.test(e.key))e.preventDefault();
+        if(type==='letter'&&!/^[a-zA-Z]$/.test(e.key))e.preventDefault();
     });
-
-  </script>
-
-<script src="/auto-menu.js"></script><script src="auto-menu.js"></script><script src="/new-domain-banner.js"></script>
-
+    el.addEventListener('input',()=>{
+        if(el.dataset.type==='letter'){
+            const selection=window.getSelection();
+            const range=selection.getRangeAt(0);
+            const offset=range.startOffset;
+            el.textContent=el.textContent.toUpperCase();
+            const newRange=document.createRange();
+            if(el.childNodes.length>0){
+                newRange.setStart(el.childNodes[0],Math.min(offset,el.textContent.length));
+                newRange.collapse(true);
+                selection.removeAllRanges();
+                selection.addRange(newRange);
+            }
+        }
+    });
+});
+</script>
 </body>
-
-
-
 </html>
