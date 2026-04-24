@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru-uz">
 <head>
@@ -6,7 +7,7 @@
 <title>Avtoraqam rasm generatori</title>
 <link rel="icon" type="image/x-icon" href="favicon.png">
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&display=swap" rel="stylesheet"/>
@@ -46,11 +47,10 @@ body { font-family: 'Inter', sans-serif; }
     justify-content: center;
     height: 100%;
     min-width: 70px;
-    /* УДАЛЕНО: border-left: 3px solid black; */
     padding-left: 5px;
 }
 
-.plate-region svg { width: 55px; height: 30px; }
+.plate-region svg { width: 40px; height: 30px; }
 .plate-uz { font-weight: 600; font-size: 24px; margin-top: 4px; font-family: sans-serif; line-height: 1; }
 
 .plate-main {
@@ -170,14 +170,19 @@ function switchTab(activeTab){
 tabIndividual.addEventListener('click',()=>switchTab('individual'));
 tabLegal.addEventListener('click',()=>switchTab('legal'));
 
-downloadBtn.addEventListener('click',()=>{
+downloadBtn.addEventListener('click', () => {
     const activePlate = individualPlate.classList.contains('hidden') ? legalPlate : individualPlate;
     
-    html2canvas(activePlate,{backgroundColor:null,scale:3}).then((canvas)=>{
-        const link=document.createElement('a');
-        link.download='avtoraqam.png';
-        link.href=canvas.toDataURL('image/png');
+    htmlToImage.toPng(activePlate, {
+        pixelRatio: 3, // Аналог scale: 3
+        backgroundColor: 'transparent'
+    }).then((dataUrl) => {
+        const link = document.createElement('a');
+        link.download = 'avtoraqam.png';
+        link.href = dataUrl;
         link.click();
+    }).catch((error) => {
+        console.error('Yuklab olish paytida xatolik yuz berdi.', error);
     });
 });
 
