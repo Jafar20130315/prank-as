@@ -189,6 +189,7 @@
       font-family: 'Poppins', sans-serif;
       transition: 0.3s;
       font-size: 15px;
+      position: relative; /* Добавлено для кружочка */
     }
     
     .cat-btn:hover {
@@ -200,6 +201,27 @@
       background: #fff;
       color: #111;
       box-shadow: 0 0 25px rgba(255,255,255,0.8); /* Свечение самой вкладки */
+    }
+
+    /* Индикатор (красный кружок) для вкладок с новинками */
+    .cat-btn.has-new::after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      right: -4px;
+      width: 12px;
+      height: 12px;
+      background-color: #FF4500;
+      border-radius: 50%;
+      border: 2px solid rgba(0, 0, 0, 0.4);
+      box-shadow: 0 0 8px rgba(255, 69, 0, 0.8);
+      animation: pulseDot 2s infinite;
+    }
+    
+    @keyframes pulseDot {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 69, 0, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(255, 69, 0, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 69, 0, 0); }
     }
 
     /* Обертка для свайпа */
@@ -627,7 +649,7 @@
   <!-- ТАБЫ КАТЕГОРИЙ СО СВЕЧЕНИЕМ -->
   <div class="tabs-glow-wrapper">
     <div class="category-tabs">
-      <button class="cat-btn active" data-index="0">Instrumentlar</button>
+      <button class="cat-btn active" data-index="0">Pranklarr</button>
       <button class="cat-btn" data-index="1">Pranklar</button>
       <button class="cat-btn" data-index="2">Boshqa</button>
     </div>
@@ -638,26 +660,10 @@
     <div class="swipe-viewport">
       <div class="swipe-container" id="swipeContainer">
         
-        <!-- СЛАЙД 0: INSTRUMENTLAR -->
+        <!-- СЛАЙД 0: PRANKLAR -->
         <div class="swipe-slide">
           <div class="button-container">
-            
-            <a class="btn" href="/ovoz-olchovchi">Ovoz o‘lchovchi</a>
-            <a class="btn" href="/tekst-ovoz">Tekst → Ovo‍z</a>
-            <a class="btn" href="/rangligradient">Rangli sensor</a>
-            <a class="btn" href="/3d-qol-boshqaruvi">3D Shakl boshqaruvi</a>
-            <a class="btn" href="/ai-kamera">Aqlli kamera</a>
-            <a class="btn" href="/kuzatuv-kamerasi">Kuzatuv kamerasi (telefon orqali)</a>
-            <a class="btn" href="/kolgin">Kolgin - harakat trekeri</a>
-             <a class="btn" href="/avtoraqam-rasm-generatori">Avtoraqam rasm generatori</a>
-            <a class="btn" href="/musiqa-zarba-kuzatuvchi">Musiqa pleyeri</a>
-          </div>
-        </div>
-
-        <!-- СЛАЙД 1: PRANKLAR -->
-        <div class="swipe-slide">
-          <div class="button-container">
-            <a class="btn" href="/soxta-parol-aniqlovchi">Soxta parol aniqlovchi</a>
+             <a class="btn" href="/soxta-parol-aniqlovchi">Soxta parol aniqlovchi</a>
             <a class="btn" href="/soxta-balans-aniqlovchi">Soxta balans aniqlovchi</a>
             <a class="btn" href="/soxta-ulanish-sistemasi">Soxta ulanish sistemasi</a>
             <a class="btn" href="/soxta-uyin-bank-kartasi">Soxta o‘yin bank kartasi</a>
@@ -666,16 +672,32 @@
             <a class="btn" href="/soxta-random-yashash-joyi">Soxta random yashash joyi</a>
             <a class="btn" href="/soxta-shaxs-aniqlovchi">Soxta shaxs aniqlovchi</a>
             <a class="btn" href="/soxta-wifi-parol-joylashuv-aniqlovchi">Soxta Wi-Fi parol aniqlovchi PRO</a>
-            
+           
+          
+          </div>
+        </div>
+
+        <!-- СЛАЙД 1: INSTRUMENTLAR -->
+        <div class="swipe-slide">
+          <div class="button-container">
+            <a class="btn" href="/ovoz-olchovchi">Ovoz o‘lchovchi</a>
+            <a class="btn" href="/tekst-ovoz">Tekst → Ovo‍z</a>
+            <a class="btn" href="/ai-kamera">Aqlli kamera</a>
+            <a class="btn" href="/kuzatuv-kamerasi">Kuzatuv kamerasi (telefon orqali)</a>
+            <a class="btn" href="/kolgin">Kolgin - harakat trekeri</a>
           </div>
         </div>
 
         <!-- СЛАЙД 2: BOSHQA -->
         <div class="swipe-slide">
           <div class="button-container">
+            <a class="btn" href="/avtoraqam-rasm-generatori">Avtoraqam rasm generatori</a>
             <a class="btn" href="/oyin-barabani">O‘yin barabani</a>
+            <a class="btn" href="/musiqa-zarba-kuzatuvchi">Musiqa pleyeri</a>
             <a class="btn" href="/avtomobil-yo'li">Avtomobil yo'li</a>
             <a class="btn new" href="/mening-honam">"Mening xonam"</a>
+             <a class="btn" href="/rangligradient">Rangli sensor</a>
+            <a class="btn" href="/3d-qol-boshqaruvi">3D Shakl boshqaruvi</a>
           </div>
         </div>
 
@@ -838,11 +860,25 @@
     // Эффект свайпа галереи для новых кнопок-вкладок
     const catTabs = document.querySelectorAll('.cat-btn');
     const swipeCont = document.getElementById('swipeContainer');
+    const slides = document.querySelectorAll('.swipe-slide');
+
+    // Автоматически находим слайды с новыми кнопками и добавляем индикатор на их вкладки
+    slides.forEach((slide, index) => {
+      if (slide.querySelector('.btn.new')) {
+        // Если вкладка по умолчанию не активна, показываем индикатор
+        if (!catTabs[index].classList.contains('active')) {
+          catTabs[index].classList.add('has-new');
+        }
+      }
+    });
 
     catTabs.forEach((tab) => {
       tab.addEventListener('click', () => {
         // Если уже активна - ничего не делаем
         if(tab.classList.contains('active')) return;
+        
+        // Убираем красный кружок при переходе на эту вкладку
+        tab.classList.remove('has-new');
         
         // Переключаем активную вкладку
         catTabs.forEach(t => t.classList.remove('active'));
