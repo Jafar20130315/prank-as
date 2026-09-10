@@ -1,19 +1,23 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="uz">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Avtoraqam aniqlovchi - SI</title>
-    
+    <title>Avtoraqam aniqlovchi - SI & Informer</title>
+
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f8fafc;
         }
+
         .loader {
             border: 3px solid #f3f3f3;
             border-radius: 50%;
@@ -24,37 +28,121 @@
             display: inline-block;
             vertical-align: middle;
         }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+
+        /* PlatesMania Style Uzbek License Plate Informer */
+        .uz-plate-informer {
+            display: inline-flex;
+            align-items: center;
+            background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+            border: 2px solid #000000;
+            border-radius: 6px;
+            padding: 2px 6px;
+            box-shadow: inset 0 0 2px rgba(0,0,0,0.4), 0 2px 5px rgba(0,0,0,0.15);
+            user-select: none;
+            height: 44px;
+            min-width: 190px;
+            box-sizing: border-box;
+        }
+
+        .uz-plate-region {
+            font-family: 'Oswald', 'Arial Black', sans-serif;
+            font-weight: 700;
+            font-size: 20px;
+            line-height: 1;
+            color: #000000;
+            padding-right: 8px;
+            border-right: 2px solid #000000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            letter-spacing: -0.5px;
+        }
+
+        .uz-plate-number {
+            font-family: 'Oswald', 'Arial Black', sans-serif;
+            font-weight: 700;
+            font-size: 22px;
+            line-height: 1;
+            color: #000000;
+            padding: 0 10px;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .uz-plate-flag-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-left: 6px;
+            border-left: 1px solid #cbd5e1;
+            height: 100%;
+        }
+
+        .uz-plate-uz {
+            color: #0099b5;
+            font-weight: 900;
+            font-size: 10px;
+            line-height: 1;
+            margin-top: 2px;
+            font-family: sans-serif;
+            letter-spacing: -0.5px;
+        }
+
+        /* Image modal viewport bounds */
+        #modal-img-wrapper {
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+        }
+        #modal-img-wrapper:active {
+            cursor: grabbing;
+        }
+
+        .action-btn:focus-visible,
+        button:focus-visible,
+        label:focus-within {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
         }
     </style>
 </head>
 <body class="min-h-screen text-gray-800 p-4 md:p-8">
 
     <div class="max-w-6xl mx-auto space-y-6">
-        
         <!-- Header -->
         <div class="bg-white rounded-2xl shadow-sm p-6 text-center border border-gray-100">
             <h1 class="text-3xl font-bold text-gray-900 mb-2">
-                <i class="fa-solid fa-car-tunnel text-blue-600 mr-2"></i>Avtoraqam aniqlovchi skaner<span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full uppercase">BETA versiya</span>
+                <i class="fa-solid fa-car-tunnel text-blue-600 mr-2" aria-hidden="true"></i>Avtoraqam aniqlovchi skaner
+                <span class="text-xs bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full uppercase font-semibold">PlatesMania Informer</span>
             </h1>
-            <p class="text-gray-500">Rasm orqali avtotransportning davlat raqamini aniqlang.</p>
+            <p class="text-gray-500">Rasm orqali avtotransportning davlat raqamini aniqlang va PlatesMania informerini oling.</p>
         </div>
 
         <!-- Upload Section -->
         <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-            <label class="block text-sm font-semibold text-gray-700 mb-3">Rasmni yuklash (bir nechta rasm qo'llab-quvvatlanadi)</label>
+            <label class="block text-sm font-semibold text-gray-700 mb-3" for="image-upload">Rasmni yuklash (bir nechta rasm qo'llab-quvvatlanadi)</label>
             <div class="flex items-center justify-center w-full">
                 <label for="image-upload" class="flex flex-col items-center justify-center w-full h-36 border-2 border-blue-300 border-dashed rounded-xl cursor-pointer bg-blue-50/50 hover:bg-blue-50 transition-colors">
                     <div class="flex flex-col items-center justify-center pt-5 pb-6 px-4 text-center">
-                        <i class="fa-solid fa-cloud-arrow-up text-4xl text-blue-500 mb-3"></i>
-                        <p class="mb-1 text-sm text-gray-700 font-medium">Rasmlarni torib keling, yoki yuklang.</p>
-                        <p class="text-xs text-gray-400">PNG, JPG, WEBP.</p>
+                        <i class="fa-solid fa-cloud-arrow-up text-4xl text-blue-500 mb-3" aria-hidden="true"></i>
+                        <p class="mb-1 text-sm text-gray-700 font-medium">Rasmlarni tortib keling, yoki yuklang.</p>
+                        <p class="text-xs text-gray-400">PNG, JPG, WEBP. Har biri 8MB gacha.</p>
                     </div>
-                    <input id="image-upload" type="file" class="hidden" accept="image/*" multiple />
+                    <input id="image-upload" type="file" class="hidden" accept="image/png, image/jpeg, image/webp" multiple />
                 </label>
             </div>
+            <p id="upload-error" class="text-sm text-red-600 mt-3 hidden" role="alert"></p>
         </div>
 
         <!-- Results Dashboard -->
@@ -62,12 +150,9 @@
             <div class="p-6 border-b border-gray-100 flex flex-wrap items-center justify-between gap-4">
                 <div>
                     <h2 class="text-lg font-bold text-gray-900">Natija</h2>
-                    <p class="text-sm text-gray-500" id="stats-counter">0 dan 0 ta rasm aniqlandi</p>
+                    <p class="text-sm text-gray-500" id="stats-counter" aria-live="polite">0 dan 0 ta rasm aniqlandi</p>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="exportToCSV()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-lg transition-colors flex items-center gap-2">
-                        <i class="fa-solid fa-download"></i> CSV ga eksport
-                    </button>
                     <button onclick="clearAll()" class="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 text-sm font-semibold rounded-lg transition-colors">
                         Hammasini tozalash
                     </button>
@@ -79,121 +164,230 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-gray-50 text-gray-400 text-xs uppercase tracking-wider border-b border-gray-100">
-                            <th class="p-4 font-semibold">Prevyu</th>
+                            <th class="p-4 font-semibold">Prevyu (bosing)</th>
                             <th class="p-4 font-semibold">Status</th>
-                            <th class="p-4 font-semibold">Davlat raqami</th>
+                            <th class="p-4 font-semibold">Davlat raqami (PlatesMania Informer)</th>
                             <th class="p-4 font-semibold">AT turi</th>
                             <th class="p-4 font-semibold">Viloyat</th>
                             <th class="p-4 font-semibold text-right">Amallar</th>
                         </tr>
                     </thead>
-                    <tbody id="results-tbody" class="divide-y divide-gray-100 text-sm">
+                    <tbody id="results-tbody" class="divide-y divide-gray-100 text-sm" aria-live="polite">
                         <!-- Dynamic rows -->
                     </tbody>
                 </table>
             </div>
         </div>
+    </div>
 
+    <!-- Image Zoom Modal -->
+    <div id="image-modal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex flex-col items-center justify-center hidden opacity-0 transition-opacity duration-300" role="dialog" aria-modal="true" aria-label="Rasm prevyusi">
+        <!-- Control Header -->
+        <div class="absolute top-4 left-4 right-4 flex justify-between items-center z-10 px-2">
+            <div class="text-white/80 text-sm font-medium bg-black/40 px-3 py-1.5 rounded-full backdrop-blur">
+                <span id="zoom-level-text">100%</span> | Sichqoncha g'ildiragi yoki tugmalar orqali kattalashtiring
+            </div>
+            <div class="flex items-center gap-2 bg-gray-900/90 text-white p-1.5 rounded-full border border-gray-700 shadow-xl">
+                <button onclick="changeZoom(0.25)" class="w-9 h-9 rounded-full hover:bg-gray-800 flex items-center justify-center text-sm transition-colors" title="Kattalashtirish (+)" aria-label="Kattalashtirish">
+                    <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                </button>
+                <button onclick="changeZoom(-0.25)" class="w-9 h-9 rounded-full hover:bg-gray-800 flex items-center justify-center text-sm transition-colors" title="Kichiklashtirish (-)" aria-label="Kichiklashtirish">
+                    <i class="fa-solid fa-minus" aria-hidden="true"></i>
+                </button>
+                <button onclick="resetZoom()" class="w-9 h-9 rounded-full hover:bg-gray-800 flex items-center justify-center text-sm transition-colors" title="Dastlabki holat" aria-label="Dastlabki holatga qaytarish">
+                    <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
+                </button>
+                <div class="w-px h-5 bg-gray-700 mx-1"></div>
+                <button onclick="closeImageModal()" class="w-9 h-9 rounded-full bg-red-600/80 hover:bg-red-600 flex items-center justify-center text-white text-sm transition-colors" title="Yopish (ESC)" aria-label="Yopish">
+                    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Zoomable Image Viewport -->
+        <div class="w-full h-full flex items-center justify-center p-6 overflow-hidden" onclick="handleModalBackdropClick(event)">
+            <div id="modal-img-wrapper" class="relative max-w-full max-h-full transition-transform duration-75">
+                <img id="modal-img" src="" alt="Prevyu" class="max-w-[90vw] max-h-[85vh] object-contain rounded-xl shadow-2xl pointer-events-auto" />
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-gray-900 text-white px-4 py-3 rounded-xl shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-3 z-50" role="status">
+        <i class="fa-solid fa-circle-check text-green-400" aria-hidden="true"></i>
+        <span id="toast-msg">Davlat raqami nusxalandi</span>
     </div>
 
 <script>
+    // ====== SOZLAMALAR ======
+    // O'z Worker manzilingizni va (agar APP_SECRET qo'ygan bo'lsangiz) sirni shu yerga kiriting.
+    const WORKER_URL = "https://avtoraqam-aniqlovchi-si-api.jafaras.uz";
+    const APP_SECRET = ""; // worker'dagi env.APP_SECRET bilan bir xil bo'lishi kerak (ixtiyoriy)
+
+    const MAX_FILE_BYTES = 8 * 1024 * 1024; // 8 MB (yuklashdan oldingi tekshiruv)
+    const MAX_UPLOAD_DIMENSION = 1600; // px, Gemini'ga yuborishdan oldin shu o'lchamgacha kichraytiramiz
+    const CONCURRENCY_LIMIT = 3; // bir vaqtda nechta rasm serverga yuborilishi mumkin
+
     const uploadInput = document.getElementById('image-upload');
     const dashboard = document.getElementById('dashboard');
     const resultsTbody = document.getElementById('results-tbody');
     const statsCounter = document.getElementById('stats-counter');
+    const uploadError = document.getElementById('upload-error');
 
-    const validRegions = ['01', '20', '30', '40', '50', '60', '70', '75', '80', '85', '90'];
+    const validRegions = ['01', '10', '20', '25', '30', '40', '50', '60', '70', '75', '80', '85', '90', '95'];
+    // Eslatma: dastlabki versiyada '35' ham ro'yxatda edi, lekin O'zbekiston viloyat
+    // kodlari orasida amaldagi 35 kodi yo'q (30 — Samarqand uchun to'g'ri kod).
+    // Agar sizda boshqacha ma'lumot bo'lsa, shu massivga qaytarib qo'shing.
+
     let scanResults = [];
 
-    uploadInput.addEventListener('change', async function(e) {
+    // ---------- Yordamchi: matnni xavfsiz HTML ga aylantirish (XSS oldini olish) ----------
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = String(str ?? '');
+        return div.innerHTML;
+    }
+
+    // ---------- Fayl yuklash ----------
+    uploadInput.addEventListener('change', async function (e) {
         const files = Array.from(e.target.files);
         if (files.length === 0) return;
 
+        uploadError.classList.add('hidden');
+
+        const validFiles = [];
+        const rejected = [];
+        for (const file of files) {
+            const allowedTypes = ['image/png', 'image/jpeg', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                rejected.push(`${file.name} (noto'g'ri format)`);
+                continue;
+            }
+            if (file.size > MAX_FILE_BYTES) {
+                rejected.push(`${file.name} (hajmi katta, 8MB dan oshmasin)`);
+                continue;
+            }
+            validFiles.push(file);
+        }
+
+        if (rejected.length) {
+            uploadError.textContent = `Ba'zi fayllar rad etildi: ${rejected.join(', ')}`;
+            uploadError.classList.remove('hidden');
+        }
+
+        if (validFiles.length === 0) {
+            uploadInput.value = '';
+            return;
+        }
+
         dashboard.classList.remove('hidden');
-        
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            const base64Url = await fileToDataURL(file);
-            
+
+        // Har bir fayl uchun: preview + kichraytirilgan base64 tayyorlab, navbatga qo'yamiz
+        const jobs = [];
+        for (const file of validFiles) {
+            const previewUrl = await fileToDataURL(file);
+            const resized = await resizeImageForUpload(file, MAX_UPLOAD_DIMENSION);
+
             const itemIndex = scanResults.length;
             scanResults.push({
                 file: file.name,
-                image: base64Url,
-                status: 'processing',
+                image: previewUrl, // asl (yoki kichik) rasm — faqat ko'rsatish uchun
+                status: 'queued',
                 plate: '---',
                 type: '-',
                 region: '-',
-                raw: '-'
+                raw: '-',
             });
-
-            renderTable();
-            
-            // Запускаем анализ ИИ для каждого файла асинхронно
-            processImageWithAI(base64Url, itemIndex);
+            jobs.push({ index: itemIndex, base64: resized.base64, mimeType: resized.mimeType });
         }
-        
-        // Сбросить инпут, чтобы можно было загрузить те же файлы повторно если нужно
+
+        renderTable();
+        runWithConcurrencyLimit(jobs, CONCURRENCY_LIMIT, (job) => processImageWithAI(job.base64, job.mimeType, job.index));
+
         uploadInput.value = '';
     });
 
     function fileToDataURL(file) {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = () => reject(new Error('Faylni o\'qib bo\'lmadi'));
             reader.readAsDataURL(file);
         });
     }
 
-    async function processImageWithAI(base64Url, index) {
-        const base64Data = base64Url.split(',')[1];
-        const mimeType = base64Url.split(';')[0].split(':')[1];
-
-        const prompt = `Ты продвинутая система распознавания автомобильных номеров (ALPR). 
-Внимательно посмотри на фото и найди автомобильный номер Узбекистана.
-Прочитай его текст (только буквы и цифры, игнорируй флаги и гербы).
-Если номер не найден, верни found: false.
-Форматы номеров Узбекистана: 
-- Физические лица: 2 цифры региона, 1 буква, 3 цифры, 2 буквы (напр. 01A123AA)
-- Юридические лица: 2 цифры региона, 3 цифры, 3 буквы (напр. 01123AAA)
-В 'plateText' пиши результат без пробелов.`;
-
-        const payload = {
-            contents: [{
-                role: "user",
-                parts: [
-                    { text: prompt },
-                    { inlineData: { mimeType: mimeType, data: base64Data } }
-                ]
-            }],
-            generationConfig: {
-                responseMimeType: "application/json",
-                responseSchema: {
-                    type: "OBJECT",
-                    properties: {
-                        "found": { "type": "BOOLEAN" },
-                        "plateText": { "type": "STRING" }
-                    },
-                    required: ["found", "plateText"]
+    // Rasmni canvas orqali kichraytiramiz — bu Gemini'ga yuboriladigan hajmni
+    // va so'rov tezligini sezilarli yaxshilaydi (telefon kamerasi suratlari odatda
+    // bir necha MB bo'ladi, buning hammasi shart emas).
+    function resizeImageForUpload(file, maxDimension) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            const url = URL.createObjectURL(file);
+            img.onload = () => {
+                let { width, height } = img;
+                if (width > maxDimension || height > maxDimension) {
+                    const scale = maxDimension / Math.max(width, height);
+                    width = Math.round(width * scale);
+                    height = Math.round(height * scale);
                 }
-            }
-        };
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                URL.revokeObjectURL(url);
 
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                resolve({
+                    base64: dataUrl.split(',')[1],
+                    mimeType: 'image/jpeg',
+                });
+            };
+            img.onerror = () => {
+                URL.revokeObjectURL(url);
+                reject(new Error('Rasmni qayta ishlab bo\'lmadi'));
+            };
+            img.src = url;
+        });
+    }
+
+    // Bir vaqtning o'zida faqat `limit` ta ish bajariladigan oddiy navbat
+    async function runWithConcurrencyLimit(items, limit, worker) {
+        let cursor = 0;
+        const runners = new Array(Math.min(limit, items.length)).fill(null).map(async () => {
+            while (cursor < items.length) {
+                const item = items[cursor++];
+                scanResults[item.index].status = 'processing';
+                renderTable();
+                await worker(item);
+            }
+        });
+        await Promise.all(runners);
+    }
+
+    // ---------- AI orqali raqamni aniqlash ----------
+    async function processImageWithAI(base64Data, mimeType, index) {
         try {
-            const workerUrl = "https://
-avtoraqam-aniqlovchi-si-api.jafaras.uz";
-            
-            const response = await fetch(workerUrl, {
+            const headers = { 'Content-Type': 'application/json' };
+            if (APP_SECRET) headers['X-App-Secret'] = APP_SECRET;
+
+            const response = await fetch(WORKER_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                headers,
+                body: JSON.stringify({ imageBase64: base64Data, mimeType }),
             });
 
-            const result = await response.json();
-            
-            if (result.candidates && result.candidates[0].content.parts.length > 0) {
+            const result = await response.json().catch(() => null);
+
+            if (!response.ok) {
+                const msg = result?.error || `HTTP ${response.status}`;
+                throw new Error(msg);
+            }
+
+            if (result.candidates && result.candidates[0]?.content?.parts?.length > 0) {
                 const jsonText = result.candidates[0].content.parts[0].text;
                 const aiData = JSON.parse(jsonText);
-                
+
                 if (aiData.found && aiData.plateText) {
                     const analysis = parseUzbekPlate(aiData.plateText);
                     scanResults[index] = {
@@ -202,10 +396,11 @@ avtoraqam-aniqlovchi-si-api.jafaras.uz";
                         plate: analysis.formatted,
                         type: analysis.type,
                         region: analysis.region,
-                        raw: aiData.plateText
+                        raw: aiData.plateText,
+                        parsed: analysis,
                     };
                 } else {
-                    scanResults[index].status = 'error';
+                    scanResults[index].status = 'notfound';
                     scanResults[index].plate = 'Topilmadi';
                 }
             } else {
@@ -213,26 +408,29 @@ avtoraqam-aniqlovchi-si-api.jafaras.uz";
                 scanResults[index].plate = 'Javob qaytmadi';
             }
         } catch (error) {
-            console.error(error);
+            console.error('ALPR Engine Error:', error);
             scanResults[index].status = 'error';
             scanResults[index].plate = 'Aloqada xatolik yuz berdi';
         }
 
         renderTable();
     }
+
     function parseUzbekPlate(rawText) {
-        let clean = rawText.toUpperCase().replace(/[^A-Z0-9]/g, '');
-        
-        if(clean.length >= 2) {
-           let start = clean.substring(0,2).replace(/O/g, '0').replace(/I/g, '1');
-           clean = start + clean.substring(2);
+        let clean = String(rawText).toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+        if (clean.length >= 2) {
+            let start = clean.substring(0, 2).replace(/O/g, '0').replace(/I/g, '1');
+            clean = start + clean.substring(2);
         }
 
-        let result = { 
-            valid: false, 
-            type: 'Nomalum', 
-            formatted: clean || 'XATOLIK', 
-            region: 'Nomalum' 
+        let result = {
+            valid: false,
+            type: 'Nomalum',
+            formatted: clean || 'XATOLIK',
+            region: 'Nomalum',
+            regionCode: '01',
+            numberPart: clean,
         };
 
         if (!clean || clean.length < 8) return result;
@@ -241,21 +439,25 @@ avtoraqam-aniqlovchi-si-api.jafaras.uz";
         const legalRegex = /^([0-9]{2})([0-9]{3})([A-HJ-Z]{3})$/;
 
         if (physRegex.test(clean)) {
-            let match = clean.match(physRegex);
-            let reg = match[1];
+            const match = clean.match(physRegex);
+            const reg = match[1];
             if (validRegions.includes(reg)) {
                 result.valid = true;
                 result.type = 'Jis. shaxs';
                 result.region = getRegionName(reg);
+                result.regionCode = match[1];
+                result.numberPart = `${match[2]} ${match[3]} ${match[4]}`;
                 result.formatted = `${match[1]} ${match[2]} ${match[3]} ${match[4]}`;
             }
         } else if (legalRegex.test(clean)) {
-            let match = clean.match(legalRegex);
-            let reg = match[1];
+            const match = clean.match(legalRegex);
+            const reg = match[1];
             if (validRegions.includes(reg)) {
                 result.valid = true;
                 result.type = 'Yur. shaxs';
                 result.region = getRegionName(reg);
+                result.regionCode = match[1];
+                result.numberPart = `${match[2]} ${match[3]}`;
                 result.formatted = `${match[1]} ${match[2]} ${match[3]}`;
             }
         }
@@ -265,24 +467,63 @@ avtoraqam-aniqlovchi-si-api.jafaras.uz";
 
     function getRegionName(code) {
         const map = {
-            '01': 'Toshkent', '20': 'Sirdaryo', '30': 'Samarqand',
-            '40': 'Farğona', '50': 'Namangan', '60': 'Andijon',
-            '70': 'Qashqadaryo', '75': 'Surxandaryo', '80': 'Buxoro',
-            '85': 'Navoiy', '90': 'Xorazm'
+            '01': 'Toshkent shahri', '10': 'Toshkent viloyati', '20': 'Sirdaryo',
+            '25': 'Jizzax', '30': 'Samarqand', '40': 'Farg\'ona',
+            '50': 'Namangan', '60': 'Andijon', '70': 'Qashqadaryo',
+            '75': 'Surxondaryo', '80': 'Buxoro', '85': 'Navoiy',
+            '90': 'Xorazm', '95': 'Qoraqalpog\'iston',
         };
-        return `${code} - ${map[code] || 'Регион'}`;
+        return `${code} - ${map[code] || 'Viloyat'}`;
     }
 
+    function createPlatesManiaInformerHTML(item) {
+        if (item.status === 'processing' || item.status === 'queued') {
+            const label = item.status === 'queued' ? 'Navbatda...' : 'Aniqlanmoqda...';
+            return `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700"><span class="loader"></span> ${label}</span>`;
+        }
+
+        if (item.status === 'error' || item.status === 'notfound' || !item.parsed || !item.parsed.valid) {
+            return `<span class="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-red-50 text-red-600 border border-red-200">${escapeHtml(item.plate)}</span>`;
+        }
+
+        const regionCode = escapeHtml(item.parsed.regionCode || '01');
+        const numberPart = escapeHtml(item.parsed.numberPart || 'A 123 AA');
+
+        return `
+            <div class="uz-plate-informer">
+                <div class="uz-plate-region">${regionCode}</div>
+                <div class="uz-plate-number">${numberPart}</div>
+                <div class="uz-plate-flag-box">
+                    <svg class="w-5 h-3 rounded-[1px]" viewBox="0 0 50 25" aria-hidden="true">
+                        <rect width="50" height="8" fill="#0099b5"/>
+                        <rect y="8" width="50" height="1" fill="#ce1126"/>
+                        <rect y="9" width="50" height="7" fill="#ffffff"/>
+                        <rect y="16" width="50" height="1" fill="#ce1126"/>
+                        <rect y="17" width="50" height="8" fill="#1eb53a"/>
+                        <circle cx="7" cy="4" r="2.5" fill="#ffffff"/>
+                        <circle cx="8.3" cy="4" r="2" fill="#0099b5"/>
+                        <circle cx="13" cy="2" r="0.6" fill="#ffffff"/>
+                        <circle cx="15" cy="2" r="0.6" fill="#ffffff"/>
+                        <circle cx="17" cy="2" r="0.6" fill="#ffffff"/>
+                    </svg>
+                    <span class="uz-plate-uz">UZ</span>
+                </div>
+            </div>
+        `;
+    }
+
+    // ---------- Jadvalni chizish (XSS xavfsiz, event-delegation orqali) ----------
     function renderTable() {
-        resultsTbody.innerHTML = '';
+        const rows = [];
         let processedCount = 0;
 
         scanResults.forEach((item, index) => {
-            if (item.status !== 'processing') processedCount++;
+            if (item.status !== 'processing' && item.status !== 'queued') processedCount++;
 
             let statusBadge = '';
-            if (item.status === 'processing') {
-                statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700"><span class="loader"></span> Анализ...</span>`;
+            if (item.status === 'processing' || item.status === 'queued') {
+                const label = item.status === 'queued' ? 'Navbatda' : 'Tahlil...';
+                statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700"><span class="loader"></span> ${label}</span>`;
             } else if (item.status === 'success') {
                 statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700">Aniqlandi</span>`;
             } else if (item.status === 'warning') {
@@ -291,50 +532,201 @@ avtoraqam-aniqlovchi-si-api.jafaras.uz";
                 statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 text-red-600">Xatolik</span>`;
             }
 
-            const row = `
+            const informerHTML = createPlatesManiaInformerHTML(item);
+            const canCopy = item.status === 'success' || item.status === 'warning';
+
+            rows.push(`
                 <tr class="hover:bg-gray-50/50 transition-colors">
                     <td class="p-4">
-                        <img src="${item.image}" class="w-16 h-12 object-cover rounded-lg border border-gray-200" />
+                        <div class="relative group w-16 h-12">
+                            <img src="${item.image}"
+                                 data-action="zoom" data-index="${index}"
+                                 class="w-16 h-12 object-cover rounded-lg border border-gray-200 cursor-pointer transition-transform duration-200 group-hover:scale-105 group-hover:shadow-md"
+                                 alt="${escapeHtml(item.file)} prevyusi"
+                                 title="Rasmni kattalashtirish uchun bosing" />
+                            <div data-action="zoom" data-index="${index}" class="absolute inset-0 bg-black/30 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer pointer-events-none">
+                                <i class="fa-solid fa-magnifying-glass-plus text-white text-xs" aria-hidden="true"></i>
+                            </div>
+                        </div>
                     </td>
                     <td class="p-4">${statusBadge}</td>
-                    <td class="p-4 font-mono font-bold text-gray-900 tracking-wider">${item.plate}</td>
-                    <td class="p-4 text-gray-600">${item.type}</td>
-                    <td class="p-4 text-gray-600 text-xs">${item.region}</td>
+                    <td class="p-4">${informerHTML}</td>
+                    <td class="p-4 text-gray-600 font-medium">${escapeHtml(item.type)}</td>
+                    <td class="p-4 text-gray-600 text-xs">${escapeHtml(item.region)}</td>
                     <td class="p-4 text-right">
-                        <button onclick="copyToClipboard('${item.plate}')" class="p-2 text-gray-400 hover:text-blue-600 transition-colors" title="Avtoraqamni nusxalash">
-                            <i class="fa-regular fa-copy"></i>
+                        <button data-action="copy" data-index="${index}" ${canCopy ? '' : 'disabled'}
+                            class="action-btn p-2 text-gray-400 hover:text-blue-600 transition-colors rounded-lg hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+                            title="Avtoraqamni nusxalash" aria-label="Avtoraqamni nusxalash">
+                            <i class="fa-regular fa-copy text-base" aria-hidden="true"></i>
                         </button>
                     </td>
                 </tr>
-            `;
-            resultsTbody.innerHTML += row;
+            `);
         });
 
-        statsCounter.innerText = `Обработано: ${processedCount} из ${scanResults.length}`;
+        resultsTbody.innerHTML = rows.join('');
+        statsCounter.innerText = `${scanResults.length} dan ${processedCount} ta rasm aniqlandi`;
     }
 
-    function copyToClipboard(text) {
-        const dummy = document.createElement("textarea");
-        document.body.appendChild(dummy);
-        dummy.value = text;
-        dummy.select();
-        document.execCommand("copy");
-        document.body.removeChild(dummy);
-        alert(`${text} davlat raqami nusxalandi!`);
+    // Event delegation: jadval ichidagi bosishlarni bitta joydan boshqaramiz
+    resultsTbody.addEventListener('click', (e) => {
+        const target = e.target.closest('[data-action]');
+        if (!target) return;
+        const index = Number(target.dataset.index);
+        const item = scanResults[index];
+        if (!item) return;
+
+        if (target.dataset.action === 'zoom') {
+            openImageModal(item.image);
+        } else if (target.dataset.action === 'copy') {
+            copyToClipboard(item.plate);
+        }
+    });
+
+    // ---------- Rasm modal: zoom/pan (sichqoncha + touch) ----------
+    let currentZoom = 1;
+    let isDragging = false;
+    let startX = 0, startY = 0;
+    let translateX = 0, translateY = 0;
+
+    const modal = document.getElementById('image-modal');
+    const modalImg = document.getElementById('modal-img');
+    const modalWrapper = document.getElementById('modal-img-wrapper');
+    const zoomText = document.getElementById('zoom-level-text');
+
+    function openImageModal(imgSrc) {
+        modalImg.src = imgSrc;
+        resetZoom();
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.remove('opacity-0'), 10);
     }
 
-    function exportToCSV() {
-        let csvContent = "data:text/csv;charset=utf-8,File,Plate,Type,Region\n";
-        scanResults.forEach(row => {
-            csvContent += `"${row.file}","${row.plate}","${row.type}","${row.region}"\n`;
-        });
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "uzb_plates_report.csv");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+    function closeImageModal() {
+        modal.classList.add('opacity-0');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modalImg.src = '';
+        }, 300);
+    }
+
+    function handleModalBackdropClick(e) {
+        if (e.target === e.currentTarget) closeImageModal();
+    }
+
+    function updateTransform() {
+        modalWrapper.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentZoom})`;
+        zoomText.innerText = `${Math.round(currentZoom * 100)}%`;
+    }
+
+    function changeZoom(delta) {
+        currentZoom = Math.min(Math.max(0.5, currentZoom + delta), 4);
+        if (currentZoom === 1) {
+            translateX = 0;
+            translateY = 0;
+        }
+        updateTransform();
+    }
+
+    function resetZoom() {
+        currentZoom = 1;
+        translateX = 0;
+        translateY = 0;
+        updateTransform();
+    }
+
+    modal.addEventListener('wheel', (e) => {
+        if (modal.classList.contains('hidden')) return;
+        e.preventDefault();
+        changeZoom(e.deltaY < 0 ? 0.2 : -0.2);
+    }, { passive: false });
+
+    // Mouse drag
+    modalWrapper.addEventListener('mousedown', (e) => {
+        if (currentZoom <= 1) return;
+        isDragging = true;
+        startX = e.clientX - translateX;
+        startY = e.clientY - translateY;
+        e.preventDefault();
+    });
+    window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        translateX = e.clientX - startX;
+        translateY = e.clientY - startY;
+        updateTransform();
+    });
+    window.addEventListener('mouseup', () => { isDragging = false; });
+
+    // Touch drag (mobil qurilmalar uchun)
+    let lastTouchDistance = null;
+
+    modalWrapper.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1 && currentZoom > 1) {
+            isDragging = true;
+            startX = e.touches[0].clientX - translateX;
+            startY = e.touches[0].clientY - translateY;
+        } else if (e.touches.length === 2) {
+            lastTouchDistance = getTouchDistance(e.touches);
+        }
+    }, { passive: true });
+
+    modalWrapper.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 1 && isDragging) {
+            translateX = e.touches[0].clientX - startX;
+            translateY = e.touches[0].clientY - startY;
+            updateTransform();
+        } else if (e.touches.length === 2 && lastTouchDistance) {
+            const newDistance = getTouchDistance(e.touches);
+            const delta = (newDistance - lastTouchDistance) / 200;
+            changeZoom(delta);
+            lastTouchDistance = newDistance;
+        }
+    }, { passive: true });
+
+    modalWrapper.addEventListener('touchend', () => {
+        isDragging = false;
+        lastTouchDistance = null;
+    });
+
+    function getTouchDistance(touches) {
+        const dx = touches[0].clientX - touches[1].clientX;
+        const dy = touches[0].clientY - touches[1].clientY;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeImageModal();
+    });
+
+    // ---------- Toast va nusxalash ----------
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        const msg = document.getElementById('toast-msg');
+        msg.innerText = message;
+        toast.classList.remove('translate-y-20', 'opacity-0');
+        setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 2500);
+    }
+
+    async function copyToClipboard(text) {
+        if (!text || text === '---') return;
+        try {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(text);
+            } else {
+                // Eski brauzerlar / http kontekst uchun fallback
+                const dummy = document.createElement('textarea');
+                dummy.value = text;
+                dummy.style.position = 'fixed';
+                dummy.style.opacity = '0';
+                document.body.appendChild(dummy);
+                dummy.select();
+                document.execCommand('copy');
+                document.body.removeChild(dummy);
+            }
+            showToast(`${text} davlat raqami nusxalandi!`);
+        } catch (err) {
+            console.error('Clipboard error:', err);
+            showToast('Nusxalashda xatolik yuz berdi');
+        }
     }
 
     function clearAll() {
@@ -343,5 +735,5 @@ avtoraqam-aniqlovchi-si-api.jafaras.uz";
         resultsTbody.innerHTML = '';
     }
 </script>
-<script src="auto-menu.js"></script></body>
+</body>
 </html>
