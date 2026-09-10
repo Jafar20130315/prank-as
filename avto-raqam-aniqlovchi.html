@@ -219,14 +219,13 @@
     </div>
 
 <script>
-    // ====== SOZLAMALAR ======
-    // O'z Worker manzilingizni va (agar APP_SECRET qo'ygan bo'lsangiz) sirni shu yerga kiriting.
+    
     const WORKER_URL = "https://avtoraqam-aniqlovchi-si-api.jafaras.uz";
-    const APP_SECRET = ""; // worker'dagi env.APP_SECRET bilan bir xil bo'lishi kerak (ixtiyoriy)
+    const APP_SECRET = "asammidamminahehewokawokahehe";
 
-    const MAX_FILE_BYTES = 8 * 1024 * 1024; // 8 MB (yuklashdan oldingi tekshiruv)
-    const MAX_UPLOAD_DIMENSION = 1600; // px, Gemini'ga yuborishdan oldin shu o'lchamgacha kichraytiramiz
-    const CONCURRENCY_LIMIT = 3; // bir vaqtda nechta rasm serverga yuborilishi mumkin
+    const MAX_FILE_BYTES = 8 * 1024 * 1024; 
+    const MAX_UPLOAD_DIMENSION = 1600; 
+    const CONCURRENCY_LIMIT = 3; 
 
     const uploadInput = document.getElementById('image-upload');
     const dashboard = document.getElementById('dashboard');
@@ -235,20 +234,18 @@
     const uploadError = document.getElementById('upload-error');
 
     const validRegions = ['01', '10', '20', '25', '30', '40', '50', '60', '70', '75', '80', '85', '90', '95'];
-    // Eslatma: dastlabki versiyada '35' ham ro'yxatda edi, lekin O'zbekiston viloyat
-    // kodlari orasida amaldagi 35 kodi yo'q (30 — Samarqand uchun to'g'ri kod).
-    // Agar sizda boshqacha ma'lumot bo'lsa, shu massivga qaytarib qo'shing.
+    
 
     let scanResults = [];
 
-    // ---------- Yordamchi: matnni xavfsiz HTML ga aylantirish (XSS oldini olish) ----------
+    
     function escapeHtml(str) {
         const div = document.createElement('div');
         div.textContent = String(str ?? '');
         return div.innerHTML;
     }
 
-    // ---------- Fayl yuklash ----------
+
     uploadInput.addEventListener('change', async function (e) {
         const files = Array.from(e.target.files);
         if (files.length === 0) return;
@@ -282,7 +279,7 @@
 
         dashboard.classList.remove('hidden');
 
-        // Har bir fayl uchun: preview + kichraytirilgan base64 tayyorlab, navbatga qo'yamiz
+        
         const jobs = [];
         for (const file of validFiles) {
             const previewUrl = await fileToDataURL(file);
@@ -291,7 +288,7 @@
             const itemIndex = scanResults.length;
             scanResults.push({
                 file: file.name,
-                image: previewUrl, // asl (yoki kichik) rasm — faqat ko'rsatish uchun
+                image: previewUrl,
                 status: 'queued',
                 plate: '---',
                 type: '-',
@@ -316,9 +313,7 @@
         });
     }
 
-    // Rasmni canvas orqali kichraytiramiz — bu Gemini'ga yuboriladigan hajmni
-    // va so'rov tezligini sezilarli yaxshilaydi (telefon kamerasi suratlari odatda
-    // bir necha MB bo'ladi, buning hammasi shart emas).
+    
     function resizeImageForUpload(file, maxDimension) {
         return new Promise((resolve, reject) => {
             const img = new Image();
@@ -351,7 +346,7 @@
         });
     }
 
-    // Bir vaqtning o'zida faqat `limit` ta ish bajariladigan oddiy navbat
+    
     async function runWithConcurrencyLimit(items, limit, worker) {
         let cursor = 0;
         const runners = new Array(Math.min(limit, items.length)).fill(null).map(async () => {
@@ -365,7 +360,7 @@
         await Promise.all(runners);
     }
 
-    // ---------- AI orqali raqamni aniqlash ----------
+    
     async function processImageWithAI(base64Data, mimeType, index) {
         try {
             const headers = { 'Content-Type': 'application/json' };
@@ -512,7 +507,7 @@
         `;
     }
 
-    // ---------- Jadvalni chizish (XSS xavfsiz, event-delegation orqali) ----------
+    
     function renderTable() {
         const rows = [];
         let processedCount = 0;
