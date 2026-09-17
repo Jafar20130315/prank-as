@@ -7,21 +7,21 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
+            background-color: #f1f5f9; /* Slate 100 for a professional neutral background */
         }
 
         .loader {
-            border: 3px solid #f3f3f3;
+            border: 2px solid #cbd5e1;
             border-radius: 50%;
-            border-top: 3px solid #3b82f6;
-            width: 18px;
-            height: 18px;
+            border-top: 2px solid #334155;
+            width: 16px;
+            height: 16px;
             animation: spin 1s linear infinite;
             display: inline-block;
             vertical-align: middle;
@@ -32,17 +32,17 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* PlatesMania Style Uzbek License Plate Informer — moslashuvchan o'lcham */
+        /* O'zbekiston davlat raqami Informeri - Professional Look */
         .uz-plate-informer {
             display: inline-flex;
             align-items: center;
-            background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
-            border: 2px solid #000000;
-            border-radius: 6px;
+            background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%);
+            border: 1px solid #0f172a;
+            border-radius: 4px;
             padding: 2px 6px;
-            box-shadow: inset 0 0 2px rgba(0,0,0,0.4), 0 2px 5px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,1);
             user-select: none;
-            height: 40px;
+            height: 42px;
             min-width: 0;
             width: fit-content;
             max-width: 100%;
@@ -50,33 +50,33 @@
         }
 
         .uz-plate-region {
-            font-family: 'Oswald', 'Arial Black', sans-serif;
-            font-weight: 700;
-            font-size: 17px;
+            font-family: 'Oswald', sans-serif;
+            font-weight: 600;
+            font-size: 18px;
             line-height: 1;
-            color: #000000;
-            padding-right: 6px;
-            border-right: 2px solid #000000;
+            color: #0f172a;
+            padding-right: 8px;
+            border-right: 1.5px solid #94a3b8;
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 100%;
-            letter-spacing: -0.5px;
+            height: 80%;
+            letter-spacing: 0.5px;
             white-space: nowrap;
         }
 
         .uz-plate-number {
-            font-family: 'Oswald', 'Arial Black', sans-serif;
-            font-weight: 700;
-            font-size: 19px;
+            font-family: 'Oswald', sans-serif;
+            font-weight: 600;
+            font-size: 22px;
             line-height: 1;
-            color: #000000;
-            padding: 0 8px;
+            color: #0f172a;
+            padding: 0 10px;
             flex-grow: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
             text-transform: uppercase;
             white-space: nowrap;
         }
@@ -87,19 +87,62 @@
             align-items: center;
             justify-content: center;
             padding-left: 6px;
-            border-left: 1px solid #cbd5e1;
             height: 100%;
             flex-shrink: 0;
         }
 
         .uz-plate-uz {
-            color: #0099b5;
-            font-weight: 900;
+            color: #0f172a;
+            font-weight: 700;
             font-size: 9px;
             line-height: 1;
             margin-top: 2px;
-            font-family: sans-serif;
-            letter-spacing: -0.5px;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: 0.5px;
+        }
+
+        /* Xalqaro davlat raqamlari Informeri - Professional Look */
+        .intl-plate-informer {
+            display: inline-flex;
+            align-items: center;
+            background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%);
+            border: 1px solid #0f172a;
+            border-radius: 4px;
+            padding: 3px 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,1);
+            height: 42px;
+            max-width: 100%;
+            user-select: none;
+        }
+
+        .intl-plate-flag {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-right: 10px;
+            margin-right: 10px;
+            border-right: 1.5px solid #94a3b8;
+            height: 80%;
+        }
+
+        .intl-plate-code {
+            font-family: 'Inter', sans-serif;
+            font-size: 9px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-top: 3px;
+            letter-spacing: 0.5px;
+        }
+
+        .intl-plate-number {
+            font-family: 'Oswald', sans-serif;
+            font-weight: 600;
+            font-size: 22px;
+            line-height: 1;
+            color: #0f172a;
+            letter-spacing: 2px;
+            text-transform: uppercase;
         }
 
         #modal-img-wrapper {
@@ -114,123 +157,93 @@
         .action-btn:focus-visible,
         button:focus-visible,
         label:focus-within {
-            outline: 2px solid #3b82f6;
+            outline: 2px solid #0f172a;
             outline-offset: 2px;
         }
 
-        /* Katta bosish maydonlari mobil uchun (44px — Apple/Google tavsiyasi) */
         @media (max-width: 767px) {
             .touch-target {
                 min-height: 44px;
                 min-width: 44px;
             }
         }
-
-        /* Versiya belgisi — faqat kattaroq ekranlarda (PC) ko'rinadi */
-        #version-badge {
-            display: none;
-        }
-        @media (min-width: 768px) {
-            #version-badge {
-                display: flex;
-            }
-        }
     </style>
 </head>
-<body class="min-h-screen text-gray-800 p-3 sm:p-4 md:p-8">
+<body class="min-h-screen text-slate-800 p-3 sm:p-4 md:p-8">
 
-    <div class="max-w-6xl mx-auto space-y-4 md:space-y-6">
+    <div class="max-w-6xl mx-auto space-y-5 md:space-y-6">
+        
         <!-- Header -->
-        <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 text-center border border-gray-100">
-            <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2 flex flex-wrap items-center justify-center gap-2">
-                <i class="fa-solid fa-car-tunnel text-blue-600" aria-hidden="true"></i>
+        <div class="bg-white rounded-xl shadow-sm p-5 sm:p-8 text-center border border-slate-200">
+            <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 mb-3 flex flex-wrap items-center justify-center gap-2.5">
+                <i class="fa-solid fa-expand text-slate-700" aria-hidden="true"></i>
                 <span>Avtoraqam aniqlovchi skaner</span>
-                <span class="text-xs bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full uppercase font-semibold">SI</span>
+                <span class="text-[10px] sm:text-xs bg-slate-800 text-white px-2.5 py-1 rounded-md uppercase font-semibold tracking-wider">Xalqaro SI</span>
             </h1>
-            <p class="text-sm sm:text-base text-gray-500">Rasm orqali avtotransportning davlat raqamini aniqlang va PlatesMania informerini oling.</p>
+            <p class="text-sm sm:text-base text-slate-500 max-w-2xl mx-auto">
+                Dunyoning barcha mamlakatlari (Hindistondan tashqari) avtotransport raqamlarini aniqlaydi va rasmda joylashuvini belgilaydi.
+            </p>
         </div>
 
         <!-- Upload Section -->
-        <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-gray-100">
-            <label class="block text-sm font-semibold text-gray-700 mb-3" for="image-upload">Rasmni yuklash (bir nechta rasm qo'llab-quvvatlanadi)</label>
+        <div class="bg-white rounded-xl shadow-sm p-5 sm:p-6 border border-slate-200">
+            <label class="block text-sm font-semibold text-slate-700 mb-3" for="image-upload">Rasmlarni yuklash (bir nechta avto rasm qo'llab-quvvatlanadi)</label>
             <div class="flex items-center justify-center w-full">
-                <label for="image-upload" class="flex flex-col items-center justify-center w-full h-32 sm:h-36 border-2 border-blue-300 border-dashed rounded-xl cursor-pointer bg-blue-50/50 hover:bg-blue-50 active:bg-blue-100 transition-colors">
+                <label for="image-upload" class="flex flex-col items-center justify-center w-full h-36 sm:h-40 border-2 border-slate-300 border-dashed rounded-lg cursor-pointer bg-slate-50 hover:bg-slate-100 active:bg-slate-200 transition-colors group">
                     <div class="flex flex-col items-center justify-center pt-5 pb-6 px-4 text-center">
-                        <i class="fa-solid fa-cloud-arrow-up text-3xl sm:text-4xl text-blue-500 mb-3" aria-hidden="true"></i>
-                        <p class="mb-1 text-sm text-gray-700 font-medium">Rasmlarni tortib keling, yoki bosib yuklang.</p>
-                        <p class="text-xs text-gray-400">PNG, JPG, WEBP. Har biri 8MB gacha.</p>
+                        <div class="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center mb-3 group-hover:scale-105 transition-transform border border-slate-200">
+                            <i class="fa-solid fa-arrow-up-from-bracket text-lg text-slate-600" aria-hidden="true"></i>
+                        </div>
+                        <p class="mb-1 text-sm text-slate-700 font-medium">Rasmlarni shu yerga tashlang yoki tanlash uchun bosing.</p>
+                        <p class="text-xs text-slate-400">PNG, JPG, WEBP. Har biri 8MB gacha.</p>
                     </div>
                     <input id="image-upload" type="file" class="hidden" accept="image/png, image/jpeg, image/webp" multiple capture="environment" />
                 </label>
             </div>
-            <p id="upload-error" class="text-sm text-red-600 mt-3 hidden" role="alert"></p>
+            <p id="upload-error" class="text-sm text-red-600 mt-3 hidden font-medium" role="alert"></p>
         </div>
 
         <!-- Results Dashboard -->
-        <div id="dashboard" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hidden">
-            <div class="p-4 sm:p-6 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3">
+        <div id="dashboard" class="space-y-4 hidden">
+            <div class="bg-white rounded-xl p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-3">
                 <div>
-                    <h2 class="text-base sm:text-lg font-bold text-gray-900">Natija</h2>
-                    <p class="text-xs sm:text-sm text-gray-500" id="stats-counter" aria-live="polite">0 dan 0 ta rasm aniqlandi</p>
+                    <h2 class="text-base sm:text-lg font-bold text-slate-900">Natijalar</h2>
+                    <p class="text-xs sm:text-sm text-slate-500 font-medium" id="stats-counter" aria-live="polite">0 ta avtomobil aniqlandi</p>
                 </div>
-                <button onclick="clearAll()" class="touch-target px-4 py-2 bg-red-50 hover:bg-red-100 active:bg-red-200 text-red-600 text-sm font-semibold rounded-lg transition-colors">
-                    Hammasini tozalash
+                <button onclick="clearAll()" class="touch-target px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 active:bg-slate-100 text-slate-700 text-sm font-semibold rounded-lg transition-colors flex items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-trash-can text-slate-400"></i>
+                    <span>Hammasini tozalash</span>
                 </button>
             </div>
 
-            <!-- Desktop/tablet: jadval ko'rinishi -->
-            <div class="hidden md:block overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-gray-50 text-gray-400 text-xs uppercase tracking-wider border-b border-gray-100">
-                            <th class="p-4 font-semibold">Prevyu (bosing)</th>
-                            <th class="p-4 font-semibold">Status</th>
-                            <th class="p-4 font-semibold">Davlat raqami</th>
-                            <th class="p-4 font-semibold">AT turi</th>
-                            <th class="p-4 font-semibold">Viloyat</th>
-                            <th class="p-4 font-semibold text-right">Amallar</th>
-                        </tr>
-                    </thead>
-                    <tbody id="results-tbody" class="divide-y divide-gray-100 text-sm" aria-live="polite">
-                        <!-- Dynamic rows -->
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Mobil: karta ko'rinishi -->
-            <div id="results-cards" class="md:hidden divide-y divide-gray-100" aria-live="polite">
-                <!-- Dynamic cards -->
+            <!-- Avtomobillar panellari ro'yxati (Katta kartalar) -->
+            <div id="cars-grid" class="grid grid-cols-1 gap-5" aria-live="polite">
+                <!-- Dynamic Car Cards -->
             </div>
         </div>
     </div>
 
-    <!-- Version badge — faqat PC uchun -->
-    <div id="version-badge" class="fixed bottom-4 right-4 items-center gap-1.5 bg-gray-900/85 text-gray-300 text-xs px-3 py-1.5 rounded-full backdrop-blur border border-gray-700 z-40 select-none">
-        <i class="fa-solid fa-code-branch text-[10px]" aria-hidden="true"></i>
-        <span>v1.1</span>
-    </div>
-
     <!-- Image Zoom Modal -->
-    <div id="image-modal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex flex-col items-center justify-center hidden opacity-0 transition-opacity duration-300" role="dialog" aria-modal="true" aria-label="Rasm prevyusi">
-        <div class="absolute top-3 left-3 right-3 sm:top-4 sm:left-4 sm:right-4 flex justify-between items-center z-10 px-1 sm:px-2">
-            <div class="text-white/80 text-xs sm:text-sm font-medium bg-black/40 px-2.5 sm:px-3 py-1.5 rounded-full backdrop-blur hidden sm:block">
+    <div id="image-modal" class="fixed inset-0 bg-slate-900/95 backdrop-blur-sm z-50 flex flex-col items-center justify-center hidden opacity-0 transition-opacity duration-300" role="dialog" aria-modal="true" aria-label="Rasm prevyusi">
+        <div class="absolute top-3 left-3 right-3 sm:top-5 sm:left-5 sm:right-5 flex justify-between items-center z-20 px-1 sm:px-2">
+            <div class="text-white/90 text-xs sm:text-sm font-medium bg-black/40 px-3 py-1.5 rounded-md backdrop-blur hidden sm:block border border-white/10">
                 <span id="zoom-level-text">100%</span> | G'ildirak/pinch orqali kattalashtiring
             </div>
-            <div class="text-white/80 text-xs font-medium bg-black/40 px-2.5 py-1.5 rounded-full backdrop-blur sm:hidden">
+            <div class="text-white/90 text-xs font-medium bg-black/40 px-3 py-1.5 rounded-md backdrop-blur sm:hidden border border-white/10">
                 <span id="zoom-level-text-mobile">100%</span>
             </div>
-            <div class="flex items-center gap-1 sm:gap-2 bg-gray-900/90 text-white p-1.5 rounded-full border border-gray-700 shadow-xl">
-                <button onclick="changeZoom(0.25)" class="touch-target w-9 h-9 rounded-full hover:bg-gray-800 active:bg-gray-700 flex items-center justify-center text-sm transition-colors" title="Kattalashtirish (+)" aria-label="Kattalashtirish">
+            <div class="flex items-center gap-1 sm:gap-1.5 bg-slate-800 text-white p-1 rounded-lg border border-slate-700 shadow-xl">
+                <button onclick="changeZoom(0.25)" class="touch-target w-9 h-9 rounded-md hover:bg-slate-700 active:bg-slate-600 flex items-center justify-center text-sm transition-colors" title="Kattalashtirish (+)">
                     <i class="fa-solid fa-plus" aria-hidden="true"></i>
                 </button>
-                <button onclick="changeZoom(-0.25)" class="touch-target w-9 h-9 rounded-full hover:bg-gray-800 active:bg-gray-700 flex items-center justify-center text-sm transition-colors" title="Kichiklashtirish (-)" aria-label="Kichiklashtirish">
+                <button onclick="changeZoom(-0.25)" class="touch-target w-9 h-9 rounded-md hover:bg-slate-700 active:bg-slate-600 flex items-center justify-center text-sm transition-colors" title="Kichiklashtirish (-)">
                     <i class="fa-solid fa-minus" aria-hidden="true"></i>
                 </button>
-                <button onclick="resetZoom()" class="touch-target w-9 h-9 rounded-full hover:bg-gray-800 active:bg-gray-700 flex items-center justify-center text-sm transition-colors" title="Dastlabki holat" aria-label="Dastlabki holatga qaytarish">
-                    <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
+                <button onclick="resetZoom()" class="touch-target w-9 h-9 rounded-md hover:bg-slate-700 active:bg-slate-600 flex items-center justify-center text-sm transition-colors" title="Dastlabki holat">
+                    <i class="fa-solid fa-compress" aria-hidden="true"></i>
                 </button>
-                <div class="w-px h-5 bg-gray-700 mx-1"></div>
-                <button onclick="closeImageModal()" class="touch-target w-9 h-9 rounded-full bg-red-600/80 hover:bg-red-600 active:bg-red-700 flex items-center justify-center text-white text-sm transition-colors" title="Yopish (ESC)" aria-label="Yopish">
+                <div class="w-px h-5 bg-slate-600 mx-1"></div>
+                <button onclick="closeImageModal()" class="touch-target w-9 h-9 rounded-md hover:bg-red-500 active:bg-red-600 flex items-center justify-center text-white text-sm transition-colors" title="Yopish (ESC)">
                     <i class="fa-solid fa-xmark" aria-hidden="true"></i>
                 </button>
             </div>
@@ -238,15 +251,16 @@
 
         <div class="w-full h-full flex items-center justify-center p-4 sm:p-6 overflow-hidden" onclick="handleModalBackdropClick(event)">
             <div id="modal-img-wrapper" class="relative max-w-full max-h-full transition-transform duration-75">
-                <img id="modal-img" src="" alt="Prevyu" class="max-w-[92vw] max-h-[80vh] sm:max-w-[90vw] sm:max-h-[85vh] object-contain rounded-xl shadow-2xl pointer-events-auto" />
+                <img id="modal-img" src="" alt="Prevyu" class="max-w-[92vw] max-h-[80vh] sm:max-w-[90vw] sm:max-h-[85vh] object-contain rounded-lg shadow-2xl pointer-events-auto border border-white/10" />
+                <div id="modal-box-overlay"></div>
             </div>
         </div>
     </div>
 
     <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-5 left-4 right-4 sm:left-auto sm:right-5 sm:w-auto bg-gray-900 text-white px-4 py-3 rounded-xl shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-3 z-50" role="status">
-        <i class="fa-solid fa-circle-check text-green-400" aria-hidden="true"></i>
-        <span id="toast-msg">Davlat raqami nusxalandi</span>
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 sm:left-auto sm:right-6 sm:-translate-x-0 bg-slate-900 text-white px-5 py-3.5 rounded-lg shadow-xl transform translate-y-24 opacity-0 transition-all duration-300 flex items-center gap-3 z-50 min-w-[200px]" role="status">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-lg" aria-hidden="true"></i>
+        <span id="toast-msg" class="font-medium text-sm">Nusxalandi</span>
     </div>
 
 <script>
@@ -260,12 +274,11 @@
 
     const uploadInput = document.getElementById('image-upload');
     const dashboard = document.getElementById('dashboard');
-    const resultsTbody = document.getElementById('results-tbody');
-    const resultsCards = document.getElementById('results-cards');
+    const carsGrid = document.getElementById('cars-grid');
     const statsCounter = document.getElementById('stats-counter');
     const uploadError = document.getElementById('upload-error');
 
-    const validRegions = ['01', '10', '20', '25', '30', '40', '50', '60', '70', '75', '80', '85', '90', '95'];
+    const validUzRegions = ['01', '10', '20', '25', '30', '40', '50', '60', '70', '75', '80', '85', '90', '95'];
 
     let scanResults = [];
 
@@ -275,7 +288,17 @@
         return div.innerHTML;
     }
 
-    // ---------- Fayl yuklash ----------
+    // Flag SVG generation API (FlagCDN)
+    function getCountryFlag(code) {
+        if (!code || String(code).toUpperCase().trim() === 'INT') {
+            return '<i class="fa-solid fa-globe text-slate-400 text-xl"></i>';
+        }
+        const clean = String(code).toLowerCase().trim();
+        // SVG flag rendering with fallback
+        return `<img src="https://flagcdn.com/${clean}.svg" class="w-8 h-5 sm:w-10 sm:h-6 object-cover rounded-[2px] shadow-sm border border-slate-200 bg-slate-100" alt="${code.toUpperCase()}" onerror="this.outerHTML='<i class=\\'fa-solid fa-flag text-slate-400 text-xl\\'></i>'">`;
+    }
+
+    // ---------- Fayllarni yuklash ----------
     uploadInput.addEventListener('change', async function (e) {
         const files = Array.from(e.target.files);
         if (files.length === 0) return;
@@ -291,14 +314,14 @@
                 continue;
             }
             if (file.size > MAX_FILE_BYTES) {
-                rejected.push(`${file.name} (hajmi katta, 8MB dan oshmasin)`);
+                rejected.push(`${file.name} (hajmi 8MB dan katta)`);
                 continue;
             }
             validFiles.push(file);
         }
 
         if (rejected.length) {
-            uploadError.textContent = `Ba'zi fayllar rad etildi: ${rejected.join(', ')}`;
+            uploadError.textContent = `Ba'zi fayllar yuklanmadi: ${rejected.join(', ')}`;
             uploadError.classList.remove('hidden');
         }
 
@@ -320,9 +343,12 @@
                 image: previewUrl,
                 status: 'queued',
                 plate: '---',
+                rawPlate: '---',
+                country: 'Aniqlanmoqda...',
+                countryCode: 'UZ',
                 type: '-',
                 region: '-',
-                raw: '-',
+                box_2d: null
             });
             jobs.push({ index: itemIndex, base64: resized.base64, mimeType: resized.mimeType });
         }
@@ -387,7 +413,7 @@
         await Promise.all(runners);
     }
 
-    // ---------- AI orqali raqamni aniqlash ----------
+    // ---------- SI orqali raqam va Bounding Box aniqlash ----------
     async function processImageWithAI(base64Data, mimeType, index) {
         try {
             const headers = { 'Content-Type': 'application/json' };
@@ -403,17 +429,11 @@
 
             if (!response.ok) {
                 let msg = `HTTP ${response.status}`;
-                if (typeof result?.error === 'string') {
-                    msg = result.error;
-                } else if (result?.error?.message) {
-                    msg = result.error.message;
-                }
-                console.error('Server response:', result);
+                if (typeof result?.error === 'string') msg = result.error;
+                else if (result?.error?.message) msg = result.error.message;
                 throw new Error(msg);
             }
 
-            // Yangi Gemini Interactions API javob formati:
-            // { status: "completed", steps: [{ type: "model_output", content: [{ type: "text", text: "..." }] }] }
             if (result?.status === 'completed' && Array.isArray(result.steps)) {
                 const modelStep = result.steps.find(s => s.type === 'model_output');
                 const textBlock = modelStep?.content?.find(c => c.type === 'text');
@@ -421,34 +441,52 @@
                 if (textBlock?.text) {
                     const aiData = JSON.parse(textBlock.text);
 
-                    if (aiData.found && aiData.plateText) {
-                        const analysis = parseUzbekPlate(aiData.plateText);
+                    // Hindiston raqamlari rad etiladi
+                    if (aiData.isIndia) {
                         scanResults[index] = {
                             ...scanResults[index],
-                            status: analysis.valid ? 'success' : 'warning',
-                            plate: analysis.formatted,
-                            type: analysis.type,
-                            region: analysis.region,
-                            raw: aiData.plateText,
-                            parsed: analysis,
+                            status: 'india_rejected',
+                            plate: 'Hindiston raqami',
+                            country: 'Hindiston',
+                            countryCode: 'IN',
+                            type: 'Hindiston avtomobili',
+                            region: 'Hindiston',
+                            box_2d: null
+                        };
+                    } else if (aiData.found && aiData.plateText) {
+                        let parsedUz = null;
+                        if ((aiData.countryCode || '').toUpperCase() === 'UZ') {
+                            parsedUz = parseUzbekPlate(aiData.plateText);
+                        }
+
+                        scanResults[index] = {
+                            ...scanResults[index],
+                            status: 'success',
+                            plate: parsedUz && parsedUz.valid ? parsedUz.formatted : (aiData.formattedPlate || aiData.plateText),
+                            rawPlate: aiData.plateText,
+                            country: aiData.country || 'O\'zbekiston',
+                            countryCode: (aiData.countryCode || 'UZ').toUpperCase(),
+                            type: aiData.vehicleType || 'Yengil avtomobil',
+                            region: parsedUz && parsedUz.valid ? parsedUz.region : (aiData.region || 'Noma\'lum'),
+                            parsedUz: parsedUz,
+                            box_2d: Array.isArray(aiData.box_2d) && aiData.box_2d.length === 4 ? aiData.box_2d : null,
                         };
                     } else {
                         scanResults[index].status = 'notfound';
-                        scanResults[index].plate = 'Topilmadi';
+                        scanResults[index].plate = 'Raqam topilmadi';
+                        scanResults[index].country = 'Noma\'lum';
                     }
                 } else {
                     scanResults[index].status = 'error';
-                    scanResults[index].plate = 'Javob qaytmadi';
+                    scanResults[index].plate = 'Javob olina olmadi';
                 }
             } else {
-                console.error('Gemini interaction not completed:', result);
                 scanResults[index].status = 'error';
-                scanResults[index].plate = result?.errors?.[0]?.message || 'Javob qaytmadi';
+                scanResults[index].plate = result?.errors?.[0]?.message || 'Server xatoligi';
             }
         } catch (error) {
             console.error('ALPR Engine Error:', error);
             scanResults[index].status = 'error';
-            // Haqiqiy sabab ko'rinsin (avval har doim "Aloqada xatolik yuz berdi" deb yozardi)
             scanResults[index].plate = error.message || 'Aloqada xatolik yuz berdi';
         }
 
@@ -480,10 +518,10 @@
         if (physRegex.test(clean)) {
             const match = clean.match(physRegex);
             const reg = match[1];
-            if (validRegions.includes(reg)) {
+            if (validUzRegions.includes(reg)) {
                 result.valid = true;
                 result.type = 'Jis. shaxs';
-                result.region = getRegionName(reg);
+                result.region = getUzRegionName(reg);
                 result.regionCode = match[1];
                 result.numberPart = `${match[2]} ${match[3]} ${match[4]}`;
                 result.formatted = `${match[1]} ${match[2]} ${match[3]} ${match[4]}`;
@@ -491,10 +529,10 @@
         } else if (legalRegex.test(clean)) {
             const match = clean.match(legalRegex);
             const reg = match[1];
-            if (validRegions.includes(reg)) {
+            if (validUzRegions.includes(reg)) {
                 result.valid = true;
                 result.type = 'Yur. shaxs';
-                result.region = getRegionName(reg);
+                result.region = getUzRegionName(reg);
                 result.regionCode = match[1];
                 result.numberPart = `${match[2]} ${match[3]}`;
                 result.formatted = `${match[1]} ${match[2]} ${match[3]}`;
@@ -504,7 +542,7 @@
         return result;
     }
 
-    function getRegionName(code) {
+    function getUzRegionName(code) {
         const map = {
             '01': 'Toshkent shahri', '10': 'Toshkent viloyati', '20': 'Sirdaryo',
             '25': 'Jizzax', '30': 'Samarqand', '40': 'Farg\'ona',
@@ -515,155 +553,263 @@
         return `${code} - ${map[code] || 'Viloyat'}`;
     }
 
-    function getStatusLabel(item) {
-        if (item.status === 'processing' || item.status === 'queued') {
-            const label = item.status === 'queued' ? 'Navbatda' : 'Tahlil...';
-            return { html: `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700"><span class="loader"></span> ${label}</span>`, isLoading: true };
+    // Bounding box koordinatalarini foizga aylantirish (0..1000 shkaladan 0..100% ga)
+    function getBoxPercent(box) {
+        if (!Array.isArray(box) || box.length !== 4) return null;
+        let [ymin, xmin, ymax, xmax] = box;
+
+        if (ymax <= 1 && xmax <= 1) {
+            ymin *= 1000; xmin *= 1000; ymax *= 1000; xmax *= 1000;
+        } else if (ymax <= 100 && xmax <= 100 && ymax > 1) {
+            ymin *= 10; xmin *= 10; ymax *= 10; xmax *= 10;
         }
-        if (item.status === 'success') {
-            return { html: `<span class="px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700">Aniqlandi</span>` };
-        }
-        if (item.status === 'warning') {
-            return { html: `<span class="px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700">Noodatiy</span>` };
-        }
-        return { html: `<span class="px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 text-red-600">Xatolik</span>` };
+
+        const top = ymin / 10;
+        const left = xmin / 10;
+        const height = Math.max(2, (ymax - ymin) / 10);
+        const width = Math.max(2, (xmax - xmin) / 10);
+
+        return { top, left, height, width };
     }
 
-    function createPlatesManiaInformerHTML(item) {
-        if (item.status === 'processing' || item.status === 'queued') {
-            const label = item.status === 'queued' ? 'Navbatda...' : 'Aniqlanmoqda...';
-            return `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700"><span class="loader"></span> ${label}</span>`;
-        }
-
-        if (item.status === 'error' || item.status === 'notfound' || !item.parsed || !item.parsed.valid) {
-            return `<span class="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-red-50 text-red-600 border border-red-200 break-words">${escapeHtml(item.plate)}</span>`;
-        }
-
-        const regionCode = escapeHtml(item.parsed.regionCode || '01');
-        const numberPart = escapeHtml(item.parsed.numberPart || 'A 123 AA');
+    function renderBoundingBoxHTML(box, label = '') {
+        const coords = getBoxPercent(box);
+        if (!coords) return '';
 
         return `
-            <div class="uz-plate-informer">
-                <div class="uz-plate-region">${regionCode}</div>
-                <div class="uz-plate-number">${numberPart}</div>
-                <div class="uz-plate-flag-box">
-                    <svg class="w-5 h-3 rounded-[1px]" viewBox="0 0 50 25" aria-hidden="true">
-                        <rect width="50" height="8" fill="#0099b5"/>
-                        <rect y="8" width="50" height="1" fill="#ce1126"/>
-                        <rect y="9" width="50" height="7" fill="#ffffff"/>
-                        <rect y="16" width="50" height="1" fill="#ce1126"/>
-                        <rect y="17" width="50" height="8" fill="#1eb53a"/>
-                        <circle cx="7" cy="4" r="2.5" fill="#ffffff"/>
-                        <circle cx="8.3" cy="4" r="2" fill="#0099b5"/>
-                        <circle cx="13" cy="2" r="0.6" fill="#ffffff"/>
-                        <circle cx="15" cy="2" r="0.6" fill="#ffffff"/>
-                        <circle cx="17" cy="2" r="0.6" fill="#ffffff"/>
-                    </svg>
-                    <span class="uz-plate-uz">UZ</span>
-                </div>
+            <div class="absolute border-2 border-emerald-400 bg-emerald-400/20 shadow-[0_0_15px_rgba(52,211,153,0.3)] rounded transition-all duration-300 pointer-events-none z-10"
+                 style="top: ${coords.top}%; left: ${coords.left}%; height: ${coords.height}%; width: ${coords.width}%;">
+                <!-- HUD burchaklar -->
+                <div class="absolute -top-1 -left-1 w-2 h-2 border-t-2 border-l-2 border-emerald-500"></div>
+                <div class="absolute -top-1 -right-1 w-2 h-2 border-t-2 border-r-2 border-emerald-500"></div>
+                <div class="absolute -bottom-1 -left-1 w-2 h-2 border-b-2 border-l-2 border-emerald-500"></div>
+                <div class="absolute -bottom-1 -right-1 w-2 h-2 border-b-2 border-r-2 border-emerald-500"></div>
+                
+                ${label ? `
+                    <div class="absolute -top-7 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] font-bold px-2.5 py-1 rounded shadow-md whitespace-nowrap flex items-center gap-1.5 border border-slate-700">
+                        <i class="fa-solid fa-crosshairs text-[9px] text-emerald-400"></i>
+                        <span class="tracking-wider uppercase">${escapeHtml(label)}</span>
+                    </div>
+                ` : ''}
             </div>
         `;
     }
 
-    // ---------- Natijalarni chizish: desktop jadval + mobil kartalar ----------
-    function renderResults() {
-        renderTable();
-        renderCards();
-
-        const processedCount = scanResults.filter(i => i.status !== 'processing' && i.status !== 'queued').length;
-        statsCounter.innerText = `${scanResults.length} dan ${processedCount} ta rasm aniqlandi`;
+    function getStatusBadge(item) {
+        if (item.status === 'processing' || item.status === 'queued') {
+            const label = item.status === 'queued' ? 'Navbatda...' : 'SI Tahlil etmoqda...';
+            return `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200"><span class="loader"></span> ${label}</span>`;
+        }
+        if (item.status === 'success') {
+            return `<span class="inline-flex items-center gap-1 px-3 py-1 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"><i class="fa-solid fa-circle-check"></i> Aniqlandi</span>`;
+        }
+        if (item.status === 'india_rejected') {
+            return `<span class="inline-flex items-center gap-1 px-3 py-1 rounded-md text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200"><i class="fa-solid fa-ban"></i> Hindiston (Cheklangan)</span>`;
+        }
+        if (item.status === 'notfound') {
+            return `<span class="inline-flex items-center gap-1 px-3 py-1 rounded-md text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200"><i class="fa-solid fa-circle-question"></i> Topilmadi</span>`;
+        }
+        return `<span class="inline-flex items-center gap-1 px-3 py-1 rounded-md text-xs font-semibold bg-red-50 text-red-600 border border-red-200"><i class="fa-solid fa-triangle-exclamation"></i> Xatolik</span>`;
     }
 
-    function renderTable() {
-        const rows = [];
-        scanResults.forEach((item, index) => {
-            const informerHTML = createPlatesManiaInformerHTML(item);
-            const canCopy = item.status === 'success' || item.status === 'warning';
+    function renderInformer(item) {
+        if (item.status === 'processing' || item.status === 'queued') {
+            return `<span class="text-xs text-slate-500 font-medium flex items-center gap-2"><span class="loader"></span> Aniqlanmoqda...</span>`;
+        }
 
-            rows.push(`
-                <tr class="hover:bg-gray-50/50 transition-colors">
-                    <td class="p-4">
-                        <div class="relative group w-16 h-12">
-                            <img src="${item.image}"
-                                 data-action="zoom" data-index="${index}"
-                                 class="w-16 h-12 object-cover rounded-lg border border-gray-200 cursor-pointer transition-transform duration-200 group-hover:scale-105 group-hover:shadow-md"
-                                 alt="${escapeHtml(item.file)} prevyusi"
-                                 title="Rasmni kattalashtirish uchun bosing" />
-                            <div data-action="zoom" data-index="${index}" class="absolute inset-0 bg-black/30 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer pointer-events-none">
-                                <i class="fa-solid fa-magnifying-glass-plus text-white text-xs" aria-hidden="true"></i>
+        if (item.status === 'india_rejected') {
+            return `<span class="text-xs font-medium text-amber-800 bg-amber-100 px-4 py-2 rounded-md border border-amber-300">⚠️ Hindiston raqamlari qo'llab-quvvatlanmaydi</span>`;
+        }
+
+        if (item.status === 'error' || item.status === 'notfound') {
+            return `<span class="text-xs font-mono font-bold text-slate-500 bg-slate-100 px-4 py-2 rounded-md border border-slate-200">${escapeHtml(item.plate)}</span>`;
+        }
+
+        // Agar O'zbekiston raqami bo'lsa (Keep precise custom SVG for the UZ plate graphic):
+        if (item.countryCode === 'UZ' && item.parsedUz && item.parsedUz.valid) {
+            const regionCode = escapeHtml(item.parsedUz.regionCode || '01');
+            const numberPart = escapeHtml(item.parsedUz.numberPart || 'A 123 AA');
+
+            return `
+                <div class="uz-plate-informer">
+                    <div class="uz-plate-region">${regionCode}</div>
+                    <div class="uz-plate-number">${numberPart}</div>
+                    <div class="uz-plate-flag-box">
+                        <svg class="w-5 h-3 rounded-[1px] shadow-sm border border-slate-200" viewBox="0 0 50 25" aria-hidden="true">
+                            <rect width="50" height="8" fill="#0099b5"/>
+                            <rect y="8" width="50" height="1" fill="#ce1126"/>
+                            <rect y="9" width="50" height="7" fill="#ffffff"/>
+                            <rect y="16" width="50" height="1" fill="#ce1126"/>
+                            <rect y="17" width="50" height="8" fill="#1eb53a"/>
+                            <circle cx="7" cy="4" r="2.5" fill="#ffffff"/>
+                            <circle cx="8.3" cy="4" r="2" fill="#0099b5"/>
+                            <circle cx="13" cy="2" r="0.6" fill="#ffffff"/>
+                            <circle cx="15" cy="2" r="0.6" fill="#ffffff"/>
+                            <circle cx="17" cy="2" r="0.6" fill="#ffffff"/>
+                        </svg>
+                        <span class="uz-plate-uz">UZ</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        const intlFlagUrl = item.countryCode ? `https://flagcdn.com/${item.countryCode.toLowerCase()}.svg` : '';
+        const imgTag = intlFlagUrl 
+            ? `<img src="${intlFlagUrl}" class="w-6 h-auto max-h-[14px] border border-slate-300 rounded-[1px] shadow-sm mb-1 object-cover" onerror="this.style.display='none'">` 
+            : '';
+
+        // Boshqa barcha xalqaro mamlakatlar uchun informer:
+        return `
+            <div class="intl-plate-informer">
+                <div class="intl-plate-flag">
+                    ${imgTag}
+                    <span class="intl-plate-code">${escapeHtml(item.countryCode || 'INT')}</span>
+                </div>
+                <div class="intl-plate-number">${escapeHtml(item.plate)}</div>
+            </div>
+        `;
+    }
+
+    // ---------- Katta kartalar (Oynalar) rendering ----------
+    function renderResults() {
+        const htmlCards = [];
+
+        scanResults.forEach((item, index) => {
+            const canCopy = item.status === 'success';
+
+            htmlCards.push(`
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm transition-shadow overflow-hidden flex flex-col group">
+                    <!-- Karta Sarlavhasi / Oyna tepasi -->
+                    <div class="p-4 sm:px-5 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-3.5 min-w-0">
+                            <div class="shrink-0 flex items-center justify-center">
+                                ${getCountryFlag(item.countryCode)}
+                            </div>
+                            <div class="min-w-0">
+                                <h3 class="font-semibold text-slate-900 text-sm sm:text-base truncate tracking-tight">${escapeHtml(item.country || 'Avtotransport')}</h3>
+                                <p class="text-[11px] sm:text-xs text-slate-500 font-medium truncate mt-0.5">${escapeHtml(item.file)}</p>
                             </div>
                         </div>
-                    </td>
-                    <td class="p-4">${getStatusLabel(item).html}</td>
-                    <td class="p-4">${informerHTML}</td>
-                    <td class="p-4 text-gray-600 font-medium">${escapeHtml(item.type)}</td>
-                    <td class="p-4 text-gray-600 text-xs">${escapeHtml(item.region)}</td>
-                    <td class="p-4 text-right">
-                        <button data-action="copy" data-index="${index}" ${canCopy ? '' : 'disabled'}
-                            class="action-btn touch-target p-2 text-gray-400 hover:text-blue-600 transition-colors rounded-lg hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
-                            title="Avtoraqamni nusxalash" aria-label="Avtoraqamni nusxalash">
-                            <i class="fa-regular fa-copy text-base" aria-hidden="true"></i>
-                        </button>
-                    </td>
-                </tr>
-            `);
-        });
-        resultsTbody.innerHTML = rows.join('');
-    }
 
-    function renderCards() {
-        const cards = [];
-        scanResults.forEach((item, index) => {
-            const informerHTML = createPlatesManiaInformerHTML(item);
-            const canCopy = item.status === 'success' || item.status === 'warning';
-
-            cards.push(`
-                <div class="p-4 flex gap-3">
-                    <div class="relative shrink-0 w-20 h-16">
-                        <img src="${item.image}"
-                             data-action="zoom" data-index="${index}"
-                             class="w-20 h-16 object-cover rounded-lg border border-gray-200"
-                             alt="${escapeHtml(item.file)} prevyusi" />
-                    </div>
-                    <div class="flex-1 min-w-0 space-y-2">
-                        <div class="flex items-center justify-between gap-2">
-                            ${getStatusLabel(item).html}
-                            <button data-action="copy" data-index="${index}" ${canCopy ? '' : 'disabled'}
-                                class="action-btn touch-target p-2 -mr-2 text-gray-400 active:text-blue-600 transition-colors rounded-lg disabled:opacity-30 disabled:cursor-not-allowed"
-                                aria-label="Avtoraqamni nusxalash">
-                                <i class="fa-regular fa-copy text-base" aria-hidden="true"></i>
+                        <div class="flex items-center gap-2.5 shrink-0">
+                            ${getStatusBadge(item)}
+                            <!-- Tugma "X" (O'chirish) -->
+                            <button onclick="removeCard(${index})" 
+                                    class="w-8 h-8 rounded-md bg-white hover:bg-slate-100 active:bg-slate-200 text-slate-400 hover:text-red-500 transition-colors flex items-center justify-center border border-slate-200 shadow-sm" 
+                                    title="Ushbu kartani o'chirish (X)" aria-label="O'chirish">
+                                <i class="fa-solid fa-xmark"></i>
                             </button>
                         </div>
-                        <div class="overflow-x-auto">${informerHTML}</div>
-                        <div class="text-xs text-gray-500 flex flex-wrap gap-x-3">
-                            <span>${escapeHtml(item.type)}</span>
-                            <span>${escapeHtml(item.region)}</span>
+                    </div>
+
+                    <!-- Karta Tanasi / Katta oyna -->
+                    <div class="p-4 sm:p-5 grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-6 items-stretch">
+                        
+                        <!-- Chap tomonda: Avto rasmi va ramka (Bounding Box) -->
+                        <div class="relative w-full aspect-[4/3] bg-slate-900 rounded-lg overflow-hidden border border-slate-200 shadow-inner flex items-center justify-center">
+                            <img src="${item.image}" 
+                                 onclick="openImageModal(${index})" 
+                                 class="w-full h-full object-contain cursor-zoom-in transition-transform duration-500 group-hover:scale-[1.02]" 
+                                 alt="${escapeHtml(item.file)}" />
+
+                            <!-- Ramka (Bounding Box) -->
+                            ${renderBoundingBoxHTML(item.box_2d, item.plate !== '---' ? item.plate : '')}
+
+                            <!-- Kattalashtirish tugmasi -->
+                            <button onclick="openImageModal(${index})" 
+                                    class="absolute bottom-3 right-3 bg-slate-900/80 hover:bg-slate-900 text-white text-[11px] font-medium px-3 py-1.5 rounded-md backdrop-blur transition-all flex items-center gap-1.5 shadow-sm border border-white/10 z-20">
+                                <i class="fa-solid fa-expand"></i>
+                                <span>Kattalashtirish</span>
+                            </button>
                         </div>
+
+                        <!-- O'ng tomonda: Informer badge va ma'lumotlar -->
+                        <div class="flex flex-col justify-between space-y-4">
+                            ${item.status === 'india_rejected' ? `
+                                <div class="p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-900 text-sm flex items-start gap-3">
+                                    <i class="fa-solid fa-triangle-exclamation text-amber-600 text-lg shrink-0 mt-0.5"></i>
+                                    <div>
+                                        <h4 class="font-semibold">Hindiston raqami aniqlandi</h4>
+                                        <p class="text-xs text-amber-700 mt-1.5 leading-relaxed">
+                                            Hindiston davlat raqamlari qabul qilinmaydi. Tizim O'zbekiston va dunyoning boshqa barcha mamlakatlari raqamlarini taniydi.
+                                        </p>
+                                    </div>
+                                </div>
+                            ` : `
+                                <div>
+                                    <label class="block text-[11px] uppercase tracking-wider font-semibold text-slate-500 mb-2.5">
+                                        Davlat raqami (Informer)
+                                    </label>
+                                    <div class="p-5 bg-slate-50/50 border border-slate-200 rounded-lg flex items-center justify-center min-h-[80px] shadow-[inset_0_1px_4px_rgba(0,0,0,0.02)]">
+                                        ${renderInformer(item)}
+                                    </div>
+                                </div>
+
+                                <!-- Detallar katakchasi -->
+                                <div class="grid grid-cols-2 gap-3 text-xs sm:text-sm">
+                                    <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+                                        <span class="text-[11px] text-slate-400 block font-semibold uppercase tracking-wider">Mamlakat</span>
+                                        <span class="font-medium text-slate-800 flex items-center gap-2 mt-1.5">
+                                            <span>${item.countryCode && item.countryCode !== 'IN' ? `<img src="https://flagcdn.com/${item.countryCode.toLowerCase()}.svg" class="w-4 h-auto shadow-sm border border-slate-200 rounded-[1px] object-cover">` : '<i class="fa-solid fa-globe text-slate-400"></i>'}</span>
+                                            <span class="truncate">${escapeHtml(item.country || '-')}</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+                                        <span class="text-[11px] text-slate-400 block font-semibold uppercase tracking-wider">Transport turi</span>
+                                        <span class="font-medium text-slate-800 truncate block mt-1.5">${escapeHtml(item.type || '-')}</span>
+                                    </div>
+
+                                    <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+                                        <span class="text-[11px] text-slate-400 block font-semibold uppercase tracking-wider">Hudud / Viloyat</span>
+                                        <span class="font-medium text-slate-800 truncate block mt-1.5">${escapeHtml(item.region || '-')}</span>
+                                    </div>
+
+                                    <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+                                        <span class="text-[11px] text-slate-400 block font-semibold uppercase tracking-wider">Xom matn (Raw)</span>
+                                        <span class="font-mono font-semibold text-slate-700 truncate block mt-1.5">${escapeHtml(item.rawPlate || item.plate || '-')}</span>
+                                    </div>
+                                </div>
+                            `}
+
+                            <!-- Harakatlar tugmasi -->
+                            <div class="pt-1">
+                                <button onclick="copyToClipboard('${escapeHtml(item.plate)}')" ${canCopy ? '' : 'disabled'}
+                                        class="w-full py-2.5 px-4 bg-slate-800 hover:bg-slate-900 active:bg-black disabled:bg-slate-100 disabled:border-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed border border-transparent text-white font-semibold rounded-lg text-sm transition-colors flex items-center justify-center gap-2 shadow-sm">
+                                    <i class="fa-regular fa-copy"></i>
+                                    <span>Davlat raqamini nusxalash</span>
+                                </button>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             `);
         });
-        resultsCards.innerHTML = cards.join('');
+
+        carsGrid.innerHTML = htmlCards.join('');
+
+        const processedCount = scanResults.filter(i => i.status !== 'processing' && i.status !== 'queued').length;
+        statsCounter.innerText = `${scanResults.length} ta avtomobildan ${processedCount} tasi tahlil qilindi`;
     }
 
-    // Event delegation ikkala konteyner uchun ham
-    function handleResultClick(e) {
-        const target = e.target.closest('[data-action]');
-        if (!target) return;
-        const index = Number(target.dataset.index);
-        const item = scanResults[index];
-        if (!item) return;
-
-        if (target.dataset.action === 'zoom') {
-            openImageModal(item.image);
-        } else if (target.dataset.action === 'copy') {
-            copyToClipboard(item.plate);
+    // Kartani "X" tugmasi orqali o'chirish
+    function removeCard(index) {
+        scanResults.splice(index, 1);
+        if (scanResults.length === 0) {
+            dashboard.classList.add('hidden');
+        } else {
+            renderResults();
         }
     }
-    resultsTbody.addEventListener('click', handleResultClick);
-    resultsCards.addEventListener('click', handleResultClick);
 
-    // ---------- Rasm modal: zoom/pan (sichqoncha + touch/pinch) ----------
+    function clearAll() {
+        scanResults = [];
+        dashboard.classList.add('hidden');
+        carsGrid.innerHTML = '';
+    }
+
+    // ---------- Modal Zoom (Kattalashtirish) ----------
     let currentZoom = 1;
     let isDragging = false;
     let startX = 0, startY = 0;
@@ -671,12 +817,24 @@
 
     const modal = document.getElementById('image-modal');
     const modalImg = document.getElementById('modal-img');
-    const modalWrapper = document.getElementById('modal-img-wrapper');
+    const modalImgWrapper = document.getElementById('modal-img-wrapper');
+    const modalBoxOverlay = document.getElementById('modal-box-overlay');
     const zoomText = document.getElementById('zoom-level-text');
     const zoomTextMobile = document.getElementById('zoom-level-text-mobile');
 
-    function openImageModal(imgSrc) {
-        modalImg.src = imgSrc;
+    function openImageModal(index) {
+        const item = scanResults[index];
+        if (!item) return;
+
+        modalImg.src = item.image;
+        
+        // Modal ichida ham ramka (Bounding box) ni ko'rsatish
+        if (item.box_2d) {
+            modalBoxOverlay.innerHTML = renderBoundingBoxHTML(item.box_2d, item.plate !== '---' ? item.plate : '');
+        } else {
+            modalBoxOverlay.innerHTML = '';
+        }
+
         resetZoom();
         modal.classList.remove('hidden');
         setTimeout(() => modal.classList.remove('opacity-0'), 10);
@@ -687,6 +845,7 @@
         setTimeout(() => {
             modal.classList.add('hidden');
             modalImg.src = '';
+            modalBoxOverlay.innerHTML = '';
         }, 300);
     }
 
@@ -695,7 +854,7 @@
     }
 
     function updateTransform() {
-        modalWrapper.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentZoom})`;
+        modalImgWrapper.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentZoom})`;
         const pct = `${Math.round(currentZoom * 100)}%`;
         zoomText.innerText = pct;
         zoomTextMobile.innerText = pct;
@@ -723,7 +882,7 @@
         changeZoom(e.deltaY < 0 ? 0.2 : -0.2);
     }, { passive: false });
 
-    modalWrapper.addEventListener('mousedown', (e) => {
+    modalImgWrapper.addEventListener('mousedown', (e) => {
         if (currentZoom <= 1) return;
         isDragging = true;
         startX = e.clientX - translateX;
@@ -740,7 +899,7 @@
 
     let lastTouchDistance = null;
 
-    modalWrapper.addEventListener('touchstart', (e) => {
+    modalImgWrapper.addEventListener('touchstart', (e) => {
         if (e.touches.length === 1 && currentZoom > 1) {
             isDragging = true;
             startX = e.touches[0].clientX - translateX;
@@ -750,7 +909,7 @@
         }
     }, { passive: true });
 
-    modalWrapper.addEventListener('touchmove', (e) => {
+    modalImgWrapper.addEventListener('touchmove', (e) => {
         if (e.touches.length === 1 && isDragging) {
             translateX = e.touches[0].clientX - startX;
             translateY = e.touches[0].clientY - startY;
@@ -763,7 +922,7 @@
         }
     }, { passive: true });
 
-    modalWrapper.addEventListener('touchend', () => {
+    modalImgWrapper.addEventListener('touchend', () => {
         isDragging = false;
         lastTouchDistance = null;
     });
@@ -778,13 +937,13 @@
         if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeImageModal();
     });
 
-    // ---------- Toast va nusxalash ----------
+    // ---------- Nusxalash & Toast ----------
     function showToast(message) {
         const toast = document.getElementById('toast');
         const msg = document.getElementById('toast-msg');
         msg.innerText = message;
-        toast.classList.remove('translate-y-20', 'opacity-0');
-        setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 2500);
+        toast.classList.remove('translate-y-24', 'opacity-0');
+        setTimeout(() => toast.classList.add('translate-y-24', 'opacity-0'), 2500);
     }
 
     async function copyToClipboard(text) {
@@ -802,19 +961,12 @@
                 document.execCommand('copy');
                 document.body.removeChild(dummy);
             }
-            showToast(`${text} davlat raqami nusxalandi!`);
+            showToast(`${text} nusxalandi!`);
         } catch (err) {
             console.error('Clipboard error:', err);
-            showToast('Nusxalashda xatolik yuz berdi');
+            showToast('Nusxalashda xatolik');
         }
     }
-
-    function clearAll() {
-        scanResults = [];
-        dashboard.classList.add('hidden');
-        resultsTbody.innerHTML = '';
-        resultsCards.innerHTML = '';
-    }
 </script>
-<script src="auto-menu.js"></script></body>
+</body>
 </html>
