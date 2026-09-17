@@ -145,7 +145,7 @@
             <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2 flex flex-wrap items-center justify-center gap-2">
                 <i class="fa-solid fa-car-tunnel text-blue-600" aria-hidden="true"></i>
                 <span>Avtoraqam aniqlovchi skaner</span>
-                <span class="text-xs bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full uppercase font-semibold">PlatesMania Informer</span>
+                <span class="text-xs bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full uppercase font-semibold">SI</span>
             </h1>
             <p class="text-sm sm:text-base text-gray-500">Rasm orqali avtotransportning davlat raqamini aniqlang va PlatesMania informerini oling.</p>
         </div>
@@ -207,7 +207,7 @@
     <!-- Version badge — faqat PC uchun -->
     <div id="version-badge" class="fixed bottom-4 right-4 items-center gap-1.5 bg-gray-900/85 text-gray-300 text-xs px-3 py-1.5 rounded-full backdrop-blur border border-gray-700 z-40 select-none">
         <i class="fa-solid fa-code-branch text-[10px]" aria-hidden="true"></i>
-        <span>v1.0</span>
+        <span>v1.1</span>
     </div>
 
     <!-- Image Zoom Modal -->
@@ -252,7 +252,7 @@
 <script>
     // ====== SOZLAMALAR ======
     const WORKER_URL = "https://avtoraqam-aniqlovchi-si-api.jafaras.uz";
-    const APP_SECRET = "asammidamminahehewokawokahehe"; // worker'dagi env.APP_SECRET bilan bir xil bo'lishi kerak
+    const APP_SECRET = "asammidamminahehewokawokahehe"; 
 
     const MAX_FILE_BYTES = 8 * 1024 * 1024; // 8 MB
     const MAX_UPLOAD_DIMENSION = 1600; // px
@@ -412,33 +412,44 @@
                 throw new Error(msg);
             }
 
-            if (result.candidates && result.candidates[0]?.content?.parts?.length > 0) {
-                const jsonText = result.candidates[0].content.parts[0].text;
-                const aiData = JSON.parse(jsonText);
+            // Yangi Gemini Interactions API javob formati:
+            // { status: "completed", steps: [{ type: "model_output", content: [{ type: "text", text: "..." }] }] }
+            if (result?.status === 'completed' && Array.isArray(result.steps)) {
+                const modelStep = result.steps.find(s => s.type === 'model_output');
+                const textBlock = modelStep?.content?.find(c => c.type === 'text');
 
-                if (aiData.found && aiData.plateText) {
-                    const analysis = parseUzbekPlate(aiData.plateText);
-                    scanResults[index] = {
-                        ...scanResults[index],
-                        status: analysis.valid ? 'success' : 'warning',
-                        plate: analysis.formatted,
-                        type: analysis.type,
-                        region: analysis.region,
-                        raw: aiData.plateText,
-                        parsed: analysis,
-                    };
+                if (textBlock?.text) {
+                    const aiData = JSON.parse(textBlock.text);
+
+                    if (aiData.found && aiData.plateText) {
+                        const analysis = parseUzbekPlate(aiData.plateText);
+                        scanResults[index] = {
+                            ...scanResults[index],
+                            status: analysis.valid ? 'success' : 'warning',
+                            plate: analysis.formatted,
+                            type: analysis.type,
+                            region: analysis.region,
+                            raw: aiData.plateText,
+                            parsed: analysis,
+                        };
+                    } else {
+                        scanResults[index].status = 'notfound';
+                        scanResults[index].plate = 'Topilmadi';
+                    }
                 } else {
-                    scanResults[index].status = 'notfound';
-                    scanResults[index].plate = 'Topilmadi';
+                    scanResults[index].status = 'error';
+                    scanResults[index].plate = 'Javob qaytmadi';
                 }
             } else {
+                console.error('Gemini interaction not completed:', result);
                 scanResults[index].status = 'error';
-                scanResults[index].plate = 'Javob qaytmadi';
+                scanResults[index].plate = result?.errors?.[0]?.message || 'Javob qaytmadi';
             }
         } catch (error) {
             console.error('ALPR Engine Error:', error);
             scanResults[index].status = 'error';
-            scanResults[index].plate = 'Aloqada xatolik yuz berdi';
+            // Haqiqiy sabab ko'rinsin (avval har doim "Aloqada xatolik yuz berdi" deb yozardi)
+            scanResults[index].plate = error.message || 'Aloqada xatolik yuz berdi';
         }
 
         renderResults();
