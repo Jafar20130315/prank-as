@@ -52,32 +52,30 @@
 
 <script>
   OneSignalDeferred.push(async function(OneSignal) {
-    // Важно: если у кнопки в HTML нет id="notifyBtn", а есть только класс .notify-btn, выбираем по классу или добавляем id в html
     const btn = document.querySelector(".notify-btn");
+    const wrapper = document.querySelector(".bottom-ui-wrapper");
     const notifyModal = document.getElementById("notifyModal");
     const modalCancel = document.getElementById("modalCancel");
     const modalOk = document.getElementById("modalOk");
       
-    // 1️⃣ Проверка состояния разрешений
-    async function checkStatus() {
+    // 1️⃣ Проверка статуса при загрузке страницы
+    function checkStatus() {
       const permission = Notification.permission;
-      // ❌ Если заблокировано или уже разрешено — скрываем обертку с кнопкой
-      if (permission === "granted" || permission === "denied") {
-        const wrapper = document.querySelector(".bottom-ui-wrapper");
+      console.log("Статус уведомлений:", permission);
+
+      // Если пользователь УЖЕ дал разрешение — скрываем кнопку, она больше не нужна
+      if (permission === "granted") {
         if (wrapper) wrapper.style.display = "none";
-        return;
-      }
-      // 2️⃣ Если разрешение еще не запрошено — показываем через 3 секунды
-      setTimeout(() => {
-        const wrapper = document.querySelector(".bottom-ui-wrapper");
+      } else {
+        // В остальных случаях (default / denied) гарантированно показываем блок с кнопкой
         if (wrapper) wrapper.style.display = "flex";
-      }, 3000);
+      }
     }
       
-    // Запускаем при загрузке
+    // Вызываем проверку сразу
     checkStatus();
       
-    // 3️⃣ При нажатии на круглую кнопку — открываем КАСЯТУМНОЕ окно вместо браузера
+    // 2️⃣ При нажатии на круглую кнопку 🔔 — открываем наше кастомное модальное окно
     if (btn) {
       btn.onclick = (e) => {
         e.preventDefault();
@@ -87,14 +85,14 @@
       };
     }
 
-    // Кнопка «Позже» в модалке
+    // Кнопка «Позже» в модалке (закрытие)
     if (modalCancel) {
       modalCancel.onclick = () => {
         if (notifyModal) notifyModal.classList.remove("show");
       };
     }
 
-    // Закрытие кликом по фону
+    // Закрытие модалки при клике на темный фон вокруг неё
     if (notifyModal) {
       notifyModal.onclick = (e) => {
         if (e.target === notifyModal) {
@@ -103,20 +101,21 @@
       };
     }
 
-    // 4️⃣ При нажатии «Разрешить» в нашем окне — вызываем OneSignal optIn()
+    // 3️⃣ При нажатии «Разрешить» в модалке — вызываем запрос от OneSignal
     if (modalOk) {
       modalOk.onclick = async () => {
         if (notifyModal) notifyModal.classList.remove("show");
         
         try {
-          // Вызываем официальный запрос от OneSignal
+          // Запрашиваем подписку через OneSignal
           await OneSignal.User.PushSubscription.optIn();
 
-          // Проверяем результат
+          // Проверяем результат после запроса
           if (Notification.permission === "granted") {
-            const wrapper = document.querySelector(".bottom-ui-wrapper");
             if (wrapper) wrapper.style.display = "none";
             alert("✔️ Bildirishnomalar yoqildi!");
+          } else if (Notification.permission === "denied") {
+            alert("❌ Bildirishnomalar bloklangan. Brauzer sozlamalaridan ruxsat berishingiz mumkin.");
           }
         } catch (err) {
           console.error("OneSignal optIn error:", err);
@@ -125,7 +124,6 @@
     }
   });
 </script>
-  
   <script>
     // Yangi SW topilsa    
     if ('serviceWorker' in navigator) {
