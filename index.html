@@ -793,9 +793,84 @@
       transform: scale(1.03);
       box-shadow: 0 6px 20px rgba(255, 69, 0, 0.6);
     }
+
+    /* Saytda ishlar olib borilayabdi */
+    .maintenance-overlay {
+  position: fixed;
+  inset: 0; /* Заменяет top, left, right, bottom */
+  background: rgba(15, 15, 15, 0.45); /* Легкое затемнение, чтобы просвечивал градиент */
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  z-index: 9999999; /* Поверх абсолютно всех элементов (меню, модалок) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+.maintenance-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.maintenance-card {
+  background: rgba(25, 25, 25, 0.85); /* Темный фон карточки под стиль сайта */
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  padding: 40px 30px;
+  text-align: center;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 255, 255, 0.05);
+  transform: translateY(30px) scale(0.95);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.maintenance-overlay.active .maintenance-card {
+  transform: translateY(0) scale(1);
+}
+
+.maintenance-icon {
+  font-size: 56px;
+  margin-bottom: 15px;
+  display: inline-block;
+  animation: swayIcon 2.5s ease-in-out infinite;
+}
+
+@keyframes swayIcon {
+  0%, 100% { transform: rotate(-15deg); }
+  50% { transform: rotate(15deg); }
+}
+
+.maintenance-card h2 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+}
+
+.maintenance-card p {
+  font-size: 15px;
+  color: #bbb;
+  line-height: 1.6;
+}
+/* Saytda ishlar olib borilayabdi */
 </style> 
 </head>
 <body>    
+  <!-- Заглушка технических работ -->
+<div id="maintenanceOverlay" class="maintenance-overlay">
+  <div class="maintenance-card">
+    <div class="maintenance-icon">!</div>
+    <h2>Saytga o'zgarishlar kiritilmoqda</h2>
+    <p>Iltimos, keyinroq qaytib keling. Saytni yaxshilash ustida ishlayapmiz. Noqulayliklar uchun uzr so'raymiz!</p>
+  </div>
+</div>
+  <!-- Заглушка технических работ -->
+  
   <!-- Yangiliklardan xabardor bo'lish tugmasi  -->
 <div class="custom-modal-overlay" id="notifyModal">
     <div class="custom-modal-box">
@@ -947,7 +1022,34 @@
   </nav>
   
   <div class="top-message" id="topMsg"></div>
+  
+<script>
+  // 🔴 ТУМБЛЕР ТЕХРАБОТ:
+  // Измени на true, чтобы закрыть сайт. Измени на false, чтобы сайт работал.
+  const isMaintenanceMode = false; 
 
+  if (isMaintenanceMode) {
+    // Включаем слой и жестко блокируем прокрутку остального сайта
+    document.addEventListener("DOMContentLoaded", () => {
+      const overlay = document.getElementById("maintenanceOverlay");
+      if (overlay) {
+        overlay.classList.add("active");
+        document.body.style.overflow = "hidden";
+        document.body.style.pointerEvents = "none"; // Блокируем клики по фону
+        overlay.style.pointerEvents = "auto"; // Разрешаем клики внутри самого оверлея (если понадобится)
+      }
+    });
+  } else {
+    // Если техработы отключены — полностью удаляем код заглушки, чтобы не мешал SEO и DOM-дереву
+    document.addEventListener("DOMContentLoaded", () => {
+      const overlay = document.getElementById("maintenanceOverlay");
+      if (overlay) {
+        overlay.remove();
+      }
+    });
+  }
+</script>
+  
   <script>
     // Fade message
     function showMessage(text, time = 2500) {  
