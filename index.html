@@ -37,51 +37,94 @@
   </script>
   
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-  <script>
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(async function(OneSignal) {
-      await OneSignal.init({
-        appId: "3b7b6b4f-c457-42e4-ad68-65d990d783a6",
-        safari_web_id: "web.onesignal.auto.2cd5950f-b486-4c84-8005-0f30059d0b0c",
-        notifyButton: {
-          enable: false,
-        },
-      });
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "3b7b6b4f-c457-42e4-ad68-65d990d783a6",
+      safari_web_id: "web.onesignal.auto.2cd5950f-b486-4c84-8005-0f30059d0b0c",
+      notifyButton: {
+        enable: false,
+      },
     });
-  </script>
-  
-  <script>
-    OneSignalDeferred.push(async function(OneSignal) {
-      const btn = document.getElementById("notifyBtn");
+  });
+</script>
+
+<script>
+  OneSignalDeferred.push(async function(OneSignal) {
+    // Важно: если у кнопки в HTML нет id="notifyBtn", а есть только класс .notify-btn, выбираем по классу или добавляем id в html
+    const btn = document.querySelector(".notify-btn");
+    const notifyModal = document.getElementById("notifyModal");
+    const modalCancel = document.getElementById("modalCancel");
+    const modalOk = document.getElementById("modalOk");
       
-      // 1️⃣ ruxsat holatini tekshiruvchi funksiya  
-      async function checkStatus() {
-        const permission = Notification.permission;
-        // ❌ bloklangan yoki allaqachon ruxsat berilgan bo‘lsa → tugma ko‘rsatmaymiz    
-        if(permission === "granted" || permission === "denied") {      
-          btn.style.display = "none";      
-          return;    
-        }
-        // 2️⃣ ruxsat hali berilmagan → 3 soniyadan keyin ko‘rsatamiz    
-        setTimeout(() => {      
-          btn.style.display = "inline-block";    
-        }, 3000);  
+    // 1️⃣ Проверка состояния разрешений
+    async function checkStatus() {
+      const permission = Notification.permission;
+      // ❌ Если заблокировано или уже разрешено — скрываем обертку с кнопкой
+      if (permission === "granted" || permission === "denied") {
+        const wrapper = document.querySelector(".bottom-ui-wrapper");
+        if (wrapper) wrapper.style.display = "none";
+        return;
       }
+      // 2️⃣ Если разрешение еще не запрошено — показываем через 3 секунды
+      setTimeout(() => {
+        const wrapper = document.querySelector(".bottom-ui-wrapper");
+        if (wrapper) wrapper.style.display = "flex";
+      }, 3000);
+    }
       
-      // sahifa yuklanganda tekshiradi  
-      checkStatus();
+    // Запускаем при загрузке
+    checkStatus();
       
-      // 3️⃣ tugma bosilganda  
-      btn.onclick = async () => {
-        await OneSignal.User.PushSubscription.optIn();
-        // agar ruxsat berilsa — tugmani yo‘q qilamiz    
-        if(Notification.permission === "granted") {      
-          btn.style.display = "none";      
-          alert("✔️ Bildirishnomalar yoqildi!");    
-        }  
+    // 3️⃣ При нажатии на круглую кнопку — открываем КАСЯТУМНОЕ окно вместо браузера
+    if (btn) {
+      btn.onclick = (e) => {
+        e.preventDefault();
+        if (notifyModal) {
+          notifyModal.classList.add("show");
+        }
       };
-    });
-  </script>
+    }
+
+    // Кнопка «Позже» в модалке
+    if (modalCancel) {
+      modalCancel.onclick = () => {
+        if (notifyModal) notifyModal.classList.remove("show");
+      };
+    }
+
+    // Закрытие кликом по фону
+    if (notifyModal) {
+      notifyModal.onclick = (e) => {
+        if (e.target === notifyModal) {
+          notifyModal.classList.remove("show");
+        }
+      };
+    }
+
+    // 4️⃣ При нажатии «Разрешить» в нашем окне — вызываем OneSignal optIn()
+    if (modalOk) {
+      modalOk.onclick = async () => {
+        if (notifyModal) notifyModal.classList.remove("show");
+        
+        try {
+          // Вызываем официальный запрос от OneSignal
+          await OneSignal.User.PushSubscription.optIn();
+
+          // Проверяем результат
+          if (Notification.permission === "granted") {
+            const wrapper = document.querySelector(".bottom-ui-wrapper");
+            if (wrapper) wrapper.style.display = "none";
+            alert("✔️ Bildirishnomalar yoqildi!");
+          }
+        } catch (err) {
+          console.error("OneSignal optIn error:", err);
+        }
+      };
+    }
+  });
+</script>
   
   <script>
     // Yangi SW topilsa    
@@ -647,11 +690,126 @@
       from { transform: translate3d(var(--x0), -30px, 0); }  
       to   { transform: translate3d(var(--x1), 110vh, 0); }
     }
+
+    /* ===== Кастомное модальное окно уведомлений ===== */
+    .custom-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      z-index: 999999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      padding: 20px;
+    }
+
+    .custom-modal-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .custom-modal-box {
+      background: rgba(25, 25, 25, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 360px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 153, 0, 0.2);
+      transform: translateY(20px) scale(0.95);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .custom-modal-overlay.show .custom-modal-box {
+      transform: translateY(0) scale(1);
+    }
+
+    .custom-modal-icon {
+      font-size: 42px;
+      margin-bottom: 15px;
+      display: inline-block;
+      animation: modalBellPulse 2s infinite;
+    }
+
+    @keyframes modalBellPulse {
+      0%, 100% { transform: rotate(0deg); }
+      20% { transform: rotate(14deg); }
+      40% { transform: rotate(-14deg); }
+      60% { transform: rotate(7deg); }
+      80% { transform: rotate(-7deg); }
+    }
+
+    .custom-modal-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+
+    .custom-modal-desc {
+      font-size: 14px;
+      color: #bbb;
+      margin-bottom: 25px;
+      line-height: 1.5;
+    }
+
+    .custom-modal-buttons {
+      display: flex;
+      gap: 12px;
+    }
+
+    .custom-modal-btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: 0.2s;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .custom-modal-btn.cancel {
+      background: rgba(255, 255, 255, 0.08);
+      color: #ccc;
+    }
+
+    .custom-modal-btn.cancel:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+
+    .custom-modal-btn.ok {
+      background: linear-gradient(135deg, #ff9900, #ff4500);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(255, 69, 0, 0.4);
+    }
+
+    .custom-modal-btn.ok:hover {
+      transform: scale(1.03);
+      box-shadow: 0 6px 20px rgba(255, 69, 0, 0.6);
+    }
 </style> 
 </head>
 <body>    
   <!-- Yangiliklardan xabardor bo'lish tugmasi  -->
-  <button id="notifyBtn" class="notify-btn" style="display:none">🔔</button>
+<div class="custom-modal-overlay" id="notifyModal">
+    <div class="custom-modal-box">
+        <div class="custom-modal-icon">🔔</div>
+        <div class="custom-modal-title">Bildirishnomalar yoqilsinmi?</div>
+        <div class="custom-modal-desc">Yangiliklardan xabardor bo'lish uchun.</div>
+        <div class="custom-modal-buttons">
+            <button class="custom-modal-btn cancel" id="modalCancel">Bekor qilish</button>
+            <button class="custom-modal-btn ok" id="modalOk">OK</button>
+        </div>
+    </div>
+</div>
  <!-- Yangiliklardan xabardor bo'lish tugmasi  -->
 
   <audio id="clickSound" preload="auto">  
