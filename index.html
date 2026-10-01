@@ -1116,10 +1116,10 @@
   </script>
 
   <script type="module">        
-    const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co';        
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg';                
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co';        
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg';                
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     async function initTracking() {            
       const startTime = Date.now();            
       const openedAt = new Date().toISOString();            
@@ -1185,8 +1185,8 @@
   </script>    
   
   <script>
-    fetch("https://prankasapi.windowsnoutbook.workers.dev/visit");
-  </script>
+  fetch("https://prankasapi.windowsnoutbook.workers.dev/visit").catch(() => {});
+</script>
 
   <script>  
     const tgAvatar = localStorage.getItem("tg_avatar");
