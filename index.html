@@ -189,7 +189,7 @@
       font-family: 'Poppins', sans-serif;
       transition: 0.3s;
       font-size: 15px;
-      position: relative; /* Добавлено для кружочка */
+      position: relative; 
     }
     
     .cat-btn:hover {
@@ -200,10 +200,9 @@
     .cat-btn.active {
       background: #fff;
       color: #111;
-      box-shadow: 0 0 25px rgba(255,255,255,0.8); /* Свечение самой вкладки */
+      box-shadow: 0 0 25px rgba(255,255,255,0.8); 
     }
 
-    /* Индикатор (красный кружок) для вкладок с новинками */
     .cat-btn.has-new::after {
       content: '';
       position: absolute;
@@ -224,7 +223,6 @@
       100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 69, 0, 0); }
     }
 
-    /* Обертка для свайпа */
     .swipe-glow-wrapper {
       position: relative;
       z-index: 7001;
@@ -233,11 +231,10 @@
       width: 100%;
     }
 
-    /* Контейнеры для эффекта свайпа галереи */
     .swipe-viewport {
       width: 100%;
       overflow-x: hidden;
-      padding: 15px 0; /* Чтобы тени кнопок не обрезались */
+      padding: 15px 0; 
     }
     
     .swipe-container {
@@ -247,10 +244,9 @@
       will-change: transform, filter;
     }
 
-    /* Анимация для идеального тайминга размытия */
     @keyframes motionBlur {
       0% { filter: blur(0px); }
-      50% { filter: blur(4px); } /* Мягкое размытие для комфорта глаз */
+      50% { filter: blur(4px); } 
       100% { filter: blur(0px); }
     }
 
@@ -478,7 +474,7 @@
     }
 
     .subtitle {  
-      font-size: 16px;      
+      font-size: 16px;     
       color: #666;          
       max-width: 700px;  
       margin: 12px auto 30px;  
@@ -488,7 +484,6 @@
       z-index: 2; 
     }
 
-    /* Основной контейнер иконки (ссылка) */
     .user-icon {    
       text-decoration: none;    
       background: rgba(255,255,255,0.1);    
@@ -528,29 +523,62 @@
       object-fit: cover;    
       border-radius: 50%;
     }
-    
-    .notify-btn {  
-      position: fixed; 
-      bottom: 20px;
+
+    /* =========================================================   
+       🔥 НОВЫЙ БЛОК УВЕДОМЛЕНИЙ И МЕТРИКИ
+    ========================================================= */
+    .bottom-ui-wrapper {
+      position: fixed;
+      bottom: 15px; /* Отступ от нижнего края экрана */
       left: 50%;
       transform: translateX(-50%);
       z-index: 100000;
-      padding: 12px 18px;  
-      border-radius: 12px;  
-      border: none;  
-      font-size: 15px;  
-      font-weight: 700;  
-      cursor: pointer;  
-      background: linear-gradient(45deg, #ffbb00, #ff7b00);  
-      color: #111;  
-      box-shadow: 0 5px 20px rgba(0,0,0,.4);  
-      transition: .25s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px; /* Аккуратный отступ между кнопкой и метрикой */
+      pointer-events: none; /* Чтобы сама обертка не перекрывала клики по контенту */
     }
     
-    .notify-btn:hover {  
-      transform: translateX(-50%) scale(1.05); 
+    /* Возвращаем возможность кликать по элементам внутри обертки */
+    .bottom-ui-wrapper > * {
+      pointer-events: auto; 
     }
 
+    .notify-btn {  
+      width: 56px; /* Идеальный размер для пальца */
+      height: 56px;
+      border-radius: 50%; /* Делаем идеальный круг */
+      border: none;  
+      font-size: 26px; /* Размер эмодзи 🔔 */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;  
+      background: linear-gradient(135deg, #ff9900, #ff4500); /* Сочный градиент */
+      color: #fff;  
+      box-shadow: 0 6px 15px rgba(255, 69, 0, 0.4), inset 0 -3px 6px rgba(0,0,0,0.15); /* Объемная тень */
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent; /* Убираем синее выделение на мобильных */
+    }
+    
+    .notify-btn:hover, .notify-btn:focus {  
+      transform: scale(1.12); /* Красивое увеличение при наведении */
+      box-shadow: 0 8px 25px rgba(255, 69, 0, 0.6), inset 0 -3px 6px rgba(0,0,0,0.15);
+      outline: none;
+    }
+
+    .metrika-informer {
+      width: 88px;
+      height: 31px;
+      border-radius: 4px; /* Легкое скругление для плашки */
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6); /* Темная тень, чтобы выделялось */
+      display: block;
+      background-color: #000; /* Фон на случай если картинка грузится */
+    }
+    
     /* =========================================================   
        SEASON FX ONLY 
     ========================================================= */
@@ -619,7 +647,7 @@
       from { transform: translate3d(var(--x0), -30px, 0); }  
       to   { transform: translate3d(var(--x1), 110vh, 0); }
     }
-  </style>  
+</style> 
 </head>
 <body>    
   <button id="notifyBtn" class="notify-btn" style="display:none">🔔 Yangiliklardan xabardor bo‘lish</button>
