@@ -8,7 +8,7 @@
   <link rel="icon" type="image/x-icon" href="favicon.png" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet" />
   <link rel="manifest" href="/manifest.json">
-  
+
   <!-- Google Tag Manager -->
   <script>
     (function(w,d,s,l,i){
@@ -19,7 +19,7 @@
     })(window,document,'script','dataLayer','GTM-KTZG4BCC');
   </script>
   <!-- End Google Tag Manager -->
-  
+
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -28,883 +28,229 @@
     "url": "https://prank-as.site",
     "logo": "https://prank-as.site/icons/icon-512.png",
     "description": "Prank-as — tajriba va ko‘ngilochar maqsadlarda yaratilgan onlayn platforma.",
-    "contactPoint": {
-      "@type": "ContactPoint",
-      "email": "admin@prank-as.site",
-      "contactType": "customer support"
-    }
+    "contactPoint": { "@type": "ContactPoint", "email": "admin@prank-as.site", "contactType": "customer support" }
   }
   </script>
-  
+
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "3b7b6b4f-c457-42e4-ad68-65d990d783a6",
-      safari_web_id: "web.onesignal.auto.2cd5950f-b486-4c84-8005-0f30059d0b0c",
-      notifyButton: {
-        enable: false,
-      },
-    });
-  });
-</script>
-
-<script>
-  OneSignalDeferred.push(async function(OneSignal) {
-    const btn = document.querySelector(".notify-btn");
-    const wrapper = document.querySelector(".bottom-ui-wrapper");
-    const notifyModal = document.getElementById("notifyModal");
-    const modalCancel = document.getElementById("modalCancel");
-    const modalOk = document.getElementById("modalOk");
-      
-    // 1️⃣ Проверка статуса при загрузке страницы
-    function checkStatus() {
-      const permission = Notification.permission;
-      console.log("Статус уведомлений:", permission);
-
-      // Если пользователь УЖЕ дал разрешение — скрываем кнопку, она больше не нужна
-      if (permission === "granted") {
-        if (wrapper) wrapper.style.display = "none";
-      } else {
-        // В остальных случаях (default / denied) гарантированно показываем блок с кнопкой
-        if (wrapper) wrapper.style.display = "flex";
-      }
-    }
-      
-    // Вызываем проверку сразу
-    checkStatus();
-      
-    // 2️⃣ При нажатии на круглую кнопку 🔔 — открываем наше кастомное модальное окно
-    if (btn) {
-      btn.onclick = (e) => {
-        e.preventDefault();
-        if (notifyModal) {
-          notifyModal.classList.add("show");
-        }
-      };
-    }
-
-    // Кнопка «Позже» в модалке (закрытие)
-    if (modalCancel) {
-      modalCancel.onclick = () => {
-        if (notifyModal) notifyModal.classList.remove("show");
-      };
-    }
-
-    // Закрытие модалки при клике на темный фон вокруг неё
-    if (notifyModal) {
-      notifyModal.onclick = (e) => {
-        if (e.target === notifyModal) {
-          notifyModal.classList.remove("show");
-        }
-      };
-    }
-
-    // 3️⃣ При нажатии «Разрешить» в модалке — вызываем запрос от OneSignal
-    if (modalOk) {
-      modalOk.onclick = async () => {
-        if (notifyModal) notifyModal.classList.remove("show");
-        
-        try {
-          // Запрашиваем подписку через OneSignal
-          await OneSignal.User.PushSubscription.optIn();
-
-          // Проверяем результат после запроса
-          if (Notification.permission === "granted") {
-            if (wrapper) wrapper.style.display = "none";
-            alert("✔️ Bildirishnomalar yoqildi!");
-          } else if (Notification.permission === "denied") {
-            alert("❌ Bildirishnomalar bloklangan. Brauzer sozlamalaridan ruxsat berishingiz mumkin.");
-          }
-        } catch (err) {
-          console.error("OneSignal optIn error:", err);
-        }
-      };
-    }
-  });
-</script>
   <script>
-    // Yangi SW topilsa    
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.ready.then(reg => {
-        reg.addEventListener('updatefound', () => {      
-          const newWorker = reg.installing;      
-          newWorker.addEventListener('statechange', () => {        
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              // Yangilanish bo'lganda amal
-            }      
-          });    
-        });  
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+      await OneSignal.init({
+        appId: "3b7b6b4f-c457-42e4-ad68-65d990d783a6",
+        safari_web_id: "web.onesignal.auto.2cd5950f-b486-4c84-8005-0f30059d0b0c",
+        notifyButton: { enable: false },
       });
-    }
+    });
+  </script>
+
+  <script>
+    OneSignalDeferred.push(async function(OneSignal) {
+      const btn = document.querySelector(".notify-btn");
+      const wrapper = document.querySelector(".bottom-ui-wrapper");
+      const notifyModal = document.getElementById("notifyModal");
+      const modalCancel = document.getElementById("modalCancel");
+      const modalOk = document.getElementById("modalOk");
+
+      // Если разрешение уже дано — скрываем кнопку
+      if (Notification.permission === "granted" && wrapper) wrapper.style.display = "none";
+      else if (wrapper) wrapper.style.display = "flex";
+
+      if (btn) btn.onclick = (e) => { e.preventDefault(); if (notifyModal) notifyModal.classList.add("show"); };
+      if (modalCancel) modalCancel.onclick = () => { if (notifyModal) notifyModal.classList.remove("show"); };
+      if (notifyModal) notifyModal.onclick = (e) => { if (e.target === notifyModal) notifyModal.classList.remove("show"); };
+
+      if (modalOk) {
+        modalOk.onclick = async () => {
+          if (notifyModal) notifyModal.classList.remove("show");
+          try {
+            await OneSignal.User.PushSubscription.optIn();
+            if (Notification.permission === "granted") {
+              if (wrapper) wrapper.style.display = "none";
+              alert("✔️ Bildirishnomalar yoqildi!");
+            } else if (Notification.permission === "denied") {
+              alert("❌ Bildirishnomalar bloklangan. Brauzer sozlamalaridan ruxsat berishingiz mumkin.");
+            }
+          } catch (err) { console.error("OneSignal optIn error:", err); }
+        };
+      }
+    });
   </script>
 
   <style>
     /* ===== Global ===== */
-    @keyframes gradientBG { 
-      0% { background-position: 0% 50%; } 
-      50% { background-position: 100% 50%; } 
-      100% { background-position: 0% 50%; } 
+    @keyframes gradientBG { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'Poppins',sans-serif; line-height:1.6; color:#fff;
+      background:linear-gradient(270deg,#1f1f1f,#111,#222,#333); background-size:800% 800%;
+      animation:gradientBG 20s ease infinite; min-height:100vh;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding:20px; overflow-x:hidden;
     }
-    
-    * { 
-      margin: 0; 
-      padding: 0; 
-      box-sizing: border-box; 
-    }
-    
-    body {  
-      font-family: 'Poppins', sans-serif;
-      line-height: 1.6;
-      color: #fff;  
-      background: linear-gradient(270deg, #1f1f1f, #111, #222, #333);  
-      background-size: 800% 800%;
-      animation: gradientBG 20s ease infinite;  
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;  
-      overflow-x: hidden; /* Gorizontal skrollni oldini olish uchun */
-    }
+    html.menu-open { overflow:hidden; } /* блокировка прокрутки при открытом меню */
 
-    @keyframes doodleFloat {  
-      0%, 100% { transform: translateX(-50%) rotate(-8deg) scale(1); }  
-      50% { transform: translateX(-50%) rotate(-4deg) scale(1.05); }
-    }
+    /* ===== Text ===== */
+    h1 { text-align:center; margin-bottom:40px; text-shadow:0 2px 6px rgba(0,0,0,.7); position:relative; z-index:7001; }
+    .subtitle { font-size:16px; color:#666; max-width:700px; margin:12px auto 30px; line-height:1.6; text-align:center; position:relative; z-index:2; }
 
-    /* ===== Text Styling ===== */
-    h1 {     
-      text-align: center;    
-      margin-bottom: 40px;     
-      text-shadow: 0 2px 6px rgba(0,0,0,0.7);     
-      position: relative;     
-      z-index: 7001; /* 2026 dan yuqorida */
-    }
-    
-    .section-title {
-      font-size: 24px;
-      font-weight: 700;
-      margin: 30px 0 15px;
-      text-align: center;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.6);
-      position: relative;
-      z-index: 7001;
-      width: 100%;
-      max-width: 800px;
-    }
-
-    /* ===== Category Tabs & Swipe Layout ===== */
-    .tabs-glow-wrapper {
-      position: relative;
-      z-index: 7001;
-      margin: 10px auto 30px auto;
-      display: flex;
-      justify-content: center;
-      max-width: 800px;
-      width: 100%;
-    }
-    
-    .category-tabs {
-      display: flex;
-      gap: 5px;
-      background: rgba(0,0,0,0.4);
-      padding: 8px;
-      border-radius: 16px;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.1);
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    
-    .cat-btn {
-      background: transparent;
-      border: none;
-      color: #ccc;
-      padding: 10px 18px;
-      border-radius: 10px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: 'Poppins', sans-serif;
-      transition: 0.3s;
-      font-size: 15px;
-      position: relative; 
-    }
-    
-    .cat-btn:hover {
-      background: rgba(255,255,255,0.1);
-      color: #fff;
-    }
-    
-    .cat-btn.active {
-      background: #fff;
-      color: #111;
-      box-shadow: 0 0 25px rgba(255,255,255,0.8); 
-    }
-
-    .cat-btn.has-new::after {
-      content: '';
-      position: absolute;
-      top: -2px;
-      right: -4px;
-      width: 12px;
-      height: 12px;
-      background-color: #FF4500;
-      border-radius: 50%;
-      border: 2px solid rgba(0, 0, 0, 0.4);
-      box-shadow: 0 0 8px rgba(255, 69, 0, 0.8);
-      animation: pulseDot 2s infinite;
-    }
-    
+    /* ===== Category tabs & swipe ===== */
+    .tabs-glow-wrapper { position:relative; z-index:7001; margin:10px auto 30px; display:flex; justify-content:center; max-width:800px; width:100%; }
+    .category-tabs { display:flex; gap:5px; background:rgba(0,0,0,.4); padding:8px; border-radius:16px; backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,.1); flex-wrap:wrap; justify-content:center; }
+    .cat-btn { background:transparent; border:none; color:#ccc; padding:10px 18px; border-radius:10px; font-weight:600; cursor:pointer; font-family:'Poppins',sans-serif; transition:.3s; font-size:15px; position:relative; }
+    .cat-btn:hover { background:rgba(255,255,255,.1); color:#fff; }
+    .cat-btn.active { background:#fff; color:#111; box-shadow:0 0 25px rgba(255,255,255,.8); }
+    .cat-btn.has-new::after { content:''; position:absolute; top:-2px; right:-4px; width:12px; height:12px; background:#FF4500; border-radius:50%; border:2px solid rgba(0,0,0,.4); box-shadow:0 0 8px rgba(255,69,0,.8); animation:pulseDot 2s infinite; }
     @keyframes pulseDot {
-      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 69, 0, 0.7); }
-      70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(255, 69, 0, 0); }
-      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 69, 0, 0); }
+      0% { transform:scale(.95); box-shadow:0 0 0 0 rgba(255,69,0,.7); }
+      70% { transform:scale(1); box-shadow:0 0 0 6px rgba(255,69,0,0); }
+      100% { transform:scale(.95); box-shadow:0 0 0 0 rgba(255,69,0,0); }
     }
-
-    .swipe-glow-wrapper {
-      position: relative;
-      z-index: 7001;
-      max-width: 800px;
-      margin: 0 auto 40px auto;
-      width: 100%;
-    }
-
-    .swipe-viewport {
-      width: 100%;
-      overflow-x: hidden;
-      padding: 15px 0; 
-    }
-    
-    .swipe-container {
-      display: flex;
-      width: 100%;
-      transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
-      will-change: transform, filter;
-    }
-
-    @keyframes motionBlur {
-      0% { filter: blur(0px); }
-      50% { filter: blur(4px); } 
-      100% { filter: blur(0px); }
-    }
-
-    .swipe-container.is-blur {
-      animation: motionBlur 0.25s ease-in-out;
-    }
-    
-    .swipe-slide {
-      min-width: 100%;
-      padding: 0 5px;
-    }
-
-    .button-container {  
-      display: grid;
-      gap: 15px;
-      width: 100%;
-      margin-bottom: 0; 
-      position: relative; 
-      z-index: 7001;
-    }
-    
-    @media(min-width: 768px) {
-      .button-container { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media(min-width: 1200px) {
-      .button-container { grid-template-columns: repeat(3, 1fr); }
-    }
+    .swipe-glow-wrapper { position:relative; z-index:7001; max-width:800px; margin:0 auto 40px; width:100%; }
+    .swipe-viewport { width:100%; overflow-x:hidden; padding:15px 0; }
+    .swipe-container { display:flex; width:100%; transition:transform .25s cubic-bezier(.25,1,.5,1); will-change:transform,filter; }
+    @keyframes motionBlur { 0%{filter:blur(0)} 50%{filter:blur(4px)} 100%{filter:blur(0)} }
+    .swipe-container.is-blur { animation:motionBlur .25s ease-in-out; }
+    .swipe-slide { min-width:100%; padding:0 5px; }
+    .button-container { display:grid; gap:15px; width:100%; position:relative; z-index:7001; }
+    @media(min-width:768px){ .button-container{ grid-template-columns:repeat(2,1fr); } }
+    @media(min-width:1200px){ .button-container{ grid-template-columns:repeat(3,1fr); } }
 
     /* ===== Buttons ===== */
-    .btn {  
-      display: block;
-      padding: 16px 20px;
-      background: rgba(255,255,255,0.1);  
-      border: 2px solid rgba(255,255,255,0.5);
-      border-radius: 8px;
-      color: #fff;  
-      text-decoration: none;
-      font-weight: 600;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.3);  
-      transition: all 0.3s;
-      opacity: 0;
-      transform: translateY(20px);
-      animation: moveBtn 0.5s ease forwards;  
-      position: relative;
-    }
-    
-    .btn:hover {  
-      transform: translateY(-4px) scale(1.05);  
-      box-shadow: 0 8px 20px rgba(0,0,0,0.4);  
-      background: rgba(255,255,255,0.95);  
-      color: #111;
-    }
-    
-    @keyframes moveBtn { 
-      from { transform: translateY(20px); opacity: 0; } 
-      to { transform: translateY(0); opacity: 1; } 
-    }
-    
-    .btn.new { 
-      background: linear-gradient(45deg, #FFD700, #FFC107); 
-      color: #111; 
-      z-index: 20; 
-      animation: pulse 1.5s infinite alternate, moveBtn 0.5s ease forwards; 
-    }
-    
-    @keyframes pulse { 
-      0% { transform: translateY(0) scale(1); } 
-      50% { transform: translateY(-5px) scale(1.05); } 
-      100% { transform: translateY(0) scale(1); } 
-    }
+    .btn { display:block; padding:16px 20px; background:rgba(255,255,255,.1); border:2px solid rgba(255,255,255,.5); border-radius:8px; color:#fff; text-decoration:none; font-weight:600; box-shadow:0 4px 6px rgba(0,0,0,.3); transition:all .3s; opacity:0; transform:translateY(20px); animation:moveBtn .5s ease forwards; position:relative; }
+    .btn:hover { transform:translateY(-4px) scale(1.05); box-shadow:0 8px 20px rgba(0,0,0,.4); background:rgba(255,255,255,.95); color:#111; }
+    @keyframes moveBtn { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+    .btn.new { background:linear-gradient(45deg,#FFD700,#FFC107); color:#111; z-index:20; animation:pulse 1.5s infinite alternate, moveBtn .5s ease forwards; }
+    @keyframes pulse { 0%{transform:translateY(0) scale(1)} 50%{transform:translateY(-5px) scale(1.05)} 100%{transform:translateY(0) scale(1)} }
+    .btn .tag { position:absolute; top:-10px; right:-10px; background:#FF4500; color:#fff; font-size:13px; font-weight:500; padding:2px 10px; border-radius:6px; animation:smoothMove 1.5s ease-in-out infinite; }
+    @keyframes smoothMove { 0%{transform:translateY(0)} 50%{transform:translateY(-4px)} 100%{transform:translateY(0)} }
 
-    /* ===== Top menu ===== */
-    .top-left-menu-toggle {  
-      position: fixed;
-      top: 15px;
-      left: 15px;
-      background: rgba(255,255,255,0.15);  
-      border: none;
-      border-radius: 12px;
-      padding: 10px 12px;
-      cursor: pointer;  
-      z-index: 99999; 
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-      backdrop-filter: blur(6px);
-      transition: 0.3s;
-      width: 48px;
-      height: 48px;  
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .top-left-menu-toggle:hover {
-      background: rgba(255,255,255,0.35);
-      transform: scale(1.1);
-    }
-    
-    .top-left-menu-toggle svg {
-      fill: #fff;
-      width: 26px;
-      height: 26px;
-    }
-    
-    .dropdown-menu-small {  
-      position: fixed;
-      top: 70px;
-      left: 15px;
-      width: 220px;
-      background: rgba(20,20,20,0.95);  
-      backdrop-filter: blur(12px);
-      border-radius: 12px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.7);  
-      padding: 15px 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;  
-      opacity: 0;
-      pointer-events: none;
-      transform: translateY(-10px);
-      transition: all 0.35s ease;  
-      z-index: 99998;
-    }
-    
-    .dropdown-menu-small.show {
-      opacity: 1;
-      pointer-events: auto;
-      transform: translateY(0);
-    }
-    
-    .dropdown-menu-small a {
-      color: #fff;
-      font-weight: 600;
-      text-decoration: none;
-      padding: 8px 12px;
-      border-radius: 8px;
-      transition: background 0.3s;
-    }
-    
-    .dropdown-menu-small a:hover {
-      background: rgba(255,255,255,0.12);
-    }
-    
-    .overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.4);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-      z-index: 99997;
-      backdrop-filter: blur(3px);
-    }
+    /* ===== Hamburger button ===== */
+    .top-left-menu-toggle { position:fixed; top:15px; left:15px; background:rgba(255,255,255,.15); border:none; border-radius:12px; padding:10px 12px; cursor:pointer; z-index:99999; box-shadow:0 4px 12px rgba(0,0,0,.4); backdrop-filter:blur(6px); transition:.3s; width:48px; height:48px; display:flex; align-items:center; justify-content:center; -webkit-tap-highlight-color:transparent; }
+    .top-left-menu-toggle:hover { background:rgba(255,255,255,.35); transform:scale(1.1); }
+    .top-left-menu-toggle svg { width:26px; height:26px; }
 
-    /* ===== Tags ===== */
-    .btn .tag { 
-      position: absolute; 
-      top: -10px; 
-      right: -10px; 
-      background: #FF4500; 
-      color: #fff; 
-      font-size: 13px; 
-      font-weight: 500; 
-      padding: 2px 10px; 
-      border-radius: 6px; 
-      animation: smoothMove 1.5s ease-in-out infinite; 
+    /* ===== Drawer menu ===== */
+    .menu-overlay { position:fixed; inset:0; background:rgba(0,0,0,.55); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px); opacity:0; visibility:hidden; transition:opacity .3s ease, visibility 0s linear .3s; z-index:100010; }
+    .menu-overlay.show { opacity:1; visibility:visible; transition:opacity .3s ease; }
+    .dropdown-menu-small {
+      position:fixed; top:0; left:0; height:100vh; height:100dvh; width:80%; max-width:300px;
+      background:rgba(20,20,20,.97); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+      border-right:1px solid rgba(255,255,255,.08); box-shadow:8px 0 30px rgba(0,0,0,.6);
+      padding:calc(20px + env(safe-area-inset-top,0px)) 14px calc(20px + env(safe-area-inset-bottom,0px));
+      display:flex; flex-direction:column; gap:4px;
+      overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch;
+      transform:translateX(-100%); visibility:hidden;
+      transition:transform .3s cubic-bezier(.25,1,.5,1), visibility 0s linear .3s; z-index:100011;
     }
-    
-    @keyframes smoothMove { 
-      0% { transform: translateY(0); } 
-      50% { transform: translateY(-4px); } 
-      100% { transform: translateY(0); } 
-    }
+    .dropdown-menu-small.show { transform:translateX(0); visibility:visible; transition:transform .3s cubic-bezier(.25,1,.5,1); }
+    .menu-title { font-size:20px; font-weight:700; padding:4px 12px 14px; margin-bottom:6px; border-bottom:1px solid rgba(255,255,255,.1); }
+    .dropdown-menu-small a { color:#fff; font-weight:600; font-size:15px; text-decoration:none; padding:13px 12px; border-radius:10px; transition:background .2s; -webkit-tap-highlight-color:transparent; }
+    .dropdown-menu-small a[hidden] { display:none; }
+    .dropdown-menu-small a:hover, .dropdown-menu-small a:focus-visible { background:rgba(255,255,255,.12); outline:none; }
+    .menu-divider { height:1px; background:rgba(255,255,255,.1); margin:8px 6px; flex-shrink:0; }
+    @media (prefers-reduced-motion:reduce){ .dropdown-menu-small, .menu-overlay { transition:none; } }
 
-    /* ===== Top message ===== */
-    .top-message {  
-      position: fixed;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);  
-      background: #222;
-      color: #fff;
-      padding: 10px 20px;
-      border-radius: 10px;  
-      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-      z-index: 99999;
-      opacity: 0;
-      transition: opacity 0.4s ease;
-      font-size: 14px;
-    }
-    
-    .top-message.show { 
-      opacity: 1; 
-    }
+    /* ===== Top message / top bar ===== */
+    .top-message { position:fixed; top:10px; left:50%; transform:translateX(-50%); background:#222; color:#fff; padding:10px 20px; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,.3); z-index:99999; opacity:0; transition:opacity .4s ease; font-size:14px; pointer-events:none; }
+    .top-message.show { opacity:1; }
+    .top-bar { position:fixed; top:10px; right:15px; z-index:9999; display:flex; justify-content:flex-end; }
+    .top-bar-right { display:flex; align-items:center; gap:12px; }
+    .desktop-clock { font-size:16px; background:rgba(0,0,0,.4); padding:6px 12px; border-radius:8px; backdrop-filter:blur(6px); font-weight:600; box-shadow:0 4px 12px rgba(0,0,0,.4); display:none; }
+    @media (min-width:768px){ .desktop-clock{ display:block; } }
+    .user-icon { text-decoration:none; background:rgba(255,255,255,.1); color:#fff; width:44px; height:44px; display:flex; align-items:center; justify-content:center; border-radius:50%; box-shadow:0 4px 15px rgba(0,0,0,.3); transition:.3s; border:1px solid rgba(255,255,255,.2); backdrop-filter:blur(5px); overflow:hidden; }
+    .user-icon:hover { transform:scale(1.1); background:#2563eb; border-color:#3b82f6; }
+    .user-icon svg { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+    .user-icon img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
 
-    /* ===== Top Bar & Clock Layout Fix ===== */ 
-    .top-bar {  
-      position: fixed;  
-      top: 10px;  
-      right: 15px;  
-      z-index: 9999; 
-      display: flex;  
-      justify-content: flex-end;
-    }
+    /* ===== Notification button ===== */
+    .bottom-ui-wrapper { position:relative; bottom:15px; left:50%; transform:translateX(-50%); z-index:100000; display:flex; flex-direction:column; align-items:center; gap:12px; pointer-events:none; }
+    .bottom-ui-wrapper > * { pointer-events:auto; }
+    .notify-btn { width:56px; height:56px; border-radius:50%; border:none; font-size:26px; display:flex; align-items:center; justify-content:center; cursor:pointer; background:linear-gradient(135deg,#ff9900,#ff4500); color:#fff; box-shadow:0 6px 15px rgba(255,69,0,.4), inset 0 -3px 6px rgba(0,0,0,.15); transition:transform .3s cubic-bezier(.175,.885,.32,1.275), box-shadow .3s ease; padding:0; -webkit-tap-highlight-color:transparent; }
+    .notify-btn:hover, .notify-btn:focus { transform:scale(1.12); box-shadow:0 8px 25px rgba(255,69,0,.6), inset 0 -3px 6px rgba(0,0,0,.15); outline:none; }
 
-    .top-bar-right {  
-      display: flex;  
-      align-items: center;  
-      gap: 12px; 
-    }
+    /* ===== Season FX ===== */
+    .season-fx, .snow { pointer-events:none; position:fixed; top:0; left:0; width:100%; height:100%; overflow:hidden; z-index:1; }
+    .snowflake { position:absolute; top:-10px; color:#fff; opacity:.7; font-size:8px; animation:fall linear infinite; }
+    @keyframes fall { to { transform:translateY(105vh); } }
+    .season-leaf { position:absolute; top:-40px; width:14px; height:10px; border-radius:80% 20% 80% 20%; opacity:.85; animation:leafFall linear forwards; }
+    @keyframes leafFall { from{transform:translate3d(var(--x0),-40px,0) rotate(var(--r0))} to{transform:translate3d(var(--x1),110vh,0) rotate(var(--r1))} }
+    .summer-pollen { position:absolute; top:-30px; width:10px; height:10px; border-radius:999px; opacity:.35; filter:blur(.6px); animation:pollenFall linear forwards; }
+    @keyframes pollenFall { from{transform:translate3d(var(--x0),-30px,0)} to{transform:translate3d(var(--x1),110vh,0)} }
 
-    .desktop-clock {  
-      font-size: 16px;  
-      background: rgba(0,0,0,0.4);  
-      padding: 6px 12px;  
-      border-radius: 8px;  
-      backdrop-filter: blur(6px);  
-      color: #fff;  
-      font-weight: 600;  
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);  
-      display: none;
-    }
-    
-    @media (min-width: 768px) { 
-      .desktop-clock { display: block; } 
-    }
+    /* ===== Notify modal ===== */
+    .custom-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.6); backdrop-filter:blur(8px); z-index:999999; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .3s ease; padding:20px; }
+    .custom-modal-overlay.show { opacity:1; pointer-events:auto; }
+    .custom-modal-box { background:rgba(25,25,25,.95); border:1px solid rgba(255,255,255,.15); border-radius:20px; padding:30px; max-width:360px; width:100%; text-align:center; box-shadow:0 15px 35px rgba(0,0,0,.8), 0 0 20px rgba(255,153,0,.2); transform:translateY(20px) scale(.95); transition:transform .3s cubic-bezier(.175,.885,.32,1.275); }
+    .custom-modal-overlay.show .custom-modal-box { transform:translateY(0) scale(1); }
+    .custom-modal-icon { font-size:42px; margin-bottom:15px; display:inline-block; animation:modalBellPulse 2s infinite; }
+    @keyframes modalBellPulse { 0%,100%{transform:rotate(0)} 20%{transform:rotate(14deg)} 40%{transform:rotate(-14deg)} 60%{transform:rotate(7deg)} 80%{transform:rotate(-7deg)} }
+    .custom-modal-title { font-size:20px; font-weight:700; margin-bottom:10px; }
+    .custom-modal-desc { font-size:14px; color:#bbb; margin-bottom:25px; line-height:1.5; }
+    .custom-modal-buttons { display:flex; gap:12px; }
+    .custom-modal-btn { flex:1; padding:12px; border-radius:12px; border:none; font-weight:600; font-size:14px; cursor:pointer; transition:.2s; font-family:'Poppins',sans-serif; }
+    .custom-modal-btn.cancel { background:rgba(255,255,255,.08); color:#ccc; }
+    .custom-modal-btn.cancel:hover { background:rgba(255,255,255,.15); color:#fff; }
+    .custom-modal-btn.ok { background:linear-gradient(135deg,#ff9900,#ff4500); color:#fff; box-shadow:0 4px 15px rgba(255,69,0,.4); }
+    .custom-modal-btn.ok:hover { transform:scale(1.03); box-shadow:0 6px 20px rgba(255,69,0,.6); }
 
-    .subtitle {  
-      font-size: 16px;     
-      color: #666;          
-      max-width: 700px;  
-      margin: 12px auto 30px;  
-      line-height: 1.6;  
-      text-align: center;  
-      position: relative;  
-      z-index: 2; 
-    }
+    /* ===== Maintenance screen ===== */
+    .maintenance-overlay { position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(10,10,10,.85); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); z-index:999999; display:none; justify-content:center; align-items:center; opacity:0; transition:opacity .3s ease; padding:20px; }
+    .maintenance-overlay.active { display:flex; opacity:1; }
+    .maintenance-card { background:rgba(25,25,25,.6); border:1px solid rgba(255,255,255,.05); border-radius:16px; padding:50px 40px; max-width:460px; width:100%; text-align:center; box-shadow:0 30px 60px rgba(0,0,0,.7); }
+    .maintenance-icon { color:#fff; font-size:80px; font-weight:800; margin-bottom:5px; line-height:1; letter-spacing:2px; }
+    .maintenance-title { color:#fff; font-size:22px; font-weight:600; margin-bottom:12px; text-transform:uppercase; letter-spacing:1px; }
+    .maintenance-desc { color:#888; font-size:15px; line-height:1.6; }
 
-    .user-icon {    
-      text-decoration: none;    
-      background: rgba(255,255,255,0.1);    
-      color: #fff;    
-      width: 44px;    
-      height: 44px;    
-      display: flex;    
-      align-items: center;    
-      justify-content: center;    
-      border-radius: 50%;    
-      box-shadow: 0 4px 15px rgba(0,0,0,.3);    
-      transition: 0.3s;    
-      border: 1px solid rgba(255,255,255,0.2);    
-      backdrop-filter: blur(5px);    
-      overflow: hidden; 
-    }
-    
-    .user-icon:hover {    
-      transform: scale(1.1);    
-      background: #2563eb;    
-      border-color: #3b82f6;
-    }
-    
-    .user-icon svg {    
-      width: 22px;    
-      height: 22px;    
-      fill: none;    
-      stroke: currentColor;    
-      stroke-width: 2;    
-      stroke-linecap: round;    
-      stroke-linejoin: round;
-    }
-    
-    .user-icon img {    
-      width: 100%;    
-      height: 100%;    
-      object-fit: cover;    
-      border-radius: 50%;
-    }
-
-    /* =========================================================   
-      Bildirishnoma stillari *hammasi bu yerda bo'lmasligi mumkin
-    ========================================================= */
-    .bottom-ui-wrapper {
-      position: relative;
-      bottom: 15px; /* Отступ от нижнего края экрана */
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 100000;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px; /* Аккуратный отступ между кнопкой и метрикой */
-      pointer-events: none; /* Чтобы сама обертка не перекрывала клики по контенту */
-    }
-    
-    /* Возвращаем возможность кликать по элементам внутри обертки */
-    .bottom-ui-wrapper > * {
-      pointer-events: auto; 
-    }
-
-    .notify-btn {  
-      width: 56px; /* Идеальный размер для пальца */
-      height: 56px;
-      border-radius: 50%; /* Делаем идеальный круг */
-      border: none;  
-      font-size: 26px; /* Размер эмодзи 🔔 */
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;  
-      background: linear-gradient(135deg, #ff9900, #ff4500); /* Сочный градиент */
-      color: #fff;  
-      box-shadow: 0 6px 15px rgba(255, 69, 0, 0.4), inset 0 -3px 6px rgba(0,0,0,0.15); /* Объемная тень */
-      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent; /* Убираем синее выделение на мобильных */
-    }
-    
-    .notify-btn:hover, .notify-btn:focus {  
-      transform: scale(1.12); /* Красивое увеличение при наведении */
-      box-shadow: 0 8px 25px rgba(255, 69, 0, 0.6), inset 0 -3px 6px rgba(0,0,0,0.15);
-      outline: none;
-    }
-
-    
-    /* =========================================================   
-       SEASON FX ONLY 
-    ========================================================= */
-    .season-fx, .snow {  
-      pointer-events: none;  
-      position: fixed;  
-      top: 0; 
-      left: 0;  
-      width: 100%;  
-      height: 100%;  
-      overflow: hidden;  
-      z-index: 1; 
-    }
-    
-    .snowflake {  
-      position: absolute;  
-      top: -10px;  
-      color: #fff;  
-      opacity: 0.7;  
-      font-size: 8px;  
-      animation: fall linear infinite;
-    }
-    
-    @keyframes fall { 
-      to { transform: translateY(105vh); } 
-    }
-    
-    .season-leaf {  
-      position: absolute;  
-      top: -40px;  
-      width: 14px;  
-      height: 10px;  
-      border-radius: 80% 20% 80% 20%;  
-      opacity: .85;  
-      filter: blur(.15px);  
-      transform: rotate(0deg);  
-      animation: leafFall linear forwards;
-    }
-    
-    .season-leaf::after {  
-      content: "";  
-      position: absolute;  
-      inset: 2px 4px;  
-      border-left: 1px solid rgba(255,255,255,.35);  
-      transform: rotate(18deg);  
-      border-radius: 8px;
-    }
-    
-    @keyframes leafFall {  
-      from { transform: translate3d(var(--x0), -40px, 0) rotate(var(--r0)); }  
-      to   { transform: translate3d(var(--x1), 110vh, 0) rotate(var(--r1)); }
-    }
-    
-    .summer-pollen {  
-      position: absolute;  
-      top: -30px;  
-      width: 10px;  
-      height: 10px;  
-      border-radius: 999px;  
-      opacity: .35;  
-      filter: blur(.6px);  
-      animation: pollenFall linear forwards;
-    }
-    
-    @keyframes pollenFall {  
-      from { transform: translate3d(var(--x0), -30px, 0); }  
-      to   { transform: translate3d(var(--x1), 110vh, 0); }
-    }
-
-    /* ===== Кастомное модальное окно уведомлений ===== */
-    .custom-modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(8px);
-      z-index: 999999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-      padding: 20px;
-    }
-
-    .custom-modal-overlay.show {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .custom-modal-box {
-      background: rgba(25, 25, 25, 0.95);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 20px;
-      padding: 30px;
-      max-width: 360px;
-      width: 100%;
-      text-align: center;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 153, 0, 0.2);
-      transform: translateY(20px) scale(0.95);
-      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-
-    .custom-modal-overlay.show .custom-modal-box {
-      transform: translateY(0) scale(1);
-    }
-
-    .custom-modal-icon {
-      font-size: 42px;
-      margin-bottom: 15px;
-      display: inline-block;
-      animation: modalBellPulse 2s infinite;
-    }
-
-    @keyframes modalBellPulse {
-      0%, 100% { transform: rotate(0deg); }
-      20% { transform: rotate(14deg); }
-      40% { transform: rotate(-14deg); }
-      60% { transform: rotate(7deg); }
-      80% { transform: rotate(-7deg); }
-    }
-
-    .custom-modal-title {
-      font-size: 20px;
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: 10px;
-    }
-
-    .custom-modal-desc {
-      font-size: 14px;
-      color: #bbb;
-      margin-bottom: 25px;
-      line-height: 1.5;
-    }
-
-    .custom-modal-buttons {
-      display: flex;
-      gap: 12px;
-    }
-
-    .custom-modal-btn {
-      flex: 1;
-      padding: 12px;
-      border-radius: 12px;
-      border: none;
-      font-weight: 600;
-      font-size: 14px;
-      cursor: pointer;
-      transition: 0.2s;
-      font-family: 'Poppins', sans-serif;
-    }
-
-    .custom-modal-btn.cancel {
-      background: rgba(255, 255, 255, 0.08);
-      color: #ccc;
-    }
-
-    .custom-modal-btn.cancel:hover {
-      background: rgba(255, 255, 255, 0.15);
-      color: #fff;
-    }
-
-    .custom-modal-btn.ok {
-      background: linear-gradient(135deg, #ff9900, #ff4500);
-      color: #fff;
-      box-shadow: 0 4px 15px rgba(255, 69, 0, 0.4);
-    }
-
-    .custom-modal-btn.ok:hover {
-      transform: scale(1.03);
-      box-shadow: 0 6px 20px rgba(255, 69, 0, 0.6);
-    }
-
-/* --- ЭКРАН ТЕХРАБОТ --- */
-.maintenance-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  /* Глубокий темный фон без ярких градиентов */
-  background: rgba(10, 10, 10, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  z-index: 999999;
-  display: none;
-  justify-content: center;
-  align-items: center;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  padding: 20px;
-  box-sizing: border-box;
-}
-
-.maintenance-overlay.active {
-  display: flex;
-  opacity: 1;
-}
-
-.maintenance-card {
-  background: rgba(25, 25, 25, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
-  padding: 50px 40px;
-  max-width: 460px;
-  width: 100%;
-  text-align: center;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7);
-}
-
-/* Те самые крупные цифры */
-.maintenance-icon {
-  color: #ffffff; /* Чистый белый цвет */
-  font-size: 80px;
-  font-weight: 800;
-  margin-bottom: 5px;
-  line-height: 1;
-  letter-spacing: 2px;
-  font-family: 'Poppins', sans-serif;
-}
-
-.maintenance-title {
-  color: #ffffff;
-  font-size: 22px;
-  font-weight: 600;
-  margin-bottom: 12px;
-  font-family: 'Poppins', sans-serif;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.maintenance-desc {
-  color: #888888;
-  font-size: 15px;
-  line-height: 1.6;
-  margin: 0;
-  font-family: 'Poppins', sans-serif;
-}
-    /* --- ЭКРАН ТЕХРАБОТ --- */
-</style> 
+    /* ===== Info section ===== */
+    .info-section { max-width:900px; margin:50px auto; background:rgba(0,0,0,.4); padding:25px; border-radius:12px; backdrop-filter:blur(8px); box-shadow:0 8px 25px rgba(0,0,0,.4); position:relative; z-index:2; }
+    .info-section h2 { margin-bottom:20px; font-size:28px; font-weight:700; text-align:center; }
+    .info-section h3 { margin-top:25px; }
+    .info-section p { margin-bottom:15px; }
+  </style>
 </head>
-<body>    
-  
- <!-- Оверлей техработ -->
-<div class="maintenance-overlay" id="maintenanceOverlay">
-  <div class="maintenance-card">
-    <div class="maintenance-icon">503</div>
-    <h2 class="maintenance-title">Texnik ishlar olib borilmoqda</h2>
-    <p class="maintenance-desc">
-      Platforma vaqtincha ishlamayapti. Biz tizimni yangilayapmiz.<br>
-      Tez orada qaytamiz.
-    </p>
-  </div>
-</div>
-   <!-- Оверлей техработ -->
-  
-  <!-- Yangiliklardan xabardor bo'lish tugmasining tasdiqlash tugmasi  -->
-<div class="custom-modal-overlay" id="notifyModal">
-    <div class="custom-modal-box">
-        <div class="custom-modal-icon">🔔</div>
-        <div class="custom-modal-title">Bildirishnomalar yoqilsinmi?</div>
-        <div class="custom-modal-desc">Yangiliklardan xabardor bo'lish uchun.</div>
-        <div class="custom-modal-buttons">
-            <button class="custom-modal-btn cancel" id="modalCancel">Bekor qilish</button>
-            <button class="custom-modal-btn ok" id="modalOk">OK</button>
-        </div>
-    </div>
-</div>
- <!-- Yangiliklardan xabardor bo'lish tugmasining tasdiqlash tugmasi  -->
+<body>
 
-  <audio id="clickSound" preload="auto">  
-    <source src="/media/click.mp3" type="audio/mpeg">
-  </audio>
-  <audio id="errorSound" preload="auto">  
-    <source src="/media/error.mp3" type="audio/mpeg">
-  </audio>
-  
-  <header class="top-bar">  
-    <div class="top-bar-right">    
-      <div class="desktop-clock" id="desktopClock">Hozir</div>        
-      <a href="/auth" class="user-icon" id="userIcon" title="Kirish">    
-        <svg viewBox="0 0 24 24">        
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>        
-          <circle cx="12" cy="7" r="4"></circle>        
+  <!-- Техработы -->
+  <div class="maintenance-overlay" id="maintenanceOverlay">
+    <div class="maintenance-card">
+      <div class="maintenance-icon">503</div>
+      <h2 class="maintenance-title">Texnik ishlar olib borilmoqda</h2>
+      <p class="maintenance-desc">Platforma vaqtincha ishlamayapti. Biz tizimni yangilayapmiz.<br>6-chi yoki 7-chi oktabrda tizim qayta ishga tushadi.</p>
+    </div>
+  </div>
+
+  <!-- Bildirishnoma tasdiqlash oynasi -->
+  <div class="custom-modal-overlay" id="notifyModal">
+    <div class="custom-modal-box">
+      <div class="custom-modal-icon">🔔</div>
+      <div class="custom-modal-title">Bildirishnomalar yoqilsinmi?</div>
+      <div class="custom-modal-desc">Yangiliklardan xabardor bo'lish uchun.</div>
+      <div class="custom-modal-buttons">
+        <button class="custom-modal-btn cancel" id="modalCancel">Bekor qilish</button>
+        <button class="custom-modal-btn ok" id="modalOk">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <audio id="clickSound" preload="auto"><source src="/media/click.mp3" type="audio/mpeg"></audio>
+  <audio id="errorSound" preload="auto"><source src="/media/error.mp3" type="audio/mpeg"></audio>
+
+  <header class="top-bar">
+    <div class="top-bar-right">
+      <div class="desktop-clock" id="desktopClock">Hozir</div>
+      <a href="/auth" class="user-icon" id="userIcon" title="Kirish">
+        <svg viewBox="0 0 24 24">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
         </svg>
       </a>
     </div>
   </header>
 
-  <h1>Prank-as orqali do‘stlaringiz bilan hazillashing!</h1>    
+  <h1>Prank-as orqali do‘stlaringiz bilan hazillashing!</h1>
   <p class="subtitle">Prank-as — tajriba va ko‘ngilochar maqsadlarda yaratilgan onlayn platforma. Telegram kanal: t.me/prankas_official</p>
 
-  <!-- ТАБЫ КАТЕГОРИЙ СО СВЕЧЕНИЕМ -->
   <div class="tabs-glow-wrapper">
     <div class="category-tabs">
       <button class="cat-btn active" data-index="0">Pranklar</button>
@@ -913,15 +259,13 @@
     </div>
   </div>
 
-  <!-- СВАЙП КОНТЕЙНЕР ДЛЯ РАЗДЕЛОВ (Как в галерее) -->
   <div class="swipe-glow-wrapper">
     <div class="swipe-viewport">
       <div class="swipe-container" id="swipeContainer">
-        
-        <!-- СЛАЙД 0: PRANKLAR -->
+
         <div class="swipe-slide">
           <div class="button-container">
-             <a class="btn" href="/soxta-parol-aniqlovchi">Soxta parol aniqlovchi</a>
+            <a class="btn" href="/soxta-parol-aniqlovchi">Soxta parol aniqlovchi</a>
             <a class="btn" href="/soxta-balans-aniqlovchi">Soxta balans aniqlovchi</a>
             <a class="btn" href="/soxta-ulanish-sistemasi">Soxta ulanish sistemasi</a>
             <a class="btn" href="/soxta-uyin-bank-kartasi">Soxta o‘yin bank kartasi</a>
@@ -930,16 +274,13 @@
             <a class="btn" href="/soxta-random-yashash-joyi">Soxta random yashash joyi</a>
             <a class="btn" href="/soxta-shaxs-aniqlovchi">Soxta shaxs aniqlovchi</a>
             <a class="btn" href="/soxta-wifi-parol-joylashuv-aniqlovchi">Soxta Wi-Fi parol aniqlovchi PRO</a>
-           
-          
           </div>
         </div>
 
-        <!-- СЛАЙД 1: INSTRUMENTLAR -->
         <div class="swipe-slide">
           <div class="button-container">
             <a class="btn" href="/ovoz-olchovchi">Ovoz o‘lchovchi</a>
-            <a class="btn" href="/tekst-ovoz">Tekst → Ovo‍z</a>
+            <a class="btn" href="/tekst-ovoz">Tekst → Ovoz</a>
             <a class="btn" href="/ai-kamera">Aqlli kamera</a>
             <a class="btn" href="/kuzatuv-kamerasi">Kuzatuv kamerasi (telefon orqali)</a>
             <a class="btn" href="/kolgin">Kolgin - harakat trekeri</a>
@@ -947,7 +288,6 @@
           </div>
         </div>
 
-        <!-- СЛАЙД 2: BOSHQA -->
         <div class="swipe-slide">
           <div class="button-container">
             <a class="btn" href="/avtoraqam-rasm-generatori">Avtoraqam rasm generatori</a>
@@ -955,7 +295,7 @@
             <a class="btn" href="/musiqa-zarba-kuzatuvchi">Musiqa pleyeri</a>
             <a class="btn" href="/avtomobil-yo'li">Avtomobil yo'li</a>
             <a class="btn" href="/mening-honam">"Mening xonam"</a>
-             <a class="btn" href="/rangligradient">Rangli sensor</a>
+            <a class="btn" href="/rangligradient">Rangli sensor</a>
             <a class="btn" href="/3d-qol-boshqaruvi">3D Shakl boshqaruvi</a>
           </div>
         </div>
@@ -965,186 +305,189 @@
   </div>
 
   <p class="subtitle">Vaqti-vaqti bilan yangilanib turadigan faktlar:</p>
-  
- <section style="max-width:900px; margin:50px auto; background:rgba(0,0,0,0.4); padding:25px; border-radius:12px; backdrop-filter:blur(8px); box-shadow:0 8px 25px rgba(0,0,0,0.4);">
-    <h2 style="margin-bottom:20px; font-size:28px; font-weight:700; text-align:center;">👤 Saytda Ro'yxatdan O'tishning 10 ta Afzalligi</h2>
-    <p style="margin-bottom:15px;">Saytda ro'yxatdan o'tish va shaxsiy profil ochish nima uchun kerak? Quyida sizga shaxsiy akkauntning asosiy qulayliklari va afzalliklarini keltirib o'tamiz.</p>
-    
-    <h3 style="margin-top:25px;">1️⃣ Shaxsiy profil va qulaylik</h3>  
+
+  <section class="info-section">
+    <h2>👤 Saytda Ro'yxatdan O'tishning 10 ta Afzalligi</h2>
+    <p>Saytda ro'yxatdan o'tish va shaxsiy profil ochish nima uchun kerak? Quyida sizga shaxsiy akkauntning asosiy qulayliklari va afzalliklarini keltirib o'tamiz.</p>
+
+    <h3>1️⃣ Shaxsiy profil va qulaylik</h3>
     <p>Ro‘yxatdan o‘tish saytda o‘zingizning shaxsiy makoningizni yaratish imkonini beradi. Bu orqali interfeys va barcha imkoniyatlar aynan sizning xohishingizga moslashadi.</p>
-    
-    <h3 style="margin-top:25px;">2️⃣ Xavfsiz va ishonchli kirish</h3>  
+    <h3>2️⃣ Xavfsiz va ishonchli kirish</h3>
     <p>Zamonaviy shifrlash texnologiyalari ma'lumotlaringizning maxfiyligini va shaxsiy sahifangiz begona shaxslardan himoyalanganini kafolatlaydi.</p>
-    
-    <h3 style="margin-top:25px;">3️⃣ Qurilmalararo sinxronizatsiya</h3>  
+    <h3>3️⃣ Qurilmalararo sinxronizatsiya</h3>
     <p>Istalgan qurilmadan — xoh telefon, xoh kompyuterdan kiring, barcha shaxsiy sozlamalaringiz va ma'lumotlaringiz doimo o'zingiz bilan birga bo'ladi.</p>
-    
-    <h3 style="margin-top:25px;">4️⃣ Tezkor avtorizatsiya (OAuth)</h3>  
+    <h3>4️⃣ Tezkor avtorizatsiya (OAuth)</h3>
     <p>Har safar murakkab formalar to'ldirish yoki uzun parollar yodda saqlash shart emas — Google yoki Telegram orqali birgina tugma bosish bilan tezda kirish mumkin.</p>
-    
-    <h3 style="margin-top:25px;">5️⃣ Faollik va vaqtni kuzatish</h3>  
+    <h3>5️⃣ Faollik va vaqtni kuzatish</h3>
     <p>Tizim saytda qancha vaqt o'tkazganingizni va qaysi qiziqarli bo'limlardan ko'proq foydalanganingizni qulay tarzda hisoblab borishga yordam beradi.</p>
-    
-    <h3 style="margin-top:25px;">6️⃣ Maxsus xabarnomalar va yangiliklar</h3>  
+    <h3>6️⃣ Maxsus xabarnomalar va yangiliklar</h3>
     <p>Saytda yangi pranklar, qiziqarli funksiyalar yoki o'zgarishlar paydo bo'lganda, ulardan birinchilardan bo'lib xabardor bo'lish imkoniyati yaratiladi.</p>
-    
-    <h3 style="margin-top:25px;">7️⃣ Botlar va spamdan himoya</h3>  
+    <h3>7️⃣ Botlar va spamdan himoya</h3>
     <p>Ro'yxatdan o'tish tizimi platformani turli xil avtomatlashtirilgan spam-hujumlar va soxta akkauntlardan toza saqlashga xizmat qiladi.</p>
-    
-    <h3 style="margin-top:25px;">8️⃣ Kelgusidagi yangi imkoniyatlar</h3>  
+    <h3>8️⃣ Kelgusidagi yangi imkoniyatlar</h3>
     <p>Saytga qo'shiladigan reytinglar, yutuqlar yoki shaxsiy bonuslar tizimida o'z o'rningizga ega bo'lish uchun shaxsiy akkaunt muhim asos hisoblanadi.</p>
-    
-    <h3 style="margin-top:25px;">9️⃣ Qayta aloqa qulayligi</h3>  
+    <h3>9️⃣ Qayta aloqa qulayligi</h3>
     <p>Sayt ma'muriyati bilan bog'lanish, fikr-mulohazalar qoldirish va yordam olish jarayonlari ro'yxatdan o'tgan foydalanuvchilar uchun ancha osonlashadi.</p>
-    
-    <h3 style="margin-top:25px;">🔟 To'liq nazorat</h3>  
+    <h3>🔟 To'liq nazorat</h3>
     <p>O'z profilingizdagi ma'lumotlarni istalgan vaqtda o'zgartirish, yangilash yoki sozlamalarni o'zingizga moslab boshqarish imkoniga ega bo'lasiz.</p>
-    
-    <p style="margin-top:30px; margin-bottom:10px; font-weight:600;">🔚 Xulosa: Shaxsiy akkaunt yaratish platformadan yanada xavfsiz, qulay va to'laqonli foydalanish imkonini beradi.</p>
-</section>
-  
-  <button class="top-left-menu-toggle">  
-    <svg viewBox="0 0 24 24">
-      <path d="M3 6h18M3 12h18M3 18h18" stroke="white" stroke-width="2" stroke-linecap="round"/>
-    </svg>
+
+    <p style="margin-top:30px; font-weight:600;">🔚 Xulosa: Shaxsiy akkaunt yaratish platformadan yanada xavfsiz, qulay va to'laqonli foydalanish imkonini beradi.</p>
+  </section>
+
+  <!-- ===== Hamburger + Drawer ===== -->
+  <button class="top-left-menu-toggle" id="menuToggle" aria-label="Menyuni ochish" aria-expanded="false" aria-controls="dropdown-menu">
+    <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
   </button>
-  
-  <div class="overlay"></div>
-  
-  <nav id="dropdown-menu" class="dropdown-menu-small">  
-    <a href="/index">🏠 Bosh sahifa</a>  
-    <a href="/disclaimer">Disclaimer</a>  
-    <a href="#" id="installAppBtn">📱 Ilovani o‘rnatish</a>  
-    <a href="#" id="resetChoice">♻️ Tanlovni tiklash</a>  
-    <a href="/baholash">Fikr qoldirish</a>  
-    <a href="https://help.prank-as.site">Yordam</a>  
+
+  <div class="menu-overlay" id="menuOverlay"></div>
+
+  <nav id="dropdown-menu" class="dropdown-menu-small" aria-label="Asosiy menyu">
+    <div class="menu-title">Prank-as</div>
+
+    <a href="#" id="installAppBtn" hidden>📱 Ilovani o‘rnatish</a>
+    <a href="/baholash">Fikr qoldirish</a>
+    <a href="https://help.prank-as.site">Yordam</a>
     <a href="https://old.prank-as.site">Oldingi saytga qaytish</a>
-    <a href="/about">About</a>  
-    <a href="/contact">Contact</a>  
+
+    <div class="menu-divider"></div>
+
+    <a href="/about">About</a>
+    <a href="/contact">Contact</a>
+    <a href="/disclaimer">Disclaimer</a>
     <a href="/privacypolicy">Privacy policy</a>
   </nav>
-  
+
   <div class="top-message" id="topMsg"></div>
 
-  <!-- Bildirishnoma tugmasi -->
   <button class="notify-btn" aria-label="Bildirishnomalar">🔔</button>
-   <!-- Bildirishnoma tugmasi -->
-  
-<script>
-  // 🔴 ТУМБЛЕР ТЕХРАБОТ:
-  // Измени на true, чтобы закрыть сайт. Измени на false, чтобы сайт работал.
-  const isMaintenanceMode = false; 
 
-  if (isMaintenanceMode) {
-    // Включаем слой и жестко блокируем прокрутку остального сайта
+  <script>
+    // 🔴 ТУМБЛЕР ТЕХРАБОТ: true — закрыть сайт, false — сайт работает
+    const isMaintenanceMode = true;
+
     document.addEventListener("DOMContentLoaded", () => {
       const overlay = document.getElementById("maintenanceOverlay");
-      if (overlay) {
+      if (!overlay) return;
+      if (isMaintenanceMode) {
         overlay.classList.add("active");
         document.body.style.overflow = "hidden";
-        document.body.style.pointerEvents = "none"; // Блокируем клики по фону
-        overlay.style.pointerEvents = "auto"; // Разрешаем клики внутри самого оверлея (если понадобится)
-      }
-    });
-  } else {
-    // Если техработы отключены — полностью удаляем код заглушки, чтобы не мешал SEO и DOM-дереву
-    document.addEventListener("DOMContentLoaded", () => {
-      const overlay = document.getElementById("maintenanceOverlay");
-      if (overlay) {
+        document.body.style.pointerEvents = "none";
+        overlay.style.pointerEvents = "auto";
+      } else {
         overlay.remove();
       }
     });
-  }
-</script>
-  
+  </script>
+
   <script>
-    // Fade message
-    function showMessage(text, time = 2500) {  
-      const msg = document.getElementById('topMsg');  
-      msg.textContent = text;  
-      msg.classList.add('show');  
+    // Верхнее сообщение
+    function showMessage(text, time = 2500) {
+      const msg = document.getElementById('topMsg');
+      msg.textContent = text;
+      msg.classList.add('show');
       setTimeout(() => msg.classList.remove('show'), time);
     }
 
     // Service Worker
-    if('serviceWorker' in navigator) {  
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js');
-      });
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));
     }
 
-    // Menu toggle (click + touchstart)
-    const menuBtn = document.querySelector('.top-left-menu-toggle');
-    const menu = document.getElementById('dropdown-menu');
-    const overlay = document.querySelector('.overlay');
+    // ===== Drawer menu =====
+    (() => {
+      const toggleBtn = document.getElementById('menuToggle');
+      const drawer    = document.getElementById('dropdown-menu');
+      const backdrop  = document.getElementById('menuOverlay');
+      const root      = document.documentElement;
 
-    function toggleMenu(e) {  
-      e.preventDefault();  
-      menu.classList.toggle('show');  
-      overlay.classList.toggle('show');
-    }
+      const isOpen = () => drawer.classList.contains('show');
 
-    menuBtn.addEventListener('click', toggleMenu);
-    menuBtn.addEventListener('touchstart', toggleMenu);
-    overlay.addEventListener('click', () => {
-      menu.classList.remove('show');
-      overlay.classList.remove('show');
-    });
-
-    // Reset choice
-    document.getElementById('resetChoice').addEventListener('click', () => {  
-      localStorage.removeItem('continueChoice');  
-      localStorage.removeItem('promo');  
-      showMessage("Tanlov tiklandi! Endi yangilang 🔄");
-    });
-
-    // PWA install
-    let installPrompt;
-    window.addEventListener('beforeinstallprompt', e => {
-      e.preventDefault();
-      installPrompt = e;
-    });
-    
-    document.getElementById('installAppBtn').addEventListener('click', async () => {  
-      if(installPrompt) {    
-        installPrompt.prompt();    
-        const {outcome} = await installPrompt.userChoice;    
-        if(outcome === 'accepted') {
-          showMessage("✅ Ilova o‘rnatilmoqda...");    
-        } else {
-          showMessage("❌ O‘rnatish bekor qilindi");    
-        }
-        installPrompt = null;  
-      } else {
-        showMessage("Bu brauzer qo‘llamaydi 😕");
+      function openMenu() {
+        drawer.classList.add('show');
+        backdrop.classList.add('show');
+        root.classList.add('menu-open');
+        toggleBtn.setAttribute('aria-expanded', 'true');
+        const first = drawer.querySelector('a:not([hidden])');
+        if (first) setTimeout(() => first.focus({ preventScroll: true }), 50);
       }
-    });
 
-    // Kompyuter soati
-    function updateClock() {  
-      const now = new Date();  
-      document.getElementById("desktopClock").textContent =    
-        `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} | ${String(now.getDate()).padStart(2,'0')}:${String(now.getMonth()+1).padStart(2,'0')}:${now.getFullYear()}`;
+      function closeMenu(returnFocus = true) {
+        if (!isOpen()) return;
+        drawer.classList.remove('show');
+        backdrop.classList.remove('show');
+        root.classList.remove('menu-open');
+        toggleBtn.setAttribute('aria-expanded', 'false');
+        if (returnFocus) toggleBtn.focus({ preventScroll: true });
+      }
+
+      toggleBtn.addEventListener('click', () => isOpen() ? closeMenu() : openMenu());
+      backdrop.addEventListener('click', () => closeMenu());
+
+      // Клик в любой пустой зоне вне шторки и вне кнопки
+      document.addEventListener('click', (e) => {
+        if (isOpen() && !drawer.contains(e.target) && !toggleBtn.contains(e.target)) closeMenu();
+      });
+
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
+
+      // Закрываем меню после выбора пункта
+      drawer.addEventListener('click', (e) => {
+        const link = e.target.closest('a');
+        if (link && link.id !== 'installAppBtn') closeMenu(false);
+      });
+
+      window.addEventListener('resize', () => { if (window.innerWidth >= 1200) closeMenu(false); });
+
+      // ===== PWA install: кнопка видна, только если установка доступна =====
+      const installBtn = document.getElementById('installAppBtn');
+      let installPrompt = null;
+
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        installPrompt = e;
+        installBtn.hidden = false;
+      });
+
+      window.addEventListener('appinstalled', () => {
+        installPrompt = null;
+        installBtn.hidden = true;
+      });
+
+      installBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        if (!installPrompt) return;
+        closeMenu(false);
+        installPrompt.prompt();
+        const { outcome } = await installPrompt.userChoice;
+        showMessage(outcome === 'accepted' ? '✅ Ilova o‘rnatilmoqda...' : '❌ O‘rnatish bekor qilindi');
+        installPrompt = null;
+        installBtn.hidden = true;
+      });
+    })();
+
+    // Часы
+    function updateClock() {
+      const now = new Date();
+      const p = (n) => String(n).padStart(2, '0');
+      document.getElementById("desktopClock").textContent =
+        `${p(now.getHours())}:${p(now.getMinutes())}:${p(now.getSeconds())} | ${p(now.getDate())}:${p(now.getMonth()+1)}:${now.getFullYear()}`;
     }
     setInterval(updateClock, 1000);
     updateClock();
 
-    // BARChA containerlarni olish (endi ular 3 ta)
+    // Новые кнопки наверх + тег
     const containers = document.querySelectorAll('.button-container');
-
-    // 1. Сначала переносим новые кнопки наверх и добавляем тег (ДО подсчета задержек)
     containers.forEach(container => {
-      const newBtns = Array.from(container.querySelectorAll('.btn.new'));
-      newBtns.forEach(btn => {  
-        const tag = document.createElement('span');  
-        tag.className = 'tag';  
-        tag.textContent = 'YANGI';  
-        btn.appendChild(tag);  
+      Array.from(container.querySelectorAll('.btn.new')).forEach(btn => {
+        const tag = document.createElement('span');
+        tag.className = 'tag';
+        tag.textContent = 'YANGI';
+        btn.appendChild(tag);
         container.prepend(btn);
       });
     });
 
-    // 2. Теперь считаем и добавляем задержки анимации (новые кнопки получат delay 0)
+    // Задержки анимации
     let globalBtnIndex = 0;
     containers.forEach(container => {
       Array.from(container.children).forEach(btn => {
@@ -1153,315 +496,212 @@
       });
     });
 
-    // Эффект свайпа галереи для новых кнопок-вкладок
+    // Вкладки + свайп-слайды
     const catTabs = document.querySelectorAll('.cat-btn');
     const swipeCont = document.getElementById('swipeContainer');
     const slides = document.querySelectorAll('.swipe-slide');
 
-    // Автоматически находим слайды с новыми кнопками и добавляем индикатор на их вкладки
     slides.forEach((slide, index) => {
-      if (slide.querySelector('.btn.new')) {
-        // Если вкладка по умолчанию не активна, показываем индикатор
-        if (!catTabs[index].classList.contains('active')) {
-          catTabs[index].classList.add('has-new');
-        }
+      if (slide.querySelector('.btn.new') && !catTabs[index].classList.contains('active')) {
+        catTabs[index].classList.add('has-new');
       }
     });
 
     catTabs.forEach((tab) => {
       tab.addEventListener('click', () => {
-        // Если уже активна - ничего не делаем
-        if(tab.classList.contains('active')) return;
-        
-        // Убираем красный кружок при переходе на эту вкладку
+        if (tab.classList.contains('active')) return;
         tab.classList.remove('has-new');
-        
-        // Переключаем активную вкладку
         catTabs.forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-        
         const index = tab.getAttribute('data-index');
-        
-        // Сбрасываем анимацию размытия и запускаем её заново (через reflow)
         swipeCont.classList.remove('is-blur');
-        void swipeCont.offsetWidth; // Принудительный перерасчет стилей
+        void swipeCont.offsetWidth;
         swipeCont.classList.add('is-blur');
-        
-        // Сдвигаем контейнер
         swipeCont.style.transform = `translateX(-${index * 100}%)`;
-        
-        // Очищаем класс после завершения новой, более быстрой анимации
-        setTimeout(() => {
-          swipeCont.classList.remove('is-blur');
-        }, 250);
+        setTimeout(() => swipeCont.classList.remove('is-blur'), 250);
       });
     });
-  </script>    
-
-  <script type="module">  
-    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-    const supabase = createClient(    
-      'https://GEFAQRFJZWEMWUXUOADP.supabase.co',    
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'  
-    )
-    
-    async function checkUser() {    
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session?.user) {      
-        console.log('Пользователь найден:', session.user)      
-        const userIcon = document.querySelector('.user-icon')            
-        if (userIcon && session.user.user_metadata.picture) {        
-          userIcon.innerHTML = `          
-            <img src="${session.user.user_metadata.picture}"                
-                 alt="User"                
-                 style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">        
-          `        
-          userIcon.href = "/auth"       
-        }    
-      }  
-    }
-    
-    checkUser()
   </script>
 
-  <script type="module">        
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-const SUPABASE_URL = 'https://gefaqrfjzwemwuxuoadp.supabase.co';        
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg';                
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    async function initTracking() {            
-      const startTime = Date.now();            
-      const openedAt = new Date().toISOString();            
-      const prankName = location.pathname.split('/').pop() || 'index';                        
-      
-      const { data: { user } } = await supabase.auth.getUser();                        
-      
-      if (user?.user_metadata?.picture) {                
-        document.getElementById('userLink').innerHTML = `<img src="${user.user_metadata.picture}" style="width:100%;height:100%;object-fit:cover;">`;            
+  <!-- Supabase: пользователь + трекинг (один клиент вместо двух) -->
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+    const supabase = createClient(
+      'https://gefaqrfjzwemwuxuoadp.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'
+    );
+
+    function setAvatar(url) {
+      const icon = document.getElementById('userIcon');
+      if (icon && url) {
+        icon.innerHTML = `<img src="${url}" alt="User" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+        icon.href = '/auth';
       }
-
-      let recordId = null;            
-      const { data, error } = await supabase.from('user_activity').insert({                
-        user_id: user?.id || null,                
-        user_email: user?.email || null,                
-        user_name: user?.user_metadata?.full_name || 'Guest',                
-        prank_name: prankName,                
-        opened_at: openedAt,                
-        duration: 0            
-      }).select();
-
-      if (data && data.length > 0) recordId = data[0].id;
-
-      const interval = setInterval(async () => {                
-        if (!recordId) return;                
-        const currentDuration = Math.floor((Date.now() - startTime) / 1000);                                
-        await supabase.from('user_activity').update({                     
-          duration: currentDuration                 
-        }).eq('id', recordId);            
-      }, 10000);
-
-      window.addEventListener('beforeunload', async () => {                
-        const finalDuration = Math.floor((Date.now() - startTime) / 1000);                
-        await supabase.from('user_activity').update({ duration: finalDuration }).eq('id', recordId);            
-      });        
     }
 
-    initTracking();    
+    async function initTracking() {
+      const startTime = Date.now();
+      const prankName = location.pathname.split('/').pop() || 'index';
+      const { data: { user } } = await supabase.auth.getUser();
+
+      setAvatar(user?.user_metadata?.picture); // раньше здесь была ошибка с #userLink
+
+      const { data } = await supabase.from('user_activity').insert({
+        user_id: user?.id || null,
+        user_email: user?.email || null,
+        user_name: user?.user_metadata?.full_name || 'Guest',
+        prank_name: prankName,
+        opened_at: new Date().toISOString(),
+        duration: 0
+      }).select();
+
+      const recordId = data && data.length > 0 ? data[0].id : null;
+      if (!recordId) return;
+
+      const save = () => supabase.from('user_activity')
+        .update({ duration: Math.floor((Date.now() - startTime) / 1000) })
+        .eq('id', recordId);
+
+      setInterval(save, 10000);
+      window.addEventListener('beforeunload', save);
+    }
+
+    initTracking();
   </script>
 
   <script>
-    // =======================
-    // SOUNDEFFECT
-    // =======================
+    // Звуки
     const clickSound = document.getElementById("clickSound");
     const errorSound = document.getElementById("errorSound");
-
     clickSound.volume = 0.25;
     errorSound.volume = 0.35;
 
-    document.addEventListener("click", (e) => {  
-      const btn = e.target.closest("button, a");  
-      if (!btn) return;
-
-      clickSound.currentTime = 0;  
-      clickSound.play().catch(()=>{});
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest("button, a")) return;
+      clickSound.currentTime = 0;
+      clickSound.play().catch(() => {});
     });
 
-    function playErrorSound() {  
-      errorSound.currentTime = 0;  
-      errorSound.play().catch(()=>{});
+    function playErrorSound() {
+      errorSound.currentTime = 0;
+      errorSound.play().catch(() => {});
     }
-  </script>    
-  
-  <script>
-  fetch("https://prankasapi.windowsnoutbook.workers.dev/visit").catch(() => {});
-</script>
 
-  <script>  
+    fetch("https://prankasapi.windowsnoutbook.workers.dev/visit").catch(() => {});
+
+    // Аватар Telegram
     const tgAvatar = localStorage.getItem("tg_avatar");
-    const icon = document.getElementById("userIcon");
-
-    if (tgAvatar && icon) {
-      icon.innerHTML = `      
-        <img src="${tgAvatar}"           
-             style="             
-               width: 100%;             
-               height: 100%;             
-               border-radius: 50%;             
-               object-fit: cover;           
-             ">    
-      `;  
+    const tgIcon = document.getElementById("userIcon");
+    if (tgAvatar && tgIcon) {
+      tgIcon.innerHTML = `<img src="${tgAvatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
     }
   </script>
 
   <div class="season-fx snow"></div>
 
   <script>
-    (() => {  
-      const ENABLE_SEASON_FX = true;  
+    (() => {
+      const ENABLE_SEASON_FX = true;
       if (!ENABLE_SEASON_FX) return;
 
-      const season = "summer"; 
-      const container = document.querySelector('.snow'); 
+      const season = "summer"; // "winter" | "autumn" | "summer"
+      const container = document.querySelector('.snow');
       if (!container) return;
 
-      const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;  
+      const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const rand = (a, b) => Math.random() * (b - a) + a;
 
-      function createSnow() {    
+      function createSnow() {
         const count = reduced ? 5 : 10;
-
-        for (let i = 0; i < count; i++) {      
-          let flake = document.createElement("div");      
-          flake.className = "snowflake";      
-          flake.textContent = "❄";      
-          flake.style.left = Math.random() * 100 + "vw";      
-          flake.style.fontSize = (6 + Math.random() * 6) + "px";      
-          flake.style.animationDuration = (6 + Math.random() * 8) + "s";      
-          container.appendChild(flake);      
-          setTimeout(() => flake.remove(), 15000);    
-        }  
+        for (let i = 0; i < count; i++) {
+          const flake = document.createElement("div");
+          flake.className = "snowflake";
+          flake.textContent = "❄";
+          flake.style.left = Math.random() * 100 + "vw";
+          flake.style.fontSize = (6 + Math.random() * 6) + "px";
+          flake.style.animationDuration = (6 + Math.random() * 8) + "s";
+          container.appendChild(flake);
+          setTimeout(() => flake.remove(), 15000);
+        }
       }
 
-      function spawnLeaf() {    
-        const leaf = document.createElement("div");    
+      function spawnLeaf() {
+        const leaf = document.createElement("div");
         leaf.className = "season-leaf";
-
-        const xStart = rand(-10, 110);    
-        const drift = rand(-14, 14);    
-        const r0 = rand(-180, 180);    
-        const r1 = r0 + rand(180, 720);
-
-        leaf.style.setProperty("--x0", `${xStart}vw`);    
-        leaf.style.setProperty("--x1", `${xStart + drift}vw`);    
-        leaf.style.setProperty("--r0", `${r0}deg`);    
+        const xStart = rand(-10, 110), drift = rand(-14, 14), r0 = rand(-180, 180), r1 = r0 + rand(180, 720);
+        leaf.style.setProperty("--x0", `${xStart}vw`);
+        leaf.style.setProperty("--x1", `${xStart + drift}vw`);
+        leaf.style.setProperty("--r0", `${r0}deg`);
         leaf.style.setProperty("--r1", `${r1}deg`);
-
-        const dur = rand(6500, 12000);    
-        leaf.style.animationDuration = `${dur}ms`;    
+        const dur = rand(6500, 12000);
+        leaf.style.animationDuration = `${dur}ms`;
         leaf.style.animationDelay = `${rand(0, 600)}ms`;
-
-        const hue = rand(15, 45);    
-        leaf.style.background =      
-          `radial-gradient(circle at 30% 30%, rgba(255,255,255,.35), rgba(255,255,255,0) 45%),       
-           linear-gradient(135deg, hsla(${hue}, 80%, 65%, .95), hsla(${hue-10}, 80%, 35%, .95))`;
-
-        leaf.style.opacity = String(rand(0.35, 0.95));    
-        leaf.style.filter = `blur(${rand(0.05, 0.3)}px)`;
-
-        const scale = rand(0.8, 1.5);    
-        leaf.style.width = `${14 * scale}px`;    
+        const hue = rand(15, 45);
+        leaf.style.background = `linear-gradient(135deg, hsla(${hue},80%,65%,.95), hsla(${hue-10},80%,35%,.95))`;
+        leaf.style.opacity = String(rand(0.35, 0.95));
+        const scale = rand(0.8, 1.5);
+        leaf.style.width = `${14 * scale}px`;
         leaf.style.height = `${10 * scale}px`;
-
-        container.appendChild(leaf);    
-        setTimeout(() => leaf.remove(), dur + 1200);  
+        container.appendChild(leaf);
+        setTimeout(() => leaf.remove(), dur + 1200);
       }
 
-      function spawnPollen() {    
-        const p = document.createElement("div");    
+      function spawnPollen() {
+        const p = document.createElement("div");
         p.className = "summer-pollen";
-
-        const xStart = rand(-10, 110);    
-        const drift = rand(-8, 8);    
-        p.style.setProperty("--x0", `${xStart}vw`);    
+        const xStart = rand(-10, 110), drift = rand(-8, 8);
+        p.style.setProperty("--x0", `${xStart}vw`);
         p.style.setProperty("--x1", `${xStart + drift}vw`);
-
-        const dur = rand(9000, 16000);    
-        p.style.animationDuration = `${dur}ms`;    
+        const dur = rand(9000, 16000);
+        p.style.animationDuration = `${dur}ms`;
         p.style.animationDelay = `${rand(0, 700)}ms`;
-
-        const hue = rand(70, 120);    
-        p.style.background =      
-          `radial-gradient(circle at 35% 35%, rgba(255,255,255,.35), rgba(255,255,255,0) 55%),       
-           radial-gradient(circle at 50% 60%, hsla(${hue}, 80%, 70%, .55), hsla(${hue}, 80%, 45%, .2))`;
-
-        const scale = rand(0.5, 1.1);    
-        p.style.width = `${10 * scale}px`;    
-        p.style.height = `${10 * scale}px`;    
+        const hue = rand(70, 120);
+        p.style.background = `radial-gradient(circle at 50% 60%, hsla(${hue},80%,70%,.55), hsla(${hue},80%,45%,.2))`;
+        const scale = rand(0.5, 1.1);
+        p.style.width = `${10 * scale}px`;
+        p.style.height = `${10 * scale}px`;
         p.style.opacity = String(rand(0.18, 0.55));
-
-        container.appendChild(p);    
-        setTimeout(() => p.remove(), dur + 1200);  
+        container.appendChild(p);
+        setTimeout(() => p.remove(), dur + 1200);
       }
 
       let timer = null;
-
-      if (season === "winter") {    
-        createSnow();    
-        timer = setInterval(createSnow, 5000);  
-      } else if (season === "autumn") {    
-        const maxLeaves = reduced ? 10 : 28;    
-        const every = reduced ? 900 : 480;    
-        for (let i = 0; i < Math.min(10, maxLeaves); i++) spawnLeaf();    
-        timer = setInterval(() => {      
-          if (container.childElementCount < maxLeaves) spawnLeaf();    
-        }, every);  
-      } else if (season === "summer") {    
-        const max = reduced ? 8 : 18;    
-        const every = reduced ? 1000 : 650;    
-        for (let i = 0; i < Math.min(8, max); i++) spawnPollen();    
-        timer = setInterval(() => {      
-          if (container.childElementCount < max) spawnPollen();    
-        }, every);  
+      if (season === "winter") {
+        createSnow();
+        timer = setInterval(createSnow, 5000);
+      } else if (season === "autumn") {
+        const maxLeaves = reduced ? 10 : 28, every = reduced ? 900 : 480;
+        for (let i = 0; i < Math.min(10, maxLeaves); i++) spawnLeaf();
+        timer = setInterval(() => { if (container.childElementCount < maxLeaves) spawnLeaf(); }, every);
+      } else if (season === "summer") {
+        const max = reduced ? 8 : 18, every = reduced ? 1000 : 650;
+        for (let i = 0; i < Math.min(8, max); i++) spawnPollen();
+        timer = setInterval(() => { if (container.childElementCount < max) spawnPollen(); }, every);
       }
 
-      document.addEventListener("visibilitychange", () => {    
-        if (document.hidden) container.innerHTML = "";  
-      });
-
-      window.__stopSeasonFX = () => {    
-        if (timer) clearInterval(timer);    
-        container.innerHTML = "";  
-      };
+      document.addEventListener("visibilitychange", () => { if (document.hidden) container.innerHTML = ""; });
+      window.__stopSeasonFX = () => { if (timer) clearInterval(timer); container.innerHTML = ""; };
     })();
   </script>
 
-  
- <!-- Yandex.Metrika informer -->
-<a href="https://metrika.yandex.ru/stat/?id=113262007&amp;from=informer" target="_blank" rel="nofollow">
+  <!-- Yandex.Metrika informer -->
+  <a href="https://metrika.yandex.ru/stat/?id=113262007&amp;from=informer" target="_blank" rel="nofollow">
     <img src="https://informer.yandex.ru/informer/113262007/3_0_535353FF_333333FF_1_visits"
-         style="width:88px; height:31px; border:0;"
-         alt="Hisobot"
-         title="Bugungi ma'lumotlar"
-        class="ym-advanced-informer" data-cid="113262007" data-lang="uz"/>
-   </a>
-<!-- /Yandex.Metrika informer -->
+         style="width:88px; height:31px; border:0;" alt="Hisobot" title="Bugungi ma'lumotlar"
+         class="ym-advanced-informer" data-cid="113262007" data-lang="uz"/>
+  </a>
 
-<!-- Yandex.Metrika counter -->
-<script type="text/javascript">
+  <!-- Yandex.Metrika counter -->
+  <script type="text/javascript">
     (function(m,e,t,r,i,k,a){
-        m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-        m[i].l=1*new Date();
-        for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
-        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+      m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+      m[i].l=1*new Date();
+      for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+      k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
     })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=113262007', 'ym');
-
     ym(113262007, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
-</script>
-<noscript><div><img src="https://mc.yandex.ru/watch/113262007" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
-<!-- /Yandex.Metrika counter -->
-
-
+  </script>
+  <noscript><div><img src="https://mc.yandex.ru/watch/113262007" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
 
 </body>
 </html>
