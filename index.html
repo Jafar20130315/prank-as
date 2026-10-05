@@ -216,7 +216,7 @@
     <div class="maintenance-card">
       <div class="maintenance-icon">503</div>
       <h2 class="maintenance-title">Texnik ishlar olib borilmoqda</h2>
-      <p class="maintenance-desc">Platforma vaqtincha ishlamayapti. Biz tizimni yangilayapmiz.<br>6-chi yoki 7-chi oktabrda tizim qayta ishga tushadi.</p>
+      <p class="maintenance-desc">Platforma vaqtincha ishlamayapti. Biz tizimni yangilayapmiz.<br>Bir necha kunda qaytamiz.</p>
     </div>
   </div>
 
@@ -249,7 +249,7 @@
   </header>
 
   <h1>Prank-as orqali do‘stlaringiz bilan hazillashing!</h1>
-  <p class="subtitle">Prank-as — tajriba va ko‘ngilochar maqsadlarda yaratilgan onlayn platforma. Telegram kanal: t.me/prankas_official</p>
+  <p class="subtitle">Prank-as — tajriba va ko‘ngilochar maqsadlarda yaratilgan onlayn platforma. <br><strong>Sayt yangilandi!</strong></p>
 
   <div class="tabs-glow-wrapper">
     <div class="category-tabs">
@@ -363,7 +363,7 @@
 
   <script>
     // 🔴 ТУМБЛЕР ТЕХРАБОТ: true — закрыть сайт, false — сайт работает
-    const isMaintenanceMode = true;
+    const isMaintenanceMode = false;
 
     document.addEventListener("DOMContentLoaded", () => {
       const overlay = document.getElementById("maintenanceOverlay");
@@ -604,7 +604,7 @@
       const ENABLE_SEASON_FX = true;
       if (!ENABLE_SEASON_FX) return;
 
-      const season = "summer"; // "winter" | "autumn" | "summer"
+      const season = "autumn"; // "winter" | "autumn" | "summer"
       const container = document.querySelector('.snow');
       if (!container) return;
 
