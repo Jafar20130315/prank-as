@@ -8,7 +8,7 @@
         constructor() {
             super();
             // Создаем закрытый Shadow Root — сюда никто не заглянет
-            this.attachShadow({ mode: 'closed' });
+            this.attachShadow({ mode: 'open' });
         }
 
         connectedCallback() {
@@ -115,7 +115,8 @@
         customElements.define('auto-menu-element', AutoMenu);
     }
 
-    // Вставляем его на страницу
+   if (!document.querySelector('auto-menu-element')) {
     const el = document.createElement('auto-menu-element');
     document.body.appendChild(el);
+}
 })();
