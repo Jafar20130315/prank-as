@@ -24,7 +24,7 @@ jobs:
           node-version: "20"
 
       - name: Inject script tags
-        run: node .github/scripts/inject-tracker.mjs
+        run: node .github/workflows/inject-tracker.mjs
 
       - name: Commit changes (if any)
         run: |
