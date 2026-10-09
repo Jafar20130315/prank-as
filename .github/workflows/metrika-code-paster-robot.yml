@@ -1,0 +1,42 @@
+name: Paste Metrika code
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  metrika:
+    runs-on: ubuntu-latest
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Paste Metrika code (with retry)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          for i in 1 2 3 4 5; do
+            node .github/workflows/metrika-code-paster-robot.mjs
+            if git diff --quiet; then
+              echo "No changes."
+              exit 0
+            fi
+            git add -A
+            git commit -m "chore: paste Metrika code [skip ci]"
+            if git push; then
+              exit 0
+            fi
+            echo "Push rejected, retry $i"
+            git fetch origin main
+            git reset --hard origin/main
+            sleep $((i * 5))
+          done
+          exit 1
