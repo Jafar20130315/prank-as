@@ -98,6 +98,7 @@
       <div class="overlay" id="overlay"></div>
       <nav class="panel" id="menu" aria-label="Asosiy menyu">
         <div class="title">Prank-as</div>
+         <a href="https://prank-as.uz">Asosiy sahifa</a>
         <a href="#" id="installAppBtn" hidden>📱 Ilovani o‘rnatish</a>
         <a href="/baholash">Fikr qoldirish</a>
         <a href="https://help.prank-as.site">Yordam</a>
