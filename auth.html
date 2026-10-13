@@ -17,6 +17,16 @@
         width: 100% !important;
         display: block !important;
     }
+    /* Выравниваем и подгоняем iframe Telegram под наш стиль */
+    div:has(> iframe[id^="telegram-login"]) {
+        width: 100% !important;
+    }
+    iframe[id^="telegram-login"] {
+        width: 100% !important;
+        height: 46px !important;
+        border: none !important;
+        background: transparent !important;
+    }
   </style>
 </head>
 <body class="min-h-screen flex items-center justify-center text-white p-4"
@@ -50,12 +60,11 @@
           <span id="googleText">Google bilan kirish</span>
         </button>
 
-        <!-- Telegram Widget -->
-        <div class="w-full flex justify-center mt-2">
+       <!-- Telegram Widget Container -->
+        <div class="w-full h-[46px] rounded-2xl overflow-hidden flex justify-center items-center bg-[#229ED9] hover:opacity-90 transition-all shadow-lg relative">
             <script async src="https://telegram.org/js/telegram-widget.js?22" 
                     data-telegram-login="prank_as_bot" 
                     data-size="large" 
-                    data-radius="16" 
                     data-onauth="onTelegramAuth(user)" 
                     data-request-access="write"></script>
         </div>
