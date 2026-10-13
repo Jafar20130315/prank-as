@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Musiqa pleyeri: musiqadagi zarbani kuzatish | Prank-as</title>
+<meta name="description" content="Musiqa ritmiga javob beradigan vizualizator. Audio fayl yuklang yoki mikrofondan foydalaning. Ovoz faqat brauzeringizda qayta ishlanadi.">
+<meta name="theme-color" content="#07060d">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#07060d; --mist:#ebe8f7; --dim:#9a97b0; --line:rgba(235,232,247,.14);
+  --g:#2cf5a3; --b:#3b8bff; --m:#e04bff;
+  --ui:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --display:"Bricolage Grotesque",var(--ui);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--ink);color:var(--mist);font-family:var(--ui);overflow:hidden;-webkit-tap-highlight-color:transparent}
+#stage{position:fixed;inset:0;will-change:transform}
+canvas{display:block;width:100%;height:100%}
+:focus-visible{outline:2px solid var(--g);outline-offset:3px}
+
+/* Intro */
+.intro{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:max(24px,env(safe-area-inset-top)) 24px max(24px,env(safe-area-inset-bottom));text-align:center;
+  background:radial-gradient(ellipse at 50% 45%,rgba(7,6,13,.55),rgba(7,6,13,.9) 70%);
+  backdrop-filter:blur(6px);transition:opacity .6s ease,visibility .6s}
+body:not([data-mode=idle]) .intro{opacity:0;visibility:hidden;pointer-events:none}
+.intro h1{font-family:var(--display);font-weight:800;font-size:clamp(2rem,6.2vw,4.2rem);line-height:1.02;letter-spacing:-.025em;max-width:14ch;margin-bottom:1.1rem}
+.intro p{color:var(--dim);max-width:46ch;line-height:1.6;font-size:clamp(.95rem,2.2vw,1.05rem)}
+.actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:2rem 0 1.2rem}
+.btn{font:600 1rem var(--ui);padding:14px 26px;border-radius:14px;cursor:pointer;color:var(--mist);background:transparent;border:1.5px solid var(--line);transition:transform .2s,border-color .2s,background .2s}
+.btn:hover{transform:translateY(-2px);border-color:var(--b);background:rgba(59,139,255,.1)}
+.btn.main{border:0;color:#04130d;background:linear-gradient(110deg,var(--g),var(--b));box-shadow:0 8px 30px -8px rgba(44,245,163,.55)}
+.btn.main:hover{background:linear-gradient(110deg,var(--g),var(--b));box-shadow:0 10px 36px -6px rgba(59,139,255,.7)}
+.hint{font-size:.85rem;color:var(--dim)}
+body.drag .intro{background:radial-gradient(ellipse at 50% 45%,rgba(44,245,163,.18),rgba(7,6,13,.92) 70%)}
+
+/* Dock */
+.dock{position:fixed;left:50%;bottom:max(14px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:20;
+  width:min(780px,calc(100% - 24px));padding:12px 16px 14px;border-radius:20px;display:none;
+  background:rgba(16,14,28,.62);border:1px solid var(--line);backdrop-filter:blur(18px) saturate(1.4);transition:opacity .5s}
+body:not([data-mode=idle]) .dock{display:block}
+body.calm .dock{opacity:0;pointer-events:none}
+body.calm{cursor:none}
+.track{font-size:.85rem;color:var(--dim);margin:0 4px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.ib{flex:none;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--mist);cursor:pointer;display:grid;place-items:center;transition:background .2s}
+.ib:hover{background:rgba(255,255,255,.16)}
+.ib svg{width:20px;height:20px;fill:currentColor}
+#pp[data-s=play] .i-pause,#pp[data-s=pause] .i-play{display:none}
+.time{font-size:.8rem;color:var(--dim);font-variant-numeric:tabular-nums;min-width:2.6em}
+input[type=range]{accent-color:var(--g);height:24px;cursor:pointer}
+#seek{flex:1 1 150px;min-width:110px}
+.ctl{display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--dim)}
+.ctl input{width:84px}
+body[data-mode=mic] .file-only{display:none}
+.sp{flex:1}
+
+#toast{position:fixed;left:50%;top:max(18px,env(safe-area-inset-top));transform:translate(-50%,-20px);z-index:30;max-width:calc(100% - 32px);
+  padding:12px 18px;border-radius:12px;background:#1b1830;border:1px solid var(--line);font-size:.9rem;opacity:0;pointer-events:none;transition:.3s}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:560px){.ctl input{width:64px}.sp{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important}}
+</style>
+</head>
+<body data-mode="idle">
+
+<div id="stage"><canvas id="cv" aria-hidden="true"></canvas></div>
+
+<main class="intro" id="intro">
+  <h1>Musiqadagi zarbani kuzatish</h1>
+  <p>Chastotalar, to‘lqinlar va zarrachalar musiqa ritmiga javob beradi. Audio fayl tanlang yoki mikrofondan foydalaning.</p>
+  <div class="actions">
+    <button class="btn main" id="pick">Audio fayl tanlash</button>
+    <button class="btn" id="mic">Mikrofonni ishlatish</button>
+  </div>
+  <span class="hint">Faylni shu oynaga tashlashingiz ham mumkin. Ovoz faqat brauzeringizda qayta ishlanadi va hech qayerga yuborilmaydi.</span>
+  <input type="file" id="file" accept="audio/*" hidden>
+</main>
+
+<footer class="dock" id="dock">
+  <div class="track" id="track">Musiqa kiritilishi kutilmoqda…</div>
+  <div class="row">
+    <button class="ib file-only" id="pp" data-s="play" aria-label="Ijro etish yoki to‘xtatish" title="Ijro / pauza (Probel)">
+      <svg class="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      <svg class="i-pause" viewBox="0 0 24 24"><path d="M7 5h4v14H7zm6 0h4v14h-4z"/></svg>
+    </button>
+    <span class="time file-only" id="cur">0:00</span>
+    <input type="range" id="seek" class="file-only" min="0" max="1000" value="0" aria-label="Trek bo‘ylab surish">
+    <span class="time file-only" id="dur">0:00</span>
+    <label class="ctl file-only">Ovoz <input type="range" id="vol" min="0" max="100" value="80"></label>
+    <label class="ctl" title="Zarbani aniqlash sezgirligi">Sezgirlik <input type="range" id="sens" min="0" max="100" value="50"></label>
+    <span class="sp"></span>
+    <button class="ib" id="fs" aria-label="To‘liq ekran" title="To‘liq ekran"><svg viewBox="0 0 24 24"><path d="M5 5h5v2H7v3H5zm9 0h5v5h-2V7h-3zM5 14h2v3h3v2H5zm12 0h2v5h-5v-2h3z"/></svg></button>
+    <button class="ib" id="back" aria-label="Manbani almashtirish" title="Manbani almashtirish"><svg viewBox="0 0 24 24"><path d="M12 5V2L7 6.5 12 11V8a5 5 0 1 1-5 5H5a7 7 0 1 0 7-8z"/></svg></button>
+  </div>
+</footer>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+const cv = $('cv'), ctx = cv.getContext('2d'), stage = $('stage');
+
+/* ---------- Canvas size (HiDPI aware) ---------- */
+let W, H, DPR, cx, cy, S, sc;
+function resize() {
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = innerWidth; H = innerHeight;
+  cv.width = W * DPR; cv.height = H * DPR;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  cx = W / 2; cy = H / 2 - (H > 640 ? 24 : 0);
+  S = Math.min(W, H); sc = Math.max(.55, Math.min(1.5, S / 800));
+  ctx.fillStyle = '#07060d'; ctx.fillRect(0, 0, W, H);
+}
+addEventListener('resize', resize); resize();
+
+/* ---------- Audio graph ---------- */
+const FFT = 2048;
+let actx, an, vol, freq, bpHz;
+let src = null, audio = null, stream = null, objUrl = null, mode = 'idle';
+
+function ensureCtx() {
+  if (actx) return;
+  actx = new (window.AudioContext || window.webkitAudioContext)();
+  an = actx.createAnalyser();
+  an.fftSize = FFT;
+  an.smoothingTimeConstant = .35;   // low smoothing = sharper transients; visuals are smoothed separately
+  an.minDecibels = -90; an.maxDecibels = -10;
+  freq = new Uint8Array(an.frequencyBinCount);
+  bpHz = actx.sampleRate / FFT;
+  vol = actx.createGain(); vol.gain.value = .64;
+  vol.connect(actx.destination);
+}
+
+function setMode(m) { mode = m; document.body.dataset.mode = m; wake(); }
+
+function stopAudio() {
+  if (src) { try { src.disconnect(); } catch (e) {} src = null; }
+  if (audio) { const a = audio; audio = null; a.pause(); a.removeAttribute('src'); a.load(); }
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  if (objUrl) { URL.revokeObjectURL(objUrl); objUrl = null; }
+  hist.length = 0;
+}
+
+function reset() {
+  stopAudio(); setMode('idle');
+  $('track').textContent = 'Musiqa kiritilishi kutilmoqda…';
+  $('file').value = '';
+}
+
+async function loadFile(file) {
+  if (!file) return;
+  if (!(file.type.startsWith('audio/') || /\.(mp3|wav|ogg|oga|m4a|aac|flac|opus|weba)$/i.test(file.name))) {
+    toast('Bu audio fayl emas. MP3, WAV, OGG yoki M4A faylni tanlang.'); return;
+  }
+  ensureCtx(); await actx.resume(); stopAudio();
+  const a = audio = new Audio();
+  objUrl = URL.createObjectURL(file);
+  a.src = objUrl; a.preload = 'auto';
+  a.addEventListener('error', () => { if (a === audio) { toast('Bu faylni ijro etib bo‘lmadi. Boshqa formatni sinab ko‘ring.'); reset(); } });
+  a.addEventListener('play', () => $('pp').dataset.s = 'pause');
+  a.addEventListener('pause', () => $('pp').dataset.s = 'play');
+  a.addEventListener('loadedmetadata', () => { if (a === audio) $('dur').textContent = fmt(a.duration); });
+  a.addEventListener('timeupdate', () => {
+    if (a !== audio || seeking) return;
+    $('cur').textContent = fmt(a.currentTime);
+    if (a.duration) $('seek').value = a.currentTime / a.duration * 1000;
+  });
+  src = actx.createMediaElementSource(a);
+  src.connect(an); src.connect(vol);
+  const name = file.name.replace(/\.[^.]+$/, '');
+  $('track').textContent = name;
+  $('cur').textContent = '0:00'; $('dur').textContent = '0:00'; $('seek').value = 0;
+  if ('mediaSession' in navigator) navigator.mediaSession.metadata = new MediaMetadata({ title: name, artist: 'Prank-as' });
+  setMode('file');
+  a.play().catch(() => toast('Ijroni boshlash uchun ▶ tugmasini bosing.'));
+}
+
+async function useMic() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    toast('Mikrofon faqat HTTPS orqali ishlaydi.'); return;
+  }
+  try {
+    ensureCtx(); await actx.resume();
+    // Raw signal: browser "voice" filters would flatten the music we want to analyse
+    const s = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+    stopAudio(); stream = s;
+    src = actx.createMediaStreamSource(s);
+    src.connect(an);                // not routed to speakers, so there is no feedback loop
+    $('track').textContent = 'Mikrofondan tinglanmoqda';
+    setMode('mic');
+  } catch (err) {
+    toast('Mikrofonga ruxsat berilmadi. Brauzer sozlamalaridan ruxsat bering.');
+  }
+}
+
+const fmt = s => isFinite(s) ? Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0') : '0:00';
+
+/* ---------- Analysis ---------- */
+const N = 64;                                   // spectrum bars per side
+const edges = Array.from({ length: N + 1 }, (_, i) => 40 * Math.pow(300, i / N)); // 40 Hz → 12 kHz, log scale
+const target = new Float32Array(N), sm = new Float32Array(N);
+const bs = { bass: 0, low: 0, mid: 0, high: 0 };
+const hist = []; let lastBeat = 0;
+
+function band(lo, hi) {
+  const a = Math.max(1, Math.round(lo / bpHz)), b = Math.max(a, Math.round(hi / bpHz));
+  let s = 0; for (let k = a; k <= b; k++) s += freq[k];
+  return s / (b - a + 1) / 255;
+}
+function sample(i) {
+  const a = edges[i] / bpHz, b = edges[i + 1] / bpHz;
+  if (b - a < 1) { const p = (a + b) / 2, k = Math.floor(p), f = p - k; return (freq[k] * (1 - f) + freq[k + 1] * f) / 255; }
+  let m = 0; for (let k = Math.floor(a); k <= Math.ceil(b) && k < freq.length; k++) m = Math.max(m, freq[k]);
+  return m / 255;
+}
+
+// Adaptive beat detector: compares bass energy to its own recent average + variance,
+// so it works on quiet and loud tracks alike (no fixed volume threshold).
+function detect(b, now) {
+  hist.push(b); if (hist.length > 86) hist.shift();
+  if (hist.length < 20) return 0;
+  let m = 0; for (const v of hist) m += v; m /= hist.length;
+  let s = 0; for (const v of hist) s += (v - m) * (v - m); s = Math.sqrt(s / hist.length);
+  const sens = +$('sens').value;
+  const thr = m + Math.max((2.1 - 1.4 * sens / 100) * s, .05);
+  if (b > thr && b > .15 && now - lastBeat > (reduce.matches ? 420 : 190)) {
+    lastBeat = now; return Math.min(1, (b - m) / .35 + .25);
+  }
+  return 0;
+}
+
+/* ---------- Visual state ---------- */
+const parts = [], waves = [];
+let pulse = 0, coreR = 60, shk = 0, hue = 190;
+
+function spawn(x, y, ang, speed, size, h, life) {
+  const max = reduce.matches ? 160 : 450;
+  if (parts.length >= max) parts.shift();
+  parts.push({ x, y, vx: Math.cos(ang) * speed, vy: Math.sin(ang) * speed, s: size, l: 1, d: 1 / life, h });
+}
+
+function onBeat(str) {
+  pulse = Math.max(pulse, .45 + .55 * str);
+  waves.push({ r: coreR * 1.1, a: .55 + .3 * str, s: str });
+  const n = Math.floor((reduce.matches ? 6 : 14) + 28 * str);
+  for (let i = 0; i < n; i++) {
+    const ang = Math.random() * 6.2832;
+    spawn(cx + Math.cos(ang) * coreR * 1.2, cy + Math.sin(ang) * coreR * 1.2, ang,
+      (140 + 420 * Math.random() * str) * sc, (1.6 + Math.random() * 3.2) * sc, (hue + Math.random() * 80) % 360, .9 + Math.random() * .9);
+  }
+  if (!reduce.matches && str > .6) shk = 7 * str;
+}
+
+/* ---------- Render loop ---------- */
+let last = performance.now();
+function frame(now) {
+  requestAnimationFrame(frame);
+  const dt = Math.min((now - last) / 1000, .05); last = now;
+  const t = now / 1000;
+  const playing = mode === 'mic' || (mode === 'file' && audio && !audio.paused);
+
+  // 1. analysis
+  let rawBass = 0;
+  if (an && mode !== 'idle') {
+    an.getByteFrequencyData(freq);
+    rawBass = band(40, 120);
+    bs.bt = rawBass;
+    const tg = { bass: rawBass, low: band(120, 500), mid: band(500, 2000), high: band(2000, 8000) };
+    for (let i = 0; i < N; i++) target[i] = Math.min(1, Math.pow(sample(i), 1.25) * (.85 + .8 * i / N));
+    for (const k in tg) bs[k] += (tg[k] - bs[k]) * (1 - Math.exp(-dt * (tg[k] > bs[k] ? 35 : 7)));
+  } else {
+    for (let i = 0; i < N; i++) target[i] = Math.max(0, .1 + .07 * Math.sin(t * 1.3 + i * .35) + .04 * Math.sin(t * .7 - i * .2));
+    bs.bass = .1 + .04 * Math.sin(t * 1.4); bs.low = .08; bs.mid = .06; bs.high = .05;
+  }
+  const aU = 1 - Math.exp(-dt * 40), aD = 1 - Math.exp(-dt * 7);
+  for (let i = 0; i < N; i++) sm[i] += (target[i] - sm[i]) * (target[i] > sm[i] ? aU : aD);
+
+  if (playing) { const str = detect(rawBass, now); if (str) onBeat(str); }
+  else if (mode === 'idle' && Math.random() < dt * 3) {
+    const ang = Math.random() * 6.2832, r = S * (.18 + Math.random() * .25);
+    spawn(cx + Math.cos(ang) * r, cy + Math.sin(ang) * r, ang + 1.57, (14 + Math.random() * 26) * sc, 2.2 * sc, (hue + Math.random() * 90) % 360, 3 + Math.random() * 2);
+  }
+
+  pulse *= Math.exp(-dt * 6);
+  hue = 190 + 35 * Math.sin(t * .15);
+  const tr = Math.max(46, Math.min(150, S * .13)) * (.85 + .35 * bs.bass + .3 * pulse);
+  coreR += (tr - coreR) * (1 - Math.exp(-dt * (tr > coreR ? 30 : 8)));   // fast attack, slow release
+
+  // 2. background fade (leaves motion trails)
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.fillStyle = reduce.matches ? 'rgba(7,6,13,.55)' : 'rgba(7,6,13,.26)';
+  ctx.fillRect(0, 0, W, H);
+
+  // 3. additive layer: glow, shockwaves, spectrum, particles
+  ctx.globalCompositeOperation = 'lighter';
+  const gr = coreR * 4.2;
+  let g = ctx.createRadialGradient(cx, cy, 0, cx, cy, gr);
+  g.addColorStop(0, `hsla(${hue},95%,55%,${.09 + .2 * pulse + .1 * bs.bass})`);
+  g.addColorStop(1, `hsla(${hue},95%,55%,0)`);
+  ctx.fillStyle = g; ctx.fillRect(cx - gr, cy - gr, gr * 2, gr * 2);
+
+  for (let i = waves.length - 1; i >= 0; i--) {
+    const w = waves[i];
+    w.r += dt * (240 + 460 * w.s) * sc; w.a -= dt * 1.1;
+    if (w.a <= 0) { waves.splice(i, 1); continue; }
+    ctx.strokeStyle = `hsla(${hue + 40},95%,65%,${w.a})`;
+    ctx.lineWidth = 1.5 + 4 * w.a;
+    ctx.beginPath(); ctx.arc(cx, cy, w.r, 0, 6.2832); ctx.stroke();
+  }
+
+  const r0 = coreR * 1.28, maxLen = S * .24;
+  ctx.lineCap = 'round';
+  ctx.lineWidth = Math.max(2, Math.PI * r0 / N * .5);
+  const drift = 18 * Math.sin(t * .2);
+  for (let i = 0; i < N; i++) {
+    const v = sm[i], len = 3 + v * maxLen, f = (i + .5) / N * Math.PI;
+    ctx.strokeStyle = `hsla(${150 + i / N * 150 + drift},92%,${56 + v * 14}%,${.45 + .55 * v})`;
+    ctx.beginPath();
+    for (const s of [1, -1]) {
+      const a = -Math.PI / 2 + s * f, c = Math.cos(a), n = Math.sin(a);
+      ctx.moveTo(cx + c * r0, cy + n * r0); ctx.lineTo(cx + c * (r0 + len), cy + n * (r0 + len));
+    }
+    ctx.stroke();
+  }
+
+  if (playing && !reduce.matches && Math.random() < bs.high * dt * 30) {   // sparks follow the highs
+    const ang = Math.random() * 6.2832;
+    spawn(cx + Math.cos(ang) * r0, cy + Math.sin(ang) * r0, ang, (70 + 200 * bs.high) * sc, 1.6 * sc, (hue + 60 + Math.random() * 90) % 360, 1.1);
+  }
+  const drag = Math.exp(-dt * 1.4), cs = Math.cos(.5 * dt), sn = Math.sin(.5 * dt);
+  ctx.lineCap = 'round';
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const p = parts[i];
+    p.l -= p.d * dt;
+    if (p.l <= 0) { parts.splice(i, 1); continue; }
+    const vx = p.vx * drag, vy = p.vy * drag;
+    p.vx = vx * cs - vy * sn; p.vy = vx * sn + vy * cs;      // gentle swirl
+    p.x += p.vx * dt; p.y += p.vy * dt;
+    ctx.strokeStyle = `hsla(${p.h},95%,66%,${Math.min(1, p.l * 1.2) * .9})`;
+    ctx.lineWidth = p.s * (.4 + .6 * p.l);
+    ctx.beginPath(); ctx.moveTo(p.x - p.vx * .04, p.y - p.vy * .04); ctx.lineTo(p.x, p.y); ctx.stroke();
+  }
+
+  // 4. core (opaque layer on top)
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.save();
+  ctx.shadowColor = `hsla(${hue},100%,60%,.85)`; ctx.shadowBlur = (16 + 46 * pulse) * DPR;
+  g = ctx.createRadialGradient(cx - coreR * .3, cy - coreR * .35, coreR * .1, cx, cy, coreR);
+  g.addColorStop(0, `hsl(${hue},90%,${62 + 22 * pulse}%)`);
+  g.addColorStop(1, `hsl(${hue + 55},85%,${20 + 10 * pulse}%)`);
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.arc(cx, cy, coreR, 0, 6.2832); ctx.fill();
+  ctx.restore();
+  ctx.strokeStyle = `rgba(235,232,247,${.16 + .5 * pulse})`; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(cx, cy, coreR, 0, 6.2832); ctx.stroke();
+  ctx.strokeStyle = `hsla(${hue + 70},95%,70%,${.15 + .65 * bs.mid})`; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(cx, cy, coreR + 9 + bs.mid * 22, 0, 6.2832); ctx.stroke();
+
+  // 5. screen shake (whole stage, not just some layers)
+  if (shk > .15) { stage.style.transform = `translate(${(Math.random() - .5) * shk}px,${(Math.random() - .5) * shk}px)`; shk *= Math.exp(-dt * 18); }
+  else if (shk) { shk = 0; stage.style.transform = ''; }
+}
+requestAnimationFrame(frame);
+
+/* ---------- UI wiring ---------- */
+let seeking = false, tt, calmT;
+function toast(m) { const e = $('toast'); e.textContent = m; e.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => e.classList.remove('show'), 3800); }
+function wake() { document.body.classList.remove('calm'); clearTimeout(calmT); if (mode !== 'idle') calmT = setTimeout(() => document.body.classList.add('calm'), 3500); }
+['pointermove', 'pointerdown', 'keydown', 'touchstart'].forEach(ev => addEventListener(ev, wake, { passive: true }));
+
+$('pick').onclick = () => $('file').click();
+$('file').onchange = e => loadFile(e.target.files[0]);
+$('mic').onclick = useMic;
+$('back').onclick = reset;
+$('pp').onclick = togglePlay;
+function togglePlay() { if (mode === 'file' && audio) audio.paused ? audio.play().catch(() => {}) : audio.pause(); }
+
+const seek = $('seek');
+seek.addEventListener('pointerdown', () => seeking = true);
+addEventListener('pointerup', () => seeking = false);
+seek.addEventListener('input', () => { if (audio && audio.duration) { audio.currentTime = seek.value / 1000 * audio.duration; $('cur').textContent = fmt(audio.currentTime); } });
+$('vol').addEventListener('input', e => { if (vol) vol.gain.value = Math.pow(e.target.value / 100, 2); });
+
+if (!document.fullscreenEnabled) $('fs').hidden = true;
+$('fs').onclick = () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+
+addEventListener('keydown', e => {
+  if (e.code === 'Space' && !/^(INPUT|BUTTON|TEXTAREA)$/.test(document.activeElement.tagName)) { e.preventDefault(); togglePlay(); }
+});
+
+// Drag & drop
+let dragDepth = 0;
+addEventListener('dragenter', e => { e.preventDefault(); dragDepth++; document.body.classList.add('drag'); });
+addEventListener('dragleave', () => { if (--dragDepth <= 0) { dragDepth = 0; document.body.classList.remove('drag'); } });
+addEventListener('dragover', e => e.preventDefault());
+addEventListener('drop', e => { e.preventDefault(); dragDepth = 0; document.body.classList.remove('drag'); loadFile(e.dataTransfer.files[0]); });
+})();
+</script>
+<script src="/auto-menu.js" data-prank-as="menu"></script>
+<script src="/tracker.js" data-prank-as="tracker"></script>
+<script src="/metrika-code-paster.js" data-prank-as="metrika"></script>
+</body>
+</html>
