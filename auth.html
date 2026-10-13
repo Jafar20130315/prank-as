@@ -6,11 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  <!-- Официальная библиотека Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <link rel="icon" type="image/x-icon" href="favicon.png">
   <style>
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     .animate-fade { animation: fadeIn 0.5s ease-out forwards; }
-    
+        
     /* Принудительное центрирование виджета Telegram */
     iframe[id^="telegram-login"] {
         width: 100% !important;
@@ -18,13 +20,12 @@
     }
   </style>
 </head>
-
 <body class="min-h-screen flex items-center justify-center text-white p-4"
       style="background: radial-gradient(circle at center, #1e293b 0%, #020617 100%)">
 
 <div class="rounded-3xl p-8 w-full max-w-md text-center shadow-2xl animate-fade"
      style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1)">
-
+  
   <h1 class="text-4xl font-black mb-2 tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-500">
     Prank-as
   </h1>
@@ -39,15 +40,16 @@
   </div>
 
   <div id="loginBox" class="opacity-20 pointer-events-none transition-all duration-700 scale-95 flex flex-col items-center gap-4">
-    
     <div class="w-[248px] flex flex-col gap-3">
         
+        <!-- Google Login Button -->
         <button id="google-login"
                 class="w-full h-[40px] rounded-[20px] font-bold bg-white text-black hover:bg-slate-200 active:scale-95 transition-all flex items-center justify-center gap-3 shadow-lg text-[14px]">
           <img src="https://www.google.com/favicon.ico" class="w-4 h-4" alt="G"> 
           <span id="googleText">Google bilan kirish</span>
         </button>
 
+        <!-- Telegram Widget -->
         <div class="w-full flex justify-center">
             <script async src="https://telegram.org/js/telegram-widget.js?22" 
                     data-telegram-login="prank_as_bot" 
@@ -57,7 +59,6 @@
                     data-request-access="write"></script>
         </div>
     </div>
-
   </div>
 
   <div id="accountBox" class="hidden space-y-4 mt-6 border-t border-white/10 pt-8 animate-fade">
@@ -79,15 +80,12 @@
       Hisobni butunlay o'chirish
     </button>
   </div>
+
 </div>
 
 <script type="module">
-  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-  const supabase = createClient(
-    "https://gefaqrfjzwemwuxuoadp.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg"
-  )
+  const WORKER_URL = "https://auth.prank-as.uz";
+  const GOOGLE_CLIENT_ID = "712013430650-f0ospumog4obguv9cv52rrik753ok928.apps.googleusercontent.com";
 
   const loginBox = document.getElementById("loginBox");
   const accountBox = document.getElementById("accountBox");
@@ -123,7 +121,6 @@
   };
 
   let currentLang = 'uz'; // Default
-
   function setLanguage() {
       const userLang = navigator.language.slice(0, 2); 
       currentLang = translations[userLang] ? userLang : 'uz';
@@ -137,8 +134,7 @@
   }
   setLanguage();
 
-  // --- ЛОГИКА АВТОРИЗАЦИИ ---
-
+  // --- ЛОГИКА КАПЧИ ---
   window.onCaptchaSuccess = function(token) {
     if(token) {
       loginBox.classList.remove("opacity-20", "pointer-events-none", "scale-95");
@@ -146,72 +142,135 @@
     }
   }
 
-  document.getElementById("google-login").onclick = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: "https://prank-as.site" }
-    });
-  }
-
-  window.onTelegramAuth = async function(user) {
-    localStorage.setItem("tg_user", JSON.stringify(user));
-    if (user.photo_url) {
-        localStorage.setItem("tg_avatar", user.photo_url);
-    }
+  // --- ИНИЦИАЛИЗАЦИЯ GOOGLE AUTH ---
+  window.handleCredentialResponse = async function(response) {
     try {
-        await fetch("https://prankasapi.windowsnoutbook.workers.dev/auth", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(user)
-        });
-    } finally {
-        window.location.href = "https://prank-as.site";
+      const res = await fetch(`${WORKER_URL}/api/google-auth`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential: response.credential })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        localStorage.setItem("session_token", data.token);
+        localStorage.setItem("user_data", JSON.stringify(data.user));
+        showUserAccount(data.user);
+      } else {
+        alert("Google orqali kirishda xatolik yuz berdi");
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  window.onload = function () {
+    if (window.google) {
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleCredentialResponse
+      });
+    }
+  };
+
+  document.getElementById("google-login").onclick = () => {
+    if (window.google) {
+      google.accounts.id.prompt(); // Открывает окно выбора аккаунта Google
+    } else {
+      alert("Google SDK hali yuklanmadi");
+    }
+  };
+
+  // --- TELEGRAM AUTH ---
+  window.onTelegramAuth = async function(user) {
+    try {
+      const res = await fetch(`${WORKER_URL}/api/telegram-auth`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(user)
+      });
+      const data = await res.json();
+      if (data.success) {
+        localStorage.setItem("session_token", data.token);
+        localStorage.setItem("user_data", JSON.stringify(data.user));
+        showUserAccount(data.user);
+      }
+    } catch (e) {
+      console.error(e);
+      window.location.href = "https://prank-as.site";
     }
   }
 
-  // ЛОГИКА ВЫХОДА (LOGOUT)
+  // --- ОТОБРАЖЕНИЕ АККАУНТА ---
+  function showUserAccount(user) {
+    loginBox.classList.add("hidden");
+    captchaBox.classList.add("hidden");
+    accountBox.classList.remove("hidden");
+
+    const avatarUrl = user?.picture;
+    if (avatarUrl) {
+      userPreview.innerHTML = `<img src="${avatarUrl}" class="w-full h-full object-cover rounded-full">`;
+    }
+  }
+
+  // --- ЛОГИКА ВЫХОДА (LOGOUT) ---
   async function performLogout() {
-    await supabase.auth.signOut();
-    localStorage.removeItem("tg_user");
-    localStorage.removeItem("tg_avatar");
+    localStorage.removeItem("session_token");
+    localStorage.removeItem("user_data");
     window.location.reload();
   }
 
   document.getElementById("logout").onclick = performLogout;
 
-  // ЛОГИКА УДАЛЕНИЯ (DELETE)
+  // --- ЛОГИКА УДАЛЕНИЯ (DELETE) ---
   document.getElementById("deleteAccount").onclick = async () => {
       const t = translations[currentLang];
       
-      // 1. Спрашиваем подтверждение
       if (confirm(t.confirmDelete)) {
-          // 2. Здесь можно добавить запрос к API для удаления из БД, если есть:
-          // await fetch('YOUR_DELETE_API_URL', { method: 'DELETE', ... });
-          
-          // 3. Выполняем выход и очистку
+          try {
+              const token = localStorage.getItem("session_token");
+              const userData = JSON.parse(localStorage.getItem("user_data") || "{}");
+
+              await fetch(`${WORKER_URL}/api/delete-account`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token, userId: userData.id })
+              });
+          } catch (e) {
+              console.error(e);
+          }
           await performLogout();
       }
-  }
+  };
 
-  // ПРОВЕРКА СТАТУСА
+  // --- ПРОВЕРКА СЕССИИ ПРИ ЗАГРУЗКЕ ---
   (async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    const tgUser = localStorage.getItem("tg_user");
-
-    if (session || tgUser) {
-      loginBox.classList.add("hidden");
-      captchaBox.classList.add("hidden");
-      accountBox.classList.remove("hidden");
-
-      const avatarUrl = session?.user?.user_metadata?.picture || localStorage.getItem("tg_avatar");
-      if (avatarUrl) {
-        userPreview.innerHTML = `<img src="${avatarUrl}" class="w-full h-full object-cover rounded-full">`;
+    const token = localStorage.getItem("session_token");
+    if (token) {
+      try {
+        const res = await fetch(`${WORKER_URL}/api/me`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token })
+        });
+        const data = await res.json();
+        if (data.user) {
+          showUserAccount(data.user);
+          return;
+        }
+      } catch (e) {
+        console.error(e);
       }
     }
+    // Если токена нет или он просрочен — очищаем локал
+    localStorage.removeItem("session_token");
+    localStorage.removeItem("user_data");
   })();
 </script>
-<script src="auto-menu.js"></script>  <script src="/auto-menu.js" data-prank-as="menu"></script>
-  <script src="/tracker.js" data-prank-as="tracker"></script>
-  <script src="/metrika-code-paster.js" data-prank-as="metrika"></script>
+
+<script src="auto-menu.js"></script>
+<script src="/auto-menu.js" data-prank-as="menu"></script>
+<script src="/tracker.js" data-prank-as="tracker"></script>
+<script src="/metrika-code-paster.js" data-prank-as="metrika"></script>
 </body>
 </html>
