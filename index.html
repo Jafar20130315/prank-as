@@ -232,6 +232,26 @@
       border-radius: 6px;
       box-shadow: 0 2px 8px rgba(255, 215, 0, 0.5);
     }
+    /* ===== Сочетание NEW + VIP ===== */
+    .btn.new.vip {
+      color: #fff !important; /* Белый цвет текста */
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 140, 0, 0.2)) !important;
+      border: 2px solid #ffd700 !important;
+      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.25) !important;
+    }
+
+    .btn.new.vip:hover {
+      color: #111 !important; /* Темный текст при наведении на золотой фон */
+      background: linear-gradient(135deg, #ffd700, #ff8c00) !important;
+    }
+
+    /* Раздвигаем плашки YANGI и VIP, если они на одной кнопке */
+    .btn.vip .vip-badge {
+      right: 15px !important;
+    }
+    .btn.new.vip .tag {
+      right: 55px !important; /* Сдвигаем тег YANGI левее, чтобы не перекрывать VIP */
+    }
   </style>
 </head>
 <body>
@@ -327,7 +347,7 @@
             <a class="btn" href="/ai-kamera">Aqlli kamera</a>
             <a class="btn" href="/kuzatuv-kamerasi">Kuzatuv kamerasi (telefon orqali)</a>
             <a class="btn" href="/kolgin">Kolgin - harakat trekeri</a>
-            <a class="btn new" href="/avto-raqam-aniqlovchi">Avtoraqam aniqlovchi - SI</a>
+            <a class="btn new vip" href="/avto-raqam-aniqlovchi">Avtoraqam aniqlovchi - SI</a>
           </div>
         </div>
 
@@ -339,7 +359,7 @@
             <a class="btn" href="/avtomobil-yo'li">Avtomobil yo'li</a>
             <a class="btn" href="/mening-honam">"Mening xonam"</a>
             <a class="btn" href="/rangligradient">Rangli sensor</a>
-            <a class="btn" href="/3d-qol-boshqaruvi">3D Shakl boshqaruvi</a>
+            <a class="btn vip" href="/3d-qol-boshqaruvi">3D Shakl boshqaruvi</a>
           </div>
         </div>
 
@@ -730,7 +750,8 @@
     ym(113262007, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
   </script>
   <noscript><div><img src="https://mc.yandex.ru/watch/113262007" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
-
+  
+<script>
   // Проверка доступа к VIP кнопкам
   document.addEventListener("click", (e) => {
     const vipBtn = e.target.closest(".btn.vip");
@@ -754,7 +775,34 @@
       }, 1500);
     }
   });
+  // Автоматическое добавление тегов YANGI и VIP для кнопок
+  const containers = document.querySelectorAll('.button-container');
+  
+  containers.forEach(container => {
+    // 1. Обрабатываем новые кнопки (.btn.new)
+    const newBtns = container.querySelectorAll('.btn.new');
+    newBtns.forEach(btn => {
+      if (!btn.querySelector('.tag')) {
+        const tag = document.createElement('span');
+        tag.className = 'tag';
+        tag.textContent = 'YANGI';
+        btn.appendChild(tag);
+      }
+      container.prepend(btn); // Новые переносим наверх
+    });
 
+    // 2. Автоматически добавляем бейджик VIP (.btn.vip)
+    const vipBtns = container.querySelectorAll('.btn.vip');
+    vipBtns.forEach(btn => {
+      if (!btn.querySelector('.vip-badge')) {
+        const badge = document.createElement('span');
+        badge.className = 'vip-badge';
+        badge.textContent = 'VIP';
+        btn.appendChild(badge);
+      }
+    });
+  });
+</script>
   <script src="/auto-menu.js" data-prank-as="menu"></script>
   <script src="/tracker.js" data-prank-as="tracker"></script>
 </body>
