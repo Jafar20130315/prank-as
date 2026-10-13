@@ -523,52 +523,37 @@
     });
   </script>
 
-  <!-- Supabase: пользователь + трекинг (один клиент вместо двух) -->
+  <!-- Авторизация через Cloudflare Worker и D1 (Вместо Supabase) -->
   <script type="module">
-    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-    const supabase = createClient(
-      'https://gefaqrfjzwemwuxuoadp.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZmFxcmZqendlbXd1eHVvYWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MDEwNTMsImV4cCI6MjA4MTM3NzA1M30.97YAWGJv7i9OgEMs0mFAuaxQ94ZJCuaxa0qKv-7XDJg'
-    );
+    const WORKER_URL = "https://auth.prank-as.uz";
 
-    function setAvatar(url) {
-      const icon = document.getElementById('userIcon');
-      if (icon && url) {
-        icon.innerHTML = `<img src="${url}" alt="User" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
-        icon.href = '/auth';
+    async function checkUserSession() {
+      const token = localStorage.getItem("session_token");
+      const userIcon = document.getElementById('userIcon');
+
+      if (!token || !userIcon) return;
+
+      try {
+        const res = await fetch(`${WORKER_URL}/api/me`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token })
+        });
+        const data = await res.json();
+        
+        if (data.user && data.user.picture) {
+          // Успешно нашли пользователя и аватарку — ставим в правый верхний угол
+          userIcon.innerHTML = `<img src="${data.user.picture}" alt="User" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+          userIcon.href = '/auth'; // Ссылка на страницу управления профилем/выхода
+        }
+      } catch (e) {
+        console.error("Session check error:", e);
       }
     }
 
-    async function initTracking() {
-      const startTime = Date.now();
-      const prankName = location.pathname.split('/').pop() || 'index';
-      const { data: { user } } = await supabase.auth.getUser();
-
-      setAvatar(user?.user_metadata?.picture); // раньше здесь была ошибка с #userLink
-
-      const { data } = await supabase.from('user_activity').insert({
-        user_id: user?.id || null,
-        user_email: user?.email || null,
-        user_name: user?.user_metadata?.full_name || 'Guest',
-        prank_name: prankName,
-        opened_at: new Date().toISOString(),
-        duration: 0
-      }).select();
-
-      const recordId = data && data.length > 0 ? data[0].id : null;
-      if (!recordId) return;
-
-      const save = () => supabase.from('user_activity')
-        .update({ duration: Math.floor((Date.now() - startTime) / 1000) })
-        .eq('id', recordId);
-
-      setInterval(save, 10000);
-      window.addEventListener('beforeunload', save);
-    }
-
-    initTracking();
+    checkUserSession();
   </script>
-
+  
   <script>
     // Звуки
     const clickSound = document.getElementById("clickSound");
