@@ -207,6 +207,31 @@
     .info-section h2 { margin-bottom:20px; font-size:28px; font-weight:700; text-align:center; }
     .info-section h3 { margin-top:25px; }
     .info-section p { margin-bottom:15px; }
+    
+    /* ===== VIP Buttons ===== */
+    .btn.vip {
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(255, 140, 0, 0.12));
+      border: 2px solid rgba(255, 215, 0, 0.5);
+      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.15);
+    }
+    .btn.vip:hover {
+      background: linear-gradient(135deg, #ffd700, #ff8c00);
+      color: #111;
+      border-color: #ffd700;
+      box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+    }
+    .btn.vip .vip-badge {
+      position: absolute;
+      top: -10px;
+      right: 15px;
+      background: linear-gradient(135deg, #ffd700, #ff8c00);
+      color: #111;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(255, 215, 0, 0.5);
+    }
   </style>
 </head>
 <body>
@@ -219,7 +244,25 @@
       <p class="maintenance-desc">Platforma vaqtincha ishlamayapti. Biz tizimni yangilayapmiz.<br>Bir necha kunda qaytamiz.</p>
     </div>
   </div>
-
+  
+<!-- VIP Tasdiqlash Oynasi -->
+  <div class="custom-modal-overlay" id="vipModal">
+    <div class="custom-modal-box">
+      <div class="custom-modal-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 42px; height: 42px; margin: 0 auto; stroke: #ffd700;">
+          <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5z"></path>
+          <path d="M4 20h16"></path>
+        </svg>
+      </div>
+      <div class="custom-modal-title">VIP</div>
+      <div class="custom-modal-desc">Bu funksiyadan foydalanish uchun ro'yxatdan o'ting yoki kiring.</div>
+      <div class="custom-modal-buttons">
+        <button class="custom-modal-btn cancel" id="vipModalCancel">Bekor qilish</button>
+        <button class="custom-modal-btn ok" id="vipModalOk">Davom etish</button>
+      </div>
+    </div>
+  </div>
+  
   <!-- Bildirishnoma tasdiqlash oynasi -->
   <div class="custom-modal-overlay" id="notifyModal">
     <div class="custom-modal-box">
@@ -687,6 +730,30 @@
     ym(113262007, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
   </script>
   <noscript><div><img src="https://mc.yandex.ru/watch/113262007" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+
+  // Проверка доступа к VIP кнопкам
+  document.addEventListener("click", (e) => {
+    const vipBtn = e.target.closest(".btn.vip");
+    if (!vipBtn) return;
+
+    const token = localStorage.getItem("session_token");
+    if (!token) {
+      e.preventDefault(); // Отменяем переход по ссылке
+      
+      // Если у тебя подключена функция звука ошибки
+      if (typeof playErrorSound === "function") {
+        playErrorSound();
+      }
+
+      // Показываем предупреждение
+      showMessage("Bu VIP funksiya, iltimos ro'yxatdan o'ting.");
+
+      // Через 1.5 секунды кидаем на страницу авторизации
+      setTimeout(() => {
+        window.location.href = "/auth";
+      }, 1500);
+    }
+  });
 
   <script src="/auto-menu.js" data-prank-as="menu"></script>
   <script src="/tracker.js" data-prank-as="tracker"></script>
