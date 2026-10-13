@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bu sahifa mavjud emas</title>
+  <title>Bu sahifa mavjud emas | 404</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
   <style>
     @keyframes gradientBG {
@@ -11,14 +11,11 @@
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
-
-    /* Сброс */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-
     body {
       font-family: 'Poppins', sans-serif;
       min-height: 100vh;
@@ -33,7 +30,6 @@
       text-align: center;
       flex-direction: column;
     }
-
     .error-code {
       font-weight: 700;
       font-size: 8rem;
@@ -42,14 +38,12 @@
       margin-bottom: 0.3em;
       user-select: none;
     }
-
     h1 {
       font-weight: 600;
       font-size: 2.5rem;
       text-shadow: 0 0 10px rgba(255,255,255,0.2);
       margin-bottom: 24px;
     }
-
     .watermark {
       position: fixed;
       bottom: 12px;
@@ -63,7 +57,6 @@
       font-family: 'Poppins', sans-serif;
       z-index: 1000;
     }
-
     @media (max-width: 500px) {
       .error-code {
         font-size: 5rem;
@@ -78,7 +71,81 @@
   <div class="error-code">404</div>
   <h1>Bu sahifa mavjud emas</h1>
   <div class="watermark">www.prank-as.site</div>
-<script src="auto-menu.js"></script>  <script src="/auto-menu.js" data-prank-as="menu"></script>
+
+  <!-- Исправленный скрипт анимированного фавикона -->
+  <script>
+    (function() {
+      const size = 32;
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+
+      // Находим или создаем тег фавикона
+      let link = document.querySelector("link[rel*='icon']");
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = 'icon';
+        link.type = 'image/png';
+        document.head.appendChild(link);
+      }
+
+      // Твой PNG логотип (черный)
+      const logoImg = new Image();
+      logoImg.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAJFBMVEVHcEwEAwQEAwMEAwQGBAYDAgMEAwQEAwQEBAQEAwQEAwQEAwSeLC2RAAAADHRSTlMAU0s2BBYSLwojQGKuBA1rAAAAYElEQVQI12NgYGDpcGAAg4mCQlNANIuYS6diA5DBppBVwawAYggYGiaIARmsAubsBitBDAVjpwJVMGO2lJsImMHh4FQAZriFCzOAGdXKCRCGOcQGOINDWBLCYEgPYEAGAL0qDf/BUtJZAAAAAElFTkSuQmCC'; 
+      let imgLoaded = false;
+      logoImg.onload = () => {
+        imgLoaded = true;
+      };
+
+      // Текст и параметры анимации
+      const rawText = " 404 404 404 "; // Один длинный кусок текста
+      ctx.font = 'bold 12px Arial'; // Шрифт для измерения ширины
+      const textWidth = ctx.measureText(rawText).width;
+      let xOffset = 0;
+      const speed = 0.6; // Скорость движения
+
+      function drawFavicon() {
+        // 1. Синий фон фавикона
+        ctx.fillStyle = '#0052CC'; // Насыщенный синий
+        ctx.fillRect(0, 0, size, size);
+
+        // 2. Отрисовка текста (белого)
+        ctx.font = 'bold 12px Arial';
+        ctx.fillStyle = '#FFFFFF'; // Белый текст
+        ctx.textBaseline = 'middle';
+        
+        // Магия бесшовного цикла:
+        // Рисуем текст в текущей позиции xOffset
+        ctx.fillText(rawText, xOffset, size / 2 + 1);
+        // И рисуем его же сразу за ним, чтобы закрыть разрыв
+        ctx.fillText(rawText, xOffset + textWidth, size / 2 + 1);
+
+        // Обновляем смещение
+        xOffset -= speed;
+        // Если текст ушел за пределы своей ширины, сбрасываем смещение
+        if (xOffset < -textWidth) {
+          xOffset = 0;
+        }
+
+        // 3. Твой черный логотип по центру, ПОВЕРХ текста
+        if (imgLoaded) {
+          const logoSize = 16; // Размер логотипа внутри фавикона
+          ctx.drawImage(logoImg, (size - logoSize) / 2, (size - logoSize) / 2, logoSize, logoSize);
+        }
+
+        // Обновляем фавикон
+        link.href = canvas.toDataURL('image/png');
+      }
+
+      // Запуск анимации (~25 кадров в секунду для плавности)
+      setInterval(drawFavicon, 40);
+    })();
+  </script>
+
+  <!-- Твои оригинальные скрипты метрики -->
+  <script src="auto-menu.js"></script>
+  <script src="/auto-menu.js" data-prank-as="menu"></script>
   <script src="/tracker.js" data-prank-as="tracker"></script>
   <script src="/metrika-code-paster.js" data-prank-as="metrika"></script>
 </body>
