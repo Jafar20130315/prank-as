@@ -278,16 +278,10 @@
     </div>
   </div>
 
-  <!-- VIP Tasdiqlash Oynasi -->
+  <!-- Plus Tasdiqlash Oynasi -->
   <div class="custom-modal-overlay" id="vipModal">
     <div class="custom-modal-box">
-      <div class="custom-modal-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 42px; height: 42px; margin: 0 auto; stroke: #ffd700;">
-          <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5z"></path>
-          <path d="M4 20h16"></path>
-        </svg>
-      </div>
-      <div class="custom-modal-title">VIP</div>
+      <div class="custom-modal-title">Plus</div>
       <div class="custom-modal-desc">Bu funksiyadan foydalanish uchun ro'yxatdan o'ting yoki kiring.</div>
       <div class="custom-modal-buttons">
         <button class="custom-modal-btn cancel" id="vipModalCancel">Bekor qilish</button>
@@ -765,12 +759,11 @@
       document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeVipModal(); });
 
       // --- Бейдж Plus ---
-      const crownSvg = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zM5 18h14v2H5z"/></svg>';
       document.querySelectorAll(".button-container .btn.vip").forEach(btn => {
         if (btn.querySelector(".vip-badge")) return;
         const badge = document.createElement("span");
         badge.className = "vip-badge";
-        badge.innerHTML = crownSvg + "Plus";
+        badge.innerHTML = "Plus";
         btn.appendChild(badge);
       });
 
@@ -804,7 +797,7 @@
           localStorage.removeItem("session_token");
           openVipModal();
         } catch (err) {
-          console.error("VIP check error:", err);
+          console.error("Plus check error:", err);
           showMessage("Server bilan aloqa yo'q. Keyinroq urinib ko'ring.");
         } finally {
           checking = false;
