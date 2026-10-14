@@ -746,12 +746,12 @@
   </script>
 
   <script>
-    // ===== VIP: бейджи + окно + проверка доступа =====
+    // ===== Plus: бейджи + окно + проверка доступа =====
     (() => {
       const AUTH_WORKER_URL = "https://auth.prank-as.uz";
       const vipModal = document.getElementById("vipModal");
 
-      // --- Окно VIP ---
+      // --- Окно Plus ---
       function openVipModal() {
         if (typeof playErrorSound === "function") playErrorSound();
         vipModal.classList.add("show");
@@ -764,13 +764,13 @@
       vipModal.addEventListener("click", (e) => { if (e.target === vipModal) closeVipModal(); });
       document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeVipModal(); });
 
-      // --- Бейдж VIP ---
+      // --- Бейдж Plus ---
       const crownSvg = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zM5 18h14v2H5z"/></svg>';
       document.querySelectorAll(".button-container .btn.vip").forEach(btn => {
         if (btn.querySelector(".vip-badge")) return;
         const badge = document.createElement("span");
         badge.className = "vip-badge";
-        badge.innerHTML = crownSvg + "VIP";
+        badge.innerHTML = crownSvg + "Plus";
         btn.appendChild(badge);
       });
 
@@ -811,7 +811,7 @@
         }
       });
 
-      // --- Если пришли с VIP-страницы (/?login=vip), сразу показать окно ---
+      // --- Если пришли с Plus-страницы (/?login=vip), сразу показать окно ---
       const params = new URLSearchParams(location.search);
       if (params.get("login") === "vip") {
         openVipModal();
