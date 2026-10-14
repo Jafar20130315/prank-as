@@ -6,35 +6,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://accounts.google.com/gsi/client?hl=uz" async defer></script>
   <link rel="icon" type="image/x-icon" href="favicon.png">
   <style>
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     .animate-fade { animation: fadeIn 0.5s ease-out forwards; }
-    
-    
-    /* Контейнер-фиксатор для Telegram */
-.tg-wrapper {
-    width: 100% !important;
-    height: 46px !important;
-    background-color: #54a9eb !important; /* Родной цвет Telegram */
-    border-radius: 9999px !important;     /* Полное скругление pill */
-    overflow: hidden !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
-}
-
-/* Принудительное растягивание iframe и его внутренних контейнеров */
-.tg-wrapper *, 
-.tg-wrapper iframe {
-    width: 100% !important;
-    height: 100% !important;
-    max-width: 100% !important;
-    border: none !important;
-    background: transparent !important;
-}
   </style>
 </head>
 <body class="min-h-screen flex items-center justify-center text-white p-4"
@@ -59,20 +35,20 @@
   </div>
 
   <div id="loginBox" class="opacity-20 pointer-events-none transition-all duration-700 scale-95 flex flex-col items-center gap-4">
-    <div class="w-full flex flex-col gap-3">
-        
-        <!-- Google Sign-In Official Standard Popup Button Container -->
-        <div id="googleButtonDiv" class="w-full flex justify-center h-[46px]"></div>
-      
-<!-- Telegram Widget Container -->
-<div class="tg-wrapper">
-    <script async src="https://telegram.org/js/telegram-widget.js?22" 
-            data-telegram-login="prank_as_bot" 
-            data-size="large" 
-            data-radius="12" 
-            data-onauth="onTelegramAuth(user)" 
-            data-request-access="write"></script>
-</div>
+    <div class="w-full flex flex-col items-center gap-3">
+
+      <!-- Google Sign-In -->
+      <div id="googleButtonDiv" class="flex justify-center" style="height:40px"></div>
+
+      <!-- Telegram (своя кнопка, одинакового размера с Google) -->
+      <button id="tgLoginBtn" type="button"
+              class="rounded-full font-semibold text-sm text-white flex items-center justify-center gap-2 transition hover:brightness-110"
+              style="height:40px; background:#54a9eb">
+        <svg viewBox="0 0 24 24" class="w-4 h-4" fill="currentColor"><path d="M21.5 3.5 2.6 10.8c-.9.4-.9 1.1-.2 1.3l4.8 1.5 1.8 5.6c.2.6.4.8.8.8.4 0 .6-.2.9-.5l2.3-2.2 4.7 3.5c.9.5 1.5.2 1.7-.8l3-14.3c.3-1.2-.4-1.7-1.3-1.3ZM8.5 13.2l9.6-6c.4-.3.8-.1.5.2l-7.8 7-.3 3.2-2-4.4Z"/></svg>
+        Telegram bilan davom etish
+      </button>
+      <script async src="https://telegram.org/js/telegram-widget.js?22"></script>
+
     </div>
   </div>
 
@@ -103,13 +79,20 @@
 
 <script>
   const WORKER_URL = "https://auth.prank-as.uz";
-  const GOOGLE_CLIENT_ID = "712013430650-f0ospumog4obguv9cv52rrik753ok928.apps.googleusercontent.com"; // Не забудь вставить свой Client ID
+  const GOOGLE_CLIENT_ID = "712013430650-f0ospumog4obguv9cv52rrik753ok928.apps.googleusercontent.com";
+
+  
+  const TG_BOT_ID = "8214352355";
 
   const loginBox = document.getElementById("loginBox");
   const accountBox = document.getElementById("accountBox");
   const captchaBox = document.getElementById("captchaBox");
   const userPreview = document.getElementById("userPreview");
   const userName = document.getElementById("userName");
+
+  // Одна ширина для обеих кнопок: не больше 320px и не шире экрана телефона
+  const BTN_WIDTH = Math.min(320, window.innerWidth - 96);
+  document.getElementById("tgLoginBtn").style.width = BTN_WIDTH + "px";
 
   window.onCaptchaSuccess = function(token) {
     if(token) {
@@ -154,7 +137,8 @@
           theme: "filled_black",
           text: "continue_with",
           size: "large",
-          logo_alignment: "left"
+          logo_alignment: "left",
+          width: BTN_WIDTH
         }
       );
     }
@@ -177,6 +161,18 @@
       console.error(e);
     }
   }
+
+  // Клик по своей Telegram-кнопке
+  document.getElementById("tgLoginBtn").onclick = () => {
+    if (!window.Telegram || !Telegram.Login) {
+      alert("Telegram hali yuklanmadi, bir soniyadan keyin qayta urinib ko'ring.");
+      return;
+    }
+    Telegram.Login.auth(
+      { bot_id: TG_BOT_ID, request_access: true },
+      (user) => { if (user) window.onTelegramAuth(user); }
+    );
+  };
 
   function showUserAccount(user) {
     loginBox.classList.add("hidden");
