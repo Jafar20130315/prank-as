@@ -101,8 +101,8 @@
          <a href="https://prank-as.uz">Asosiy sahifa</a>
         <a href="#" id="installAppBtn" hidden>📱 Ilovani o‘rnatish</a>
         <a href="/baholash">Fikr qoldirish</a>
-        <a href="https://help.prank-as.site">Yordam</a>
-        <a href="https://old.prank-as.site">Oldingi saytga qaytish</a>
+        <a href="https://help.prank-as.uz">Yordam</a>
+        <a href="https://old.prank-as.uz">Oldingi saytga qaytish</a>
         <div class="divider"></div>
         <a href="/about">About</a>
         <a href="/contact">Contact</a>
