@@ -277,8 +277,8 @@
       <p class="maintenance-desc">Platforma vaqtincha ishlamayapti. Biz tizimni yangilayapmiz.<br>Bir necha kunda qaytamiz.</p>
     </div>
   </div>
-  
-<!-- VIP Tasdiqlash Oynasi -->
+
+  <!-- VIP Tasdiqlash Oynasi -->
   <div class="custom-modal-overlay" id="vipModal">
     <div class="custom-modal-box">
       <div class="custom-modal-icon">
@@ -295,7 +295,7 @@
       </div>
     </div>
   </div>
-  
+
   <!-- Bildirishnoma tasdiqlash oynasi -->
   <div class="custom-modal-overlay" id="notifyModal">
     <div class="custom-modal-box">
@@ -616,7 +616,7 @@
           body: JSON.stringify({ token })
         });
         const data = await res.json();
-        
+
         if (data.user && data.user.picture) {
           // Успешно нашли пользователя и аватарку — ставим в правый верхний угол
           userIcon.innerHTML = `<img src="${data.user.picture}" alt="User" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
@@ -629,7 +629,7 @@
 
     checkUserSession();
   </script>
-  
+
   <script>
     // Звуки
     const clickSound = document.getElementById("clickSound");
@@ -743,8 +743,85 @@
       document.addEventListener("visibilitychange", () => { if (document.hidden) container.innerHTML = ""; });
       window.__stopSeasonFX = () => { if (timer) clearInterval(timer); container.innerHTML = ""; };
     })();
+  </script>
 
-<script src="/auto-menu.js" data-prank-as="menu"></script>
-<script src="/tracker.js" data-prank-as="tracker"></script>
+  <script>
+    // ===== VIP: бейджи + окно + проверка доступа =====
+    (() => {
+      const AUTH_WORKER_URL = "https://auth.prank-as.uz";
+      const vipModal = document.getElementById("vipModal");
 
-<script src="/metrika-code-paster.js" data-prank-as="metrika"></script>
+      // --- Окно VIP ---
+      function openVipModal() {
+        if (typeof playErrorSound === "function") playErrorSound();
+        vipModal.classList.add("show");
+      }
+      function closeVipModal() {
+        vipModal.classList.remove("show");
+      }
+      document.getElementById("vipModalCancel").onclick = closeVipModal;
+      document.getElementById("vipModalOk").onclick = () => { window.location.href = "/auth"; };
+      vipModal.addEventListener("click", (e) => { if (e.target === vipModal) closeVipModal(); });
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeVipModal(); });
+
+      // --- Бейдж VIP ---
+      const crownSvg = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zM5 18h14v2H5z"/></svg>';
+      document.querySelectorAll(".button-container .btn.vip").forEach(btn => {
+        if (btn.querySelector(".vip-badge")) return;
+        const badge = document.createElement("span");
+        badge.className = "vip-badge";
+        badge.innerHTML = crownSvg + "VIP";
+        btn.appendChild(badge);
+      });
+
+      // --- Проверка при клике ---
+      let checking = false;
+      document.addEventListener("click", async (e) => {
+        const vipBtn = e.target.closest(".btn.vip");
+        if (!vipBtn) return;
+
+        e.preventDefault();
+        if (checking) return;
+
+        const href = vipBtn.getAttribute("href");
+        const token = localStorage.getItem("session_token");
+
+        if (!token) { openVipModal(); return; }
+
+        checking = true;
+        try {
+          const res = await fetch(`${AUTH_WORKER_URL}/api/me`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token })
+          });
+          const data = await res.json();
+
+          if (data && data.user) {
+            window.location.href = href;
+            return;
+          }
+          localStorage.removeItem("session_token");
+          openVipModal();
+        } catch (err) {
+          console.error("VIP check error:", err);
+          showMessage("Server bilan aloqa yo'q. Keyinroq urinib ko'ring.");
+        } finally {
+          checking = false;
+        }
+      });
+
+      // --- Если пришли с VIP-страницы (/?login=vip), сразу показать окно ---
+      const params = new URLSearchParams(location.search);
+      if (params.get("login") === "vip") {
+        openVipModal();
+        history.replaceState(null, "", "/");
+      }
+    })();
+  </script>
+
+  <script src="/auto-menu.js" data-prank-as="menu"></script>
+  <script src="/tracker.js" data-prank-as="tracker"></script>
+  <script src="/metrika-code-paster.js" data-prank-as="metrika"></script>
+</body>
+</html>
