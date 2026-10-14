@@ -207,66 +207,64 @@
     .info-section h2 { margin-bottom:20px; font-size:28px; font-weight:700; text-align:center; }
     .info-section h3 { margin-top:25px; }
     .info-section p { margin-bottom:15px; }
-    
-    /* ===== VIP Buttons ===== */
+
+    /* ===== VIP кнопки (новый дизайн) ===== */
+    @keyframes vipShine {
+      from { background-position: 100% 0, 0 0, 0 0; }
+      to   { background-position: 0% 0,   0 0, 0 0; }
+    }
+
     .btn.vip {
-      background: linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(255, 140, 0, 0.12));
-      border: 2px solid rgba(255, 215, 0, 0.5);
-      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.15);
+      color: #ffe9a8;
+      border: 2px solid transparent;
+      /* 1 слой — блик, 2 слой — тёмная подложка, 3 слой — золотая рамка */
+      background-image:
+        linear-gradient(110deg, transparent 35%, rgba(255, 226, 140, .28) 50%, transparent 65%),
+        linear-gradient(145deg, rgba(44, 34, 10, .96), rgba(18, 14, 6, .96)),
+        linear-gradient(135deg, #fff1a8 0%, #f5b700 45%, #b8741a 100%);
+      background-size: 250% 100%, 100% 100%, 100% 100%;
+      background-repeat: no-repeat;
+      background-origin: padding-box, padding-box, border-box;
+      background-clip: padding-box, padding-box, border-box;
+      background-position: 100% 0, 0 0, 0 0;
+      box-shadow: 0 4px 18px rgba(255, 200, 50, .18), inset 0 0 14px rgba(255, 200, 50, .08);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, .6);
+      animation: moveBtn .5s ease forwards, vipShine 3.6s linear infinite;
     }
     .btn.vip:hover {
-      background: linear-gradient(135deg, #ffd700, #ff8c00);
-      color: #111;
-      border-color: #ffd700;
-      box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
-    }
-    .btn.vip .vip-badge {
-      position: absolute;
-      top: -10px;
-      right: 15px;
-      background: linear-gradient(135deg, #ffd700, #ff8c00);
-      color: #111;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 6px;
-      box-shadow: 0 2px 8px rgba(255, 215, 0, 0.5);
-    }
-    /* ===== VIP & NEW кнопки ===== */
-    .btn.vip {
-      background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 140, 0, 0.15)) !important;
-      border: 2px solid #ffd700 !important;
-      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2) !important;
+      color: #1a1200;
+      text-shadow: none;
+      background: linear-gradient(135deg, #fff1a8, #ffc933 50%, #f59e0b);
+      box-shadow: 0 10px 28px rgba(255, 190, 40, .45);
     }
 
+    /* VIP + YANGI вместе: пульсация остаётся, дизайн VIP сохраняется */
+    .btn.new.vip {
+      color: #ffe9a8;
+      animation: pulse 1.5s infinite alternate, moveBtn .5s ease forwards, vipShine 3.6s linear infinite;
+    }
+    .btn.new.vip:hover { color: #1a1200; }
+
+    /* Бейдж VIP слева сверху (YANGI остаётся справа на своём месте) */
     .btn.vip .vip-badge {
       position: absolute;
-      top: -10px;
-      right: -8px;
-      background: linear-gradient(135deg, #ffd700, #ff8c00);
-      color: #111;
+      top: -11px;
+      left: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: linear-gradient(135deg, #fff1a8, #f5b700 60%, #d98a00);
+      color: #2a1a00;
       font-size: 11px;
       font-weight: 800;
-      padding: 2px 8px;
+      letter-spacing: .5px;
+      padding: 2px 9px 2px 7px;
       border-radius: 6px;
-      box-shadow: 0 2px 8px rgba(255, 215, 0, 0.5);
+      box-shadow: 0 2px 10px rgba(255, 200, 50, .55);
+      text-shadow: none;
       z-index: 25;
     }
-
-    /* Сочетание NEW + VIP */
-    .btn.new.vip {
-      color: #ffffff !important;
-    }
-
-    .btn.new.vip .tag {
-      right: 42px !important; /* Ставим YANGI сразу слева от VIP */
-      z-index: 24;
-    }
-
-    .btn.new.vip:hover {
-      color: #111111 !important;
-      background: linear-gradient(135deg, #ffd700, #ff8c00) !important;
-    }
+    .btn.vip .vip-badge svg { width: 12px; height: 12px; fill: currentColor; }
   </style>
 </head>
 <body>
@@ -745,80 +743,3 @@
       document.addEventListener("visibilitychange", () => { if (document.hidden) container.innerHTML = ""; });
       window.__stopSeasonFX = () => { if (timer) clearInterval(timer); container.innerHTML = ""; };
     })();
-  </script>
-
-  <!-- Yandex.Metrika informer -->
-  <a href="https://metrika.yandex.ru/stat/?id=113262007&amp;from=informer" target="_blank" rel="nofollow">
-    <img src="https://informer.yandex.ru/informer/113262007/3_0_535353FF_333333FF_1_visits"
-         style="width:88px; height:31px; border:0;" alt="Hisobot" title="Bugungi ma'lumotlar"
-         class="ym-advanced-informer" data-cid="113262007" data-lang="uz"/>
-  </a>
-
-  <!-- Yandex.Metrika counter -->
-  <script type="text/javascript">
-    (function(m,e,t,r,i,k,a){
-      m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-      m[i].l=1*new Date();
-      for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
-      k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
-    })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=113262007', 'ym');
-    ym(113262007, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
-  </script>
-  <noscript><div><img src="https://mc.yandex.ru/watch/113262007" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
-  
-<script>
-  // Проверка доступа к VIP кнопкам
-  document.addEventListener("click", (e) => {
-    const vipBtn = e.target.closest(".btn.vip");
-    if (!vipBtn) return;
-
-    const token = localStorage.getItem("session_token");
-    if (!token) {
-      e.preventDefault(); // Отменяем переход по ссылке
-      
-      // Если у тебя подключена функция звука ошибки
-      if (typeof playErrorSound === "function") {
-        playErrorSound();
-      }
-
-      // Показываем предупреждение
-      showMessage("Bu VIP funksiya, iltimos ro'yxatdan o'ting.");
-
-      // Через 1.5 секунды кидаем на страницу авторизации
-      setTimeout(() => {
-        window.location.href = "/auth";
-      }, 1500);
-    }
-  });
-  // Автоматическое добавление тегов YANGI и VIP для кнопок
-  const containers = document.querySelectorAll('.button-container');
-  
-  containers.forEach(container => {
-    // 1. Обрабатываем новые кнопки (.btn.new)
-    const newBtns = container.querySelectorAll('.btn.new');
-    newBtns.forEach(btn => {
-      if (!btn.querySelector('.tag')) {
-        const tag = document.createElement('span');
-        tag.className = 'tag';
-        tag.textContent = 'YANGI';
-        btn.appendChild(tag);
-      }
-      container.prepend(btn); // Новые переносим наверх
-    });
-
-    // 2. Автоматически добавляем бейджик VIP (.btn.vip)
-    const vipBtns = container.querySelectorAll('.btn.vip');
-    vipBtns.forEach(btn => {
-      if (!btn.querySelector('.vip-badge')) {
-        const badge = document.createElement('span');
-        badge.className = 'vip-badge';
-        badge.textContent = 'VIP';
-        btn.appendChild(badge);
-      }
-    });
-  });
-</script>
-  <script src="/auto-menu.js" data-prank-as="menu"></script>
-  <script src="/tracker.js" data-prank-as="tracker"></script>
-</body>
-</html>
