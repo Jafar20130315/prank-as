@@ -91,7 +91,7 @@
   if (c.saveData) return true;
   if (c.effectiveType === 'slow-2g' || c.effectiveType === '2g') return true;
   if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return true;
-  if (n.deviceMemory && n.deviceMemory <= 2) return true; // только совсем слабые
+  if (n.deviceMemory && n.deviceMemory <= 4) return true; // только совсем слабые
   return false;
 }
 
