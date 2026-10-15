@@ -3,155 +3,166 @@
 <head>
   <meta charset="UTF-8">
   <title>Prank-as — Kirish</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
   <script src="https://accounts.google.com/gsi/client?hl=uz" async defer></script>
   <link rel="icon" type="image/x-icon" href="favicon.png">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    body { font-family: 'Inter', sans-serif; }
-    .glass-panel {
-      background: rgba(24, 24, 27, 0.6);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fade { animation: fadeIn 0.5s ease-out forwards; }
+    
+    /* Профессиональный стиль для панели аккаунта */
+    .glass-professional {
+      background: rgba(24, 24, 27, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     }
-    .btn-press:active { transform: scale(0.98); }
+    .btn-hover:active { transform: scale(0.98); }
   </style>
 </head>
-<body class="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center p-4 sm:p-6">
+<body class="min-h-screen flex items-center justify-center text-white p-4"
+      style="background: radial-gradient(circle at center, #1e293b 0%, #020617 100%)">
 
-  <!-- Orqa fon effektlari -->
-  <div class="fixed inset-0 overflow-hidden pointer-events-none">
-    <div class="absolute -top-[20%] -left-[10%] w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px]"></div>
-    <div class="absolute top-[40%] -right-[10%] w-[400px] h-[400px] bg-indigo-600/10 rounded-full blur-[100px]"></div>
+<!-- ================= ОРИГИНАЛЬНЫЙ БЛОК ВХОДА (100% БЕЗ ИЗМЕНЕНИЙ) ================= -->
+<div id="loginContainer" class="rounded-3xl p-8 w-full max-w-md text-center shadow-2xl animate-fade"
+     style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1)">
+
+  <a href="/" class="inline-block mb-2">
+    <h1 class="text-4xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-500">
+      Prank-as
+    </h1>
+  </a>
+  <p class="text-slate-400 mb-8 text-sm font-medium">Xavfsiz avtorizatsiya tizimi</p>
+
+  <div id="captchaBox" class="flex flex-col items-center mb-8">
+    <div class="g-recaptcha"
+         data-sitekey="6LctEEEsAAAAAIYEMkFvKyCVj6ftjhm3iVPkwQyY"
+         data-theme="dark"
+         data-callback="onCaptchaSuccess"></div>
+    <p class="text-slate-500 text-[10px] mt-3 uppercase tracking-widest">Davom etish uchun tasdiqlang</p>
   </div>
 
-  <div class="relative w-full max-w-[400px] flex flex-col gap-5 animate-[fadeIn_0.4s_ease-out]">
+  <div id="loginBox" class="opacity-20 pointer-events-none transition-all duration-700 scale-95 flex flex-col items-center gap-4">
+    <div class="w-full flex flex-col items-center gap-3">
+
+      <!-- Google -->
+      <div id="googleButtonDiv" class="flex justify-center" style="height:40px"></div>
+
+      <!-- Telegram -->
+      <button id="tgLoginBtn" type="button"
+              class="rounded-full font-semibold text-sm text-white flex items-center justify-center gap-2 transition hover:brightness-110"
+              style="height:40px; background:#54a9eb">
+        <svg viewBox="0 0 24 24" class="w-4 h-4" fill="currentColor"><path d="M21.5 3.5 2.6 10.8c-.9.4-.9 1.1-.2 1.3l4.8 1.5 1.8 5.6c.2.6.4.8.8.8.4 0 .6-.2.9-.5l2.3-2.2 4.7 3.5c.9.5 1.5.2 1.7-.8l3-14.3c.3-1.2-.4-1.7-1.3-1.3ZM8.5 13.2l9.6-6c.4-.3.8-.1.5.2l-7.8 7-.3 3.2-2-4.4Z"/></svg>
+        Telegram bilan davom etish
+      </button>
+      <script async src="https://telegram.org/js/telegram-widget.js?22"></script>
+
+    </div>
+  </div>
+
+  <div class="mt-8 text-center">
+    <a href="/" class="text-xs text-slate-500 hover:text-slate-300 transition-colors">← Asosiy sahifaga qaytish</a>
+  </div>
+</div>
+<!-- ================= КОНЕЦ ОРИГИНАЛЬНОГО БЛОКА ================= -->
+
+
+<!-- ================= НОВЫЙ ПРОФЕССИОНАЛЬНЫЙ ДАШБОРД (Скрыт по умолчанию) ================= -->
+<div id="dashboardContainer" class="hidden rounded-3xl w-full max-w-md overflow-hidden glass-professional animate-fade">
+  
+  <!-- Заголовок -->
+  <div class="bg-white/5 px-6 py-4 border-b border-white/5 flex justify-between items-center">
+    <span class="font-bold text-lg tracking-wide text-white">Profil</span>
+    <div class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
+  </div>
+
+  <!-- Раздел 1: Аккаунт (Фото, Имя, Почта) -->
+  <div class="p-6 flex flex-col items-center border-b border-white/5">
+    <div class="relative group cursor-pointer">
+      <div id="userAvatar" class="w-24 h-24 rounded-full bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center overflow-hidden shadow-xl transition-transform duration-300 group-hover:scale-105">
+        <!-- Иконка по умолчанию (SVG) -->
+        <svg class="w-12 h-12 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"></path>
+        </svg>
+      </div>
+    </div>
     
-    <!-- Logo -->
-    <div class="text-center mb-2">
-      <h1 class="text-3xl font-bold tracking-tight text-white">Prank-as</h1>
-      <p class="text-zinc-500 text-sm mt-1">Xavfsiz avtorizatsiya tizimi</p>
-    </div>
-
-    <!-- LOGIN HOLATI -->
-    <div id="loginView" class="glass-panel rounded-3xl p-6 flex flex-col gap-5">
-      
-      <!-- reCAPTCHA -->
-      <div id="captchaBox" class="flex flex-col items-center">
-        <div class="g-recaptcha"
-             data-sitekey="6LctEEEsAAAAAIYEMkFvKyCVj6ftjhm3iVPkwQyY"
-             data-theme="dark"
-             data-callback="onCaptchaSuccess"></div>
-        <p class="text-zinc-600 text-[10px] mt-3 uppercase tracking-widest font-medium">Davom etish uchun tasdiqlang</p>
-      </div>
-
-      <!-- Tugmalar (Captcha o'tguncha o'chirilgan) -->
-      <div id="loginActions" class="flex flex-col gap-3 opacity-30 pointer-events-none transition-all duration-500">
-        
-        <!-- Google -->
-        <div id="googleButtonDiv" class="flex justify-center w-full"></div>
-
-        <!-- Telegram -->
-        <button id="tgLoginBtn" type="button"
-                class="btn-press w-full flex items-center justify-center gap-3 bg-[#2AABEE] hover:bg-[#229ED9] text-white font-semibold py-3.5 rounded-xl transition-all duration-200 shadow-lg shadow-blue-900/20">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M21.5 3.5 2.6 10.8c-.9.4-.9 1.1-.2 1.3l4.8 1.5 1.8 5.6c.2.6.4.8.8.8.4 0 .6-.2.9-.5l2.3-2.2 4.7 3.5c.9.5 1.5.2 1.7-.8l3-14.3c.3-1.2-.4-1.7-1.3-1.3ZM8.5 13.2l9.6-6c.4-.3.8-.1.5.2l-7.8 7-.3 3.2-2-4.4Z"/>
-          </svg>
-          <span>Telegram orqali kirish</span>
-        </button>
-        <script async src="https://telegram.org/js/telegram-widget.js?22"></script>
-      </div>
-    </div>
-
-    <!-- AKKAUNT HOLATI (Boshida yashirin) -->
-    <div id="dashboardView" class="hidden flex flex-col gap-4">
-      
-      <!-- 1. HISOB BO'LIMI -->
-      <div class="glass-panel rounded-3xl p-6 flex flex-col items-center text-center relative overflow-hidden">
-        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
-        
-        <div class="relative mb-4">
-          <div id="userAvatar" class="w-20 h-20 rounded-full bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center overflow-hidden shadow-xl">
-            <svg class="w-10 h-10 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"></path>
-            </svg>
-          </div>
-          <div class="absolute bottom-0 right-0 w-5 h-5 bg-emerald-500 border-2 border-zinc-900 rounded-full"></div>
-        </div>
-
-        <h2 id="userName" class="text-xl font-bold text-white mb-1">Foydalanuvchi</h2>
-        
-        <div class="flex items-center gap-2 text-zinc-400 bg-zinc-900/50 px-4 py-2 rounded-full border border-white/5 mt-2">
-          <svg class="w-4 h-4 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-          </svg>
-          <span id="userEmail" class="text-sm font-medium">email@example.com</span>
-        </div>
-      </div>
-
-      <!-- 2. SOZLAMALAR BO'LIMI -->
-      <div class="glass-panel rounded-3xl p-2 flex flex-col">
-        
-        <!-- Chiqish tugmasi -->
-        <button id="logoutBtn" class="btn-press flex items-center gap-4 w-full p-4 rounded-2xl text-zinc-300 hover:bg-white/5 hover:text-white transition-all duration-200 group">
-          <div class="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center group-hover:bg-zinc-700 transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-            </svg>
-          </div>
-          <div class="text-left">
-            <div class="font-semibold text-sm">Tizimdan chiqish</div>
-            <div class="text-xs text-zinc-500">Joriy sessiyani yakunlash</div>
-          </div>
-        </button>
-
-        <div class="h-px bg-white/5 mx-4"></div>
-
-        <!-- Hisobni o'chirish tugmasi -->
-        <button id="deleteAccountBtn" class="btn-press flex items-center gap-4 w-full p-4 rounded-2xl text-red-400 hover:bg-red-500/10 transition-all duration-200 group">
-          <div class="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center group-hover:bg-red-500/20 transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-            </svg>
-          </div>
-          <div class="text-left">
-            <div class="font-semibold text-sm">Hisobni o'chirish</div>
-            <div class="text-xs text-red-400/60">Barcha ma'lumotlar butunlay o'chiriladi</div>
-          </div>
-        </button>
-
-      </div>
-      
-      <a href="/" class="text-center text-xs text-zinc-600 hover:text-zinc-400 transition-colors mt-2 flex items-center justify-center gap-1">
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-        Asosiy sahifaga qaytish
-      </a>
-
+    <h2 id="userName" class="mt-4 text-xl font-bold text-white">Foydalanuvchi</h2>
+    <div class="mt-1 flex items-center gap-2 text-zinc-400 bg-zinc-900/50 px-3 py-1.5 rounded-full border border-white/5">
+      <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+      </svg>
+      <span id="userEmail" class="text-xs font-medium truncate max-w-[200px]">email@example.com</span>
     </div>
   </div>
+
+  <!-- Раздел 2: Настройки (Выход, Удалить) -->
+  <div class="p-4 space-y-2">
+    
+    <!-- Кнопка Выход -->
+    <button id="logoutBtn" class="btn-hover w-full flex items-center gap-4 p-3 rounded-xl text-zinc-300 hover:bg-white/5 hover:text-white transition-all duration-200 group">
+      <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center group-hover:bg-zinc-700 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+        </svg>
+      </div>
+      <div class="text-left flex-1">
+        <div class="font-semibold text-sm">Chiqish</div>
+        <div class="text-[10px] text-zinc-500">Sessiyani tugatish</div>
+      </div>
+      <svg class="w-4 h-4 text-zinc-600 group-hover:text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+    </button>
+
+    <!-- Кнопка Удалить аккаунт -->
+    <button id="deleteAccountBtn" class="btn-hover w-full flex items-center gap-4 p-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-all duration-200 group">
+      <div class="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center group-hover:bg-red-500/20 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+        </svg>
+      </div>
+      <div class="text-left flex-1">
+        <div class="font-semibold text-sm">Akkauntni o'chirish</div>
+        <div class="text-[10px] text-red-400/60">Barcha ma'lumotlar yo'qoladi</div>
+      </div>
+      <svg class="w-4 h-4 text-red-900/50 group-hover:text-red-400/80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+    </button>
+
+  </div>
+  
+  <div class="px-6 pb-6 pt-2">
+    <a href="/" class="block w-full py-3 rounded-xl font-medium text-xs text-zinc-500 hover:text-zinc-300 hover:bg-white/5 transition-all text-center border border-transparent hover:border-white/5">
+      ← Asosiy sahifaga qaytish
+    </a>
+  </div>
+</div>
+<!-- ================= КОНЕЦ ДАШБОРДА ================= -->
 
 <script>
   const WORKER_URL = "https://auth.prank-as.uz";
   const GOOGLE_CLIENT_ID = "712013430650-f0ospumog4obguv9cv52rrik753ok928.apps.googleusercontent.com";
   const TG_BOT_ID = "8214352355";
 
-  const loginView = document.getElementById("loginView");
-  const dashboardView = document.getElementById("dashboardView");
+  // Элементы оригинального входа
+  const loginContainer = document.getElementById("loginContainer");
+  const loginBox = document.getElementById("loginBox");
   const captchaBox = document.getElementById("captchaBox");
-  const loginActions = document.getElementById("loginActions");
-  
+
+  // Элементы нового дашборда
+  const dashboardContainer = document.getElementById("dashboardContainer");
   const userAvatar = document.getElementById("userAvatar");
   const userName = document.getElementById("userName");
   const userEmail = document.getElementById("userEmail");
 
-  const BTN_WIDTH = Math.min(360, window.innerWidth - 48);
+  const BTN_WIDTH = Math.min(320, window.innerWidth - 96);
+  document.getElementById("tgLoginBtn").style.width = BTN_WIDTH + "px";
 
   // ---------- reCAPTCHA ----------
   window.onCaptchaSuccess = function (token) {
     if (token) {
-      loginActions.classList.remove("opacity-30", "pointer-events-none");
+      loginBox.classList.remove("opacity-20", "pointer-events-none", "scale-95");
       captchaBox.classList.add("hidden");
     }
   };
@@ -168,7 +179,7 @@
       if (data.success) {
         localStorage.setItem("session_token", data.token);
         localStorage.setItem("user_data", JSON.stringify(data.user));
-        window.location.href = "/";
+        switchToDashboard(data.user);
       } else {
         alert("Google orqali kirishda xatolik yuz berdi");
       }
@@ -191,7 +202,7 @@
     });
     google.accounts.id.renderButton(document.getElementById("googleButtonDiv"), {
       type: "standard",
-      shape: "rectangular",
+      shape: "pill",
       theme: "filled_black",
       text: "continue_with",
       size: "large",
@@ -213,7 +224,7 @@
       if (data.success) {
         localStorage.setItem("session_token", data.token);
         localStorage.setItem("user_data", JSON.stringify(data.user));
-        window.location.href = "/";
+        switchToDashboard(data.user);
       }
     } catch (e) {
       console.error(e);
@@ -222,7 +233,7 @@
 
   document.getElementById("tgLoginBtn").onclick = () => {
     if (!window.Telegram || !Telegram.Login) {
-      alert("Telegram hali yuklanmadi, qayta urinib ko'ring.");
+      alert("Telegram hali yuklanmadi, bir soniyadan keyin qayta urinib ko'ring.");
       return;
     }
     Telegram.Login.auth(
@@ -231,10 +242,13 @@
     );
   };
 
-  // ---------- Akkaunt boshqaruvi ----------
-  function showDashboard(user) {
-    loginView.classList.add("hidden");
-    dashboardView.classList.remove("hidden");
+  // ---------- Логика переключения и управления аккаунтом ----------
+  
+  function switchToDashboard(user) {
+    // Скрываем оригинальный вход
+    loginContainer.classList.add("hidden");
+    // Показываем новый дашборд
+    dashboardContainer.classList.remove("hidden");
     
     if (user?.name) userName.textContent = user.name;
     if (user?.email) userEmail.textContent = user.email;
@@ -244,7 +258,6 @@
     }
   }
 
-  // Chiqish
   document.getElementById("logoutBtn").onclick = async () => {
     const token = localStorage.getItem("session_token");
     if (token) {
@@ -256,40 +269,36 @@
     }
     localStorage.removeItem("session_token");
     localStorage.removeItem("user_data");
-    if (window.google?.accounts?.id) {
+    if (window.google && google.accounts && google.accounts.id) {
       google.accounts.id.disableAutoSelect();
     }
-    window.location.href = "/";
+    location.reload(); // Перезагрузка для возврата к оригинальному дизайну
   };
 
-  // Hisobni o'chirish
   document.getElementById("deleteAccountBtn").onclick = async () => {
-    const isConfirmed = confirm("Rostdan ham hisobni o'chirmoqchimisiz? Bu amalni qaytarib bo'lmaydi va barcha ma'lumotlaringiz yo'qoladi.");
+    const isConfirmed = confirm("Rostdan ham hisobni o'chirmoqchimisiz? Bu amalni qaytarib bo'lmaydi.");
     if (!isConfirmed) return;
 
     const token = localStorage.getItem("session_token");
     const userData = JSON.parse(localStorage.getItem("user_data") || "{}");
-    const userId = userData.id;
-
+    
     try {
       const res = await fetch(`${WORKER_URL}/api/delete-account`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, userId })
+        body: JSON.stringify({ token, userId: userData.id })
       });
       const data = await res.json();
       if (data.success) {
         localStorage.clear();
-        alert("Hisob muvaffaqiyatli o'chirildi.");
-        window.location.href = "/";
+        location.reload();
       }
     } catch (e) {
-      console.error(e);
-      alert("Xatolik yuz berdi, qayta urinib ko'ring.");
+      alert("Xatolik yuz berdi.");
     }
   };
 
-  // Sessiyani tekshirish
+  // Проверка сессии при загрузке
   (async () => {
     const token = localStorage.getItem("session_token");
     if (token) {
@@ -301,7 +310,7 @@
         });
         const data = await res.json();
         if (data.user) {
-          showDashboard(data.user);
+          switchToDashboard(data.user);
         }
       } catch (e) {
         console.error(e);
@@ -309,9 +318,9 @@
     }
   })();
 </script>
-
 <script src="/metrika-code-paster.js" data-prank-as="metrika"></script>
 <script src="/auto-menu.js" data-prank-as="menu"></script>
 <script src="/tracker.js" data-prank-as="tracker"></script>
-<script src="auto-menu.js"></script></body>
+<script src="auto-menu.js"></script>
+</body>
 </html>
