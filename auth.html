@@ -13,15 +13,12 @@
     .animate-fade { animation: fadeIn 0.5s ease-out forwards; }
   </style>
 </head>
-<body class="min-h-screen flex items-center justify-center text-white p-4 relative"
+<body class="min-h-screen flex items-center justify-center text-white p-4"
       style="background: radial-gradient(circle at center, #1e293b 0%, #020617 100%)">
 
-<!-- Контейнер для позиционирования оверлея FedCM строго по центру экрана -->
-<div id="g_id_onload_parent" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[9999] pointer-events-none"></div>
-
-<div class="rounded-3xl p-8 w-full max-w-md text-center shadow-2xl animate-fade relative z-10"
+<div class="rounded-3xl p-8 w-full max-w-md text-center shadow-2xl animate-fade"
      style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1)">
-  
+
   <a href="/" class="inline-block mb-2">
     <h1 class="text-4xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-500">
       Prank-as
@@ -30,26 +27,41 @@
   <p class="text-slate-400 mb-8 text-sm font-medium">Xavfsiz avtorizatsiya tizimi</p>
 
   <div id="captchaBox" class="flex flex-col items-center mb-8">
-    <div class="g-recaptcha" 
-         data-sitekey="6LctEEEsAAAAAIYEMkFvKyCVj6ftjhm3iVPkwQyY" 
-         data-theme="dark" 
+    <div class="g-recaptcha"
+         data-sitekey="6LctEEEsAAAAAIYEMkFvKyCVj6ftjhm3iVPkwQyY"
+         data-theme="dark"
          data-callback="onCaptchaSuccess"></div>
     <p class="text-slate-500 text-[10px] mt-3 uppercase tracking-widest">Davom etish uchun tasdiqlang</p>
   </div>
 
   <div id="loginBox" class="opacity-20 pointer-events-none transition-all duration-700 scale-95 flex flex-col items-center gap-4">
     <div class="w-full flex flex-col items-center gap-3">
-      <!-- Google Sign-In Container -->
-      <div id="googleButtonDiv" class="flex justify-center cursor-pointer" style="height:40px"></div>
+
+      <!-- Google: своя кнопка -> показывает карточку One Tap / FedCM -->
+      <button id="googleLoginBtn" type="button"
+              class="rounded-full font-semibold text-sm text-white flex items-center justify-center gap-2 transition hover:brightness-125"
+              style="height:40px; background:#131314; border:1px solid #8e918f">
+        <svg viewBox="0 0 48 48" class="w-4 h-4">
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        </svg>
+        Google bilan davom etish
+      </button>
+
+      <!-- Запасной вариант: официальная кнопка Google (popup). Показывается только если карточка не появилась -->
+      <div id="googleButtonDiv" class="hidden justify-center" style="height:40px"></div>
 
       <!-- Telegram -->
-      <button id="tgLoginBtn" type="button" 
-              class="rounded-full font-semibold text-sm text-white flex items-center justify-center gap-2 transition hover:brightness-110" 
+      <button id="tgLoginBtn" type="button"
+              class="rounded-full font-semibold text-sm text-white flex items-center justify-center gap-2 transition hover:brightness-110"
               style="height:40px; background:#54a9eb">
         <svg viewBox="0 0 24 24" class="w-4 h-4" fill="currentColor"><path d="M21.5 3.5 2.6 10.8c-.9.4-.9 1.1-.2 1.3l4.8 1.5 1.8 5.6c.2.6.4.8.8.8.4 0 .6-.2.9-.5l2.3-2.2 4.7 3.5c.9.5 1.5.2 1.7-.8l3-14.3c.3-1.2-.4-1.7-1.3-1.3ZM8.5 13.2l9.6-6c.4-.3.8-.1.5.2l-7.8 7-.3 3.2-2-4.4Z"/></svg>
         Telegram bilan davom etish
       </button>
       <script async src="https://telegram.org/js/telegram-widget.js?22"></script>
+
     </div>
   </div>
 
@@ -62,7 +74,7 @@
         </div>
     </div>
     <p class="text-sm font-semibold text-slate-300" id="userName">Foydalanuvchi</p>
-    
+
     <a href="/" class="block w-full py-3 rounded-2xl font-bold bg-blue-600 text-white hover:bg-blue-500 transition-all text-center shadow-lg">
       Bosh sahifaga qaytish
     </a>
@@ -88,17 +100,28 @@
   const captchaBox = document.getElementById("captchaBox");
   const userPreview = document.getElementById("userPreview");
   const userName = document.getElementById("userName");
+  const googleBtn = document.getElementById("googleLoginBtn");
+  const googleFallback = document.getElementById("googleButtonDiv");
 
+  // Одна ширина для всех кнопок: не больше 320px и не шире экрана телефона
   const BTN_WIDTH = Math.min(320, window.innerWidth - 96);
   document.getElementById("tgLoginBtn").style.width = BTN_WIDTH + "px";
+  googleBtn.style.width = BTN_WIDTH + "px";
 
-  window.onCaptchaSuccess = function(token) {
-    if(token) {
+  let googleReady = false;
+  let alreadyLoggedIn = false;
+
+  // ---------- reCAPTCHA ----------
+  window.onCaptchaSuccess = function (token) {
+    if (token) {
       loginBox.classList.remove("opacity-20", "pointer-events-none", "scale-95");
       captchaBox.classList.add("hidden");
+      // Сразу показываем карточку (как у Samsung)
+      showGoogleCard();
     }
-  }
+  };
 
+  // ---------- Google ----------
   async function handleCredentialResponse(response) {
     try {
       const res = await fetch(`${WORKER_URL}/api/google-auth`, {
@@ -117,44 +140,71 @@
     } catch (e) {
       console.error(e);
     }
-  };
+  }
 
-  window.onload = function () {
-    if (window.google) {
-      google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: handleCredentialResponse,
-        use_fedcm_for_prompt: true, // Включаем встроенный оверлей браузера (как у Samsung)
-        prompt_parent_id: 'g_id_onload_parent', // Центрируем оверлей
-        cancel_on_tap_outside: false
-      });
+  // Показать запасную официальную кнопку (popup) и спрятать нашу
+  function showGoogleFallback() {
+    googleBtn.classList.add("hidden");
+    googleFallback.classList.remove("hidden");
+    googleFallback.classList.add("flex");
+  }
 
-      google.accounts.id.renderButton(
-        document.getElementById("googleButtonDiv"),
-        { 
-          type: "standard",
-          shape: "pill",
-          theme: "filled_black",
-          text: "continue_with",
-          size: "large",
-          logo_alignment: "left",
-          width: BTN_WIDTH
-        }
-      );
+  // Показать карточку One Tap / FedCM
+  function showGoogleCard() {
+    if (!googleReady || alreadyLoggedIn) return;
+    google.accounts.id.prompt((notification) => {
+      // Карточка не показалась (cooldown, блокировка, закрыл пользователь) -> запасной вариант
+      if (
+        (notification.isNotDisplayed && notification.isNotDisplayed()) ||
+        (notification.isSkippedMoment && notification.isSkippedMoment()) ||
+        (notification.isDismissedMoment && notification.isDismissedMoment() &&
+          notification.getDismissedReason &&
+          notification.getDismissedReason() !== "credential_returned")
+      ) {
+        showGoogleFallback();
+      }
+    });
+  }
 
-      // При клике активируем диалоговый оверлей
-      document.getElementById("googleButtonDiv").onclick = () => {
-        google.accounts.id.prompt();
-      };
+  function initGoogle() {
+    if (!window.google || !google.accounts || !google.accounts.id) {
+      setTimeout(initGoogle, 150); // скрипт GSI ещё не загрузился
+      return;
     }
-  };
 
-  window.onTelegramAuth = async function(user) {
+    google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: handleCredentialResponse,
+      use_fedcm_for_prompt: true,
+      cancel_on_tap_outside: false,
+      auto_select: false
+    });
+
+    // Официальная кнопка (запасной вариант с popup), скрыта до необходимости
+    google.accounts.id.renderButton(googleFallback, {
+      type: "standard",
+      shape: "pill",
+      theme: "filled_black",
+      text: "continue_with",
+      size: "large",
+      logo_alignment: "left",
+      width: BTN_WIDTH
+    });
+
+    googleReady = true;
+  }
+  initGoogle();
+
+  // Клик по нашей Google-кнопке -> карточка
+  googleBtn.onclick = showGoogleCard;
+
+  // ---------- Telegram ----------
+  window.onTelegramAuth = async function (user) {
     try {
       const res = await fetch(`${WORKER_URL}/api/telegram-auth`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(user)
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(user)
       });
       const data = await res.json();
       if (data.success) {
@@ -165,7 +215,7 @@
     } catch (e) {
       console.error(e);
     }
-  }
+  };
 
   document.getElementById("tgLoginBtn").onclick = () => {
     if (!window.Telegram || !Telegram.Login) {
@@ -178,7 +228,12 @@
     );
   };
 
+  // ---------- Аккаунт / выход ----------
   function showUserAccount(user) {
+    alreadyLoggedIn = true;
+    if (window.google && google.accounts && google.accounts.id) {
+      google.accounts.id.cancel(); // закрыть карточку, если она успела открыться
+    }
     loginBox.classList.add("hidden");
     captchaBox.classList.add("hidden");
     accountBox.classList.remove("hidden");
@@ -191,9 +246,13 @@
   document.getElementById("logout").onclick = () => {
     localStorage.removeItem("session_token");
     localStorage.removeItem("user_data");
+    if (window.google && google.accounts && google.accounts.id) {
+      google.accounts.id.disableAutoSelect();
+    }
     window.location.reload();
   };
 
+  // Проверка существующей сессии
   (async () => {
     const token = localStorage.getItem("session_token");
     if (token) {
@@ -216,5 +275,5 @@
 <script src="/metrika-code-paster.js" data-prank-as="metrika"></script>
 <script src="/auto-menu.js" data-prank-as="menu"></script>
 <script src="/tracker.js" data-prank-as="tracker"></script>
-<script src="auto-menu.js"></script></body>
+</body>
 </html>
