@@ -1,7 +1,7 @@
 (function () {
   // На главной страницу не трогаем: там своё меню
   const path = window.location.pathname;
-  if (path === "/" || path === "/index.html" || path.endsWith("/index.html" || path.endsWith("/auth.html" || path === "/auth.html")) return;
+  if (path === "/index.html" || path.endsWith("/index.html" || path.endsWith("/auth.html" || path === "/auth.html")) return;
 
   // Установка приложения (PWA)
   let deferredPrompt = window.__deferredInstallPrompt || null;
