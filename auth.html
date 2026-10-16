@@ -1,196 +1,472 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-  <meta charset="UTF-8">
-  <title>Prank-as — Kirish</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-  <script src="https://accounts.google.com/gsi/client?hl=uz" async defer></script>
-  <link rel="icon" type="image/x-icon" href="favicon.png">
-  <style>
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-    .animate-fade { animation: fadeIn 0.5s ease-out forwards; }
-    
-    /* Профессиональный стиль для панели аккаунта */
-    .glass-professional {
-      background: rgba(24, 24, 27, 0.7);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    }
-    .btn-hover:active { transform: scale(0.98); }
-  </style>
+<meta charset="UTF-8">
+<title>Prank-as — Kirish</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#020617">
+<link rel="icon" href="favicon.png">
+<link rel="preconnect" href="https://www.google.com">
+<link rel="preconnect" href="https://accounts.google.com">
+<script src="https://www.google.com/recaptcha/api.js?render=explicit&onload=onRecaptchaLoad" async defer></script>
+<script src="https://accounts.google.com/gsi/client?hl=uz" async defer></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0}
+:root{
+  --bg:#020617;--card:rgba(255,255,255,.04);--line:rgba(255,255,255,.1);
+  --text:#fff;--muted:#94a3b8;--danger:#f87171;--accent:#54a9eb;--ok:#10b981;
+  --safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px);
+}
+html{-webkit-text-size-adjust:100%}
+body{
+  min-height:100vh;min-height:100dvh;color:var(--text);
+  font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background:radial-gradient(circle at center,#1e293b 0%,#020617 100%) fixed;
+  display:flex;flex-direction:column;
+  -webkit-tap-highlight-color:transparent;
+}
+body.lock{overflow:hidden}
+.hidden{display:none!important}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fade{animation:fadeIn .4s ease-out both}
+
+/* ---------- Kirish ---------- */
+#loginView{flex:1;display:flex;align-items:center;justify-content:center;padding:calc(16px + var(--safe-t)) 16px calc(16px + var(--safe-b))}
+.card{
+  width:100%;max-width:28rem;text-align:center;border-radius:24px;padding:32px 20px;
+  background:var(--card);border:1px solid var(--line);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  box-shadow:0 25px 50px -12px rgba(0,0,0,.5);
+}
+.logo{display:inline-block;font-size:2.25rem;font-weight:900;letter-spacing:-.05em;line-height:1.2;
+  background:linear-gradient(90deg,#fff,#94a3b8);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--muted);font-size:.875rem;font-weight:500;margin:4px 0 24px}
+#captchaBox{display:flex;flex-direction:column;align-items:center;margin-bottom:24px;min-height:78px}
+#captchaWrap{transform-origin:top center}
+.hint{color:var(--muted);font-size:.75rem;margin-top:10px}
+#loginBox{display:flex;flex-direction:column;align-items:center;gap:12px;opacity:.25;pointer-events:none;transform:scale(.96);transition:all .5s}
+#loginBox.on{opacity:1;pointer-events:auto;transform:none}
+#googleButtonDiv{height:40px;display:flex;justify-content:center}
+.btn-tg{
+  height:40px;border-radius:999px;background:var(--accent);color:#fff;font-weight:600;font-size:.875rem;
+  display:flex;align-items:center;justify-content:center;gap:8px;transition:filter .2s,transform .1s;
+}
+.btn-tg:hover{filter:brightness(1.1)}
+.btn-tg:active{transform:scale(.98)}
+.btn-tg svg{width:16px;height:16px;fill:currentColor}
+.back{display:inline-block;margin-top:28px;font-size:.8125rem;color:var(--muted);padding:6px 10px;transition:color .2s}
+.back:hover{color:#e2e8f0}
+
+/* ---------- Yuklanmoqda ---------- */
+#loader{flex:1;display:flex;align-items:center;justify-content:center}
+.spinner{width:36px;height:36px;border-radius:50%;border:3px solid rgba(255,255,255,.15);border-top-color:#fff;animation:spin .8s linear infinite}
+
+/* ---------- Kabinet ---------- */
+#appView{flex:1;display:flex;flex-direction:column}
+.bar{
+  position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;
+  padding:calc(10px + var(--safe-t)) 16px 10px;
+  background:rgba(2,6,23,.75);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--line);
+}
+.bar .logo{font-size:1.5rem}
+.burger{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.burger:hover{background:rgba(255,255,255,.08)}
+.burger svg{width:24px;height:24px}
+main{flex:1;width:100%;max-width:32rem;margin:0 auto;padding:24px 16px calc(24px + var(--safe-b))}
+.title{font-size:1.25rem;font-weight:700;margin-bottom:16px}
+.panel{border-radius:24px;background:var(--card);border:1px solid var(--line);overflow:hidden}
+.profile{padding:32px 20px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.avatar{
+  width:112px;height:112px;border-radius:50%;overflow:hidden;flex:none;
+  background:linear-gradient(135deg,#334155,#1e293b);border:2px solid #3f3f46;
+  display:flex;align-items:center;justify-content:center;font-size:2.5rem;font-weight:700;color:#cbd5e1;
+  box-shadow:0 10px 25px rgba(0,0,0,.4);
+}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.pname{margin-top:16px;font-size:1.375rem;font-weight:700;word-break:break-word}
+.pmail{
+  margin-top:8px;max-width:100%;display:inline-flex;align-items:center;gap:8px;
+  padding:6px 14px;border-radius:999px;background:rgba(0,0,0,.25);border:1px solid var(--line);color:#a1a1aa;font-size:.8125rem;
+}
+.pmail svg{width:14px;height:14px;flex:none}
+.pmail span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row{
+  width:100%;display:flex;align-items:center;gap:14px;padding:14px 16px;text-align:left;
+  min-height:68px;transition:background .2s;
+}
+.row+.row{border-top:1px solid var(--line)}
+.row:hover{background:rgba(255,255,255,.05)}
+.row:active{background:rgba(255,255,255,.08)}
+.ico{width:42px;height:42px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;background:#27272a}
+.ico svg{width:20px;height:20px}
+.row b{display:block;font-size:.9375rem;font-weight:600}
+.row small{display:block;font-size:.75rem;color:#71717a}
+.row.danger{color:var(--danger)}
+.row.danger .ico{background:rgba(239,68,68,.12)}
+.row.danger small{color:rgba(248,113,113,.65)}
+.row.danger:hover{background:rgba(239,68,68,.08)}
+
+/* ---------- Gamburger menyu ---------- */
+#scrim{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:opacity .25s}
+#scrim.on{opacity:1;pointer-events:auto}
+#drawer{
+  position:fixed;top:0;right:0;bottom:0;z-index:40;width:min(82vw,20rem);
+  padding:calc(12px + var(--safe-t)) 12px calc(12px + var(--safe-b));
+  background:#0b1220;border-left:1px solid var(--line);
+  transform:translateX(100%);visibility:hidden;transition:transform .28s ease,visibility 0s .28s;
+  display:flex;flex-direction:column;gap:6px;overflow-y:auto;
+}
+#drawer.on{transform:none;visibility:visible;transition:transform .28s ease}
+.drawer-head{display:flex;align-items:center;justify-content:space-between;padding:0 4px 10px;margin-bottom:6px;border-bottom:1px solid var(--line)}
+.drawer-head span{font-weight:700}
+.nav{width:100%;display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;min-height:52px;text-align:left;font-weight:600;color:#cbd5e1;transition:background .2s}
+.nav svg{width:20px;height:20px;flex:none}
+.nav:hover{background:rgba(255,255,255,.06)}
+.nav[aria-current="page"]{background:rgba(84,169,235,.15);color:#fff}
+
+/* ---------- Oyna (alert o'rniga) ---------- */
+#modal{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.65);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.dlg{width:100%;max-width:22rem;border-radius:20px;padding:24px 20px 20px;background:#0f172a;border:1px solid var(--line);box-shadow:0 30px 60px rgba(0,0,0,.6);text-align:center;animation:fadeIn .2s ease-out both}
+.dlg .mi{width:48px;height:48px;border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;background:rgba(84,169,235,.15);color:var(--accent)}
+.dlg .mi.err{background:rgba(239,68,68,.15);color:var(--danger)}
+.dlg .mi svg{width:24px;height:24px}
+.dlg h3{font-size:1.125rem;font-weight:700}
+.dlg p{margin-top:8px;color:var(--muted);font-size:.9375rem}
+.acts{display:flex;gap:10px;margin-top:22px}
+.acts button{flex:1;min-height:46px;border-radius:12px;font-weight:600;font-size:.9375rem;transition:filter .2s,transform .1s}
+.acts button:active{transform:scale(.97)}
+.b-cancel{background:rgba(255,255,255,.08)}
+.b-ok{background:#fff;color:#0f172a}
+.b-danger{background:#ef4444;color:#fff}
+.acts button:disabled{opacity:.6;cursor:wait}
+
+@media (max-width:360px){
+  .card{padding:28px 14px}
+  .logo{font-size:2rem}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+</style>
 </head>
-<body class="min-h-screen flex items-center justify-center text-white p-4"
-      style="background: radial-gradient(circle at center, #1e293b 0%, #020617 100%)">
+<body>
 
-<!-- ================= ОРИГИНАЛЬНЫЙ БЛОК ВХОДА (100% БЕЗ ИЗМЕНЕНИЙ) ================= -->
-<div id="loginContainer" class="rounded-3xl p-8 w-full max-w-md text-center shadow-2xl animate-fade"
-     style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1)">
+<!-- Sessiyani tekshirish -->
+<div id="loader" role="status" aria-label="Yuklanmoqda"><div class="spinner"></div></div>
 
-  <a href="/" class="inline-block mb-2">
-    <h1 class="text-4xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-500">
-      Prank-as
-    </h1>
-  </a>
-  <p class="text-slate-400 mb-8 text-sm font-medium">Xavfsiz avtorizatsiya tizimi</p>
+<!-- ================= KIRISH ================= -->
+<div id="loginView" class="hidden">
+  <div class="card fade">
+    <a href="/" class="logo" aria-label="Prank-as bosh sahifa">Prank-as</a>
+    <p class="sub">Xavfsiz avtorizatsiya tizimi</p>
 
-  <div id="captchaBox" class="flex flex-col items-center mb-8">
-    <div class="g-recaptcha"
-         data-sitekey="6LctEEEsAAAAAIYEMkFvKyCVj6ftjhm3iVPkwQyY"
-         data-theme="dark"
-         data-callback="onCaptchaSuccess"></div>
-    <p class="text-slate-500 text-[10px] mt-3 uppercase tracking-widest">Davom etish uchun tasdiqlang</p>
-  </div>
+    <div id="captchaBox">
+      <div id="captchaWrap"><div id="recaptcha"></div></div>
+      <p class="hint">Davom etish uchun tasdiqlang</p>
+    </div>
 
-  <div id="loginBox" class="opacity-20 pointer-events-none transition-all duration-700 scale-95 flex flex-col items-center gap-4">
-    <div class="w-full flex flex-col items-center gap-3">
-
-      <!-- Google -->
-      <div id="googleButtonDiv" class="flex justify-center" style="height:40px"></div>
-
-      <!-- Telegram -->
-      <button id="tgLoginBtn" type="button"
-              class="rounded-full font-semibold text-sm text-white flex items-center justify-center gap-2 transition hover:brightness-110"
-              style="height:40px; background:#54a9eb">
-        <svg viewBox="0 0 24 24" class="w-4 h-4" fill="currentColor"><path d="M21.5 3.5 2.6 10.8c-.9.4-.9 1.1-.2 1.3l4.8 1.5 1.8 5.6c.2.6.4.8.8.8.4 0 .6-.2.9-.5l2.3-2.2 4.7 3.5c.9.5 1.5.2 1.7-.8l3-14.3c.3-1.2-.4-1.7-1.3-1.3ZM8.5 13.2l9.6-6c.4-.3.8-.1.5.2l-7.8 7-.3 3.2-2-4.4Z"/></svg>
+    <div id="loginBox">
+      <div id="googleButtonDiv"></div>
+      <button id="tgLoginBtn" type="button" class="btn-tg">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.5 3.5 2.6 10.8c-.9.4-.9 1.1-.2 1.3l4.8 1.5 1.8 5.6c.2.6.4.8.8.8.4 0 .6-.2.9-.5l2.3-2.2 4.7 3.5c.9.5 1.5.2 1.7-.8l3-14.3c.3-1.2-.4-1.7-1.3-1.3ZM8.5 13.2l9.6-6c.4-.3.8-.1.5.2l-7.8 7-.3 3.2-2-4.4Z"/></svg>
         Telegram bilan davom etish
       </button>
-      <script async src="https://telegram.org/js/telegram-widget.js?22"></script>
-
     </div>
-  </div>
 
-  <div class="mt-8 text-center">
-    <a href="/" class="text-xs text-slate-500 hover:text-slate-300 transition-colors">← Asosiy sahifaga qaytish</a>
+    <a href="/" class="back">← Asosiy sahifaga qaytish</a>
   </div>
 </div>
-<!-- ================= КОНЕЦ ОРИГИНАЛЬНОГО БЛОКА ================= -->
 
-
-<!-- ================= НОВЫЙ ПРОФЕССИОНАЛЬНЫЙ ДАШБОРД (Скрыт по умолчанию) ================= -->
-<div id="dashboardContainer" class="hidden rounded-3xl w-full max-w-md overflow-hidden glass-professional animate-fade">
-  
-  <!-- Заголовок -->
-  <div class="bg-white/5 px-6 py-4 border-b border-white/5 flex justify-between items-center">
-    <span class="font-bold text-lg tracking-wide text-white">Profil</span>
-    <div class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
-  </div>
-
-  <!-- Раздел 1: Аккаунт (Фото, Имя, Почта) -->
-  <div class="p-6 flex flex-col items-center border-b border-white/5">
-    <div class="relative group cursor-pointer">
-      <div id="userAvatar" class="w-24 h-24 rounded-full bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center overflow-hidden shadow-xl transition-transform duration-300 group-hover:scale-105">
-        <!-- Иконка по умолчанию (SVG) -->
-        <svg class="w-12 h-12 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"></path>
-        </svg>
-      </div>
-    </div>
-    
-    <h2 id="userName" class="mt-4 text-xl font-bold text-white">Foydalanuvchi</h2>
-    <div class="mt-1 flex items-center gap-2 text-zinc-400 bg-zinc-900/50 px-3 py-1.5 rounded-full border border-white/5">
-      <svg class="w-3.5 h-3.5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-      </svg>
-      <span id="userEmail" class="text-xs font-medium truncate max-w-[200px]">email@example.com</span>
-    </div>
-  </div>
-
-  <!-- Раздел 2: Настройки (Выход, Удалить) -->
-  <div class="p-4 space-y-2">
-    
-    <!-- Кнопка Выход -->
-    <button id="logoutBtn" class="btn-hover w-full flex items-center gap-4 p-3 rounded-xl text-zinc-300 hover:bg-white/5 hover:text-white transition-all duration-200 group">
-      <div class="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center group-hover:bg-zinc-700 transition-colors">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-        </svg>
-      </div>
-      <div class="text-left flex-1">
-        <div class="font-semibold text-sm">Chiqish</div>
-        <div class="text-[10px] text-zinc-500">Saytdagi akkauntdan chiqish</div>
-      </div>
-      <svg class="w-4 h-4 text-zinc-600 group-hover:text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+<!-- ================= KABINET ================= -->
+<div id="appView" class="hidden">
+  <header class="bar">
+    <a href="/" class="logo">Prank-as</a>
+    <button id="menuBtn" class="burger" type="button" aria-label="Menyuni ochish" aria-expanded="false" aria-controls="drawer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
     </button>
+  </header>
 
-    <!-- Кнопка Удалить аккаунт -->
-    <button id="deleteAccountBtn" class="btn-hover w-full flex items-center gap-4 p-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-all duration-200 group">
-      <div class="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center group-hover:bg-red-500/20 transition-colors">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-        </svg>
+  <main>
+    <!-- Akkaunt -->
+    <section id="view-account" class="fade">
+      <h1 class="title">Akkaunt</h1>
+      <div class="panel profile">
+        <div id="userAvatar" class="avatar" aria-hidden="true"></div>
+        <h2 id="userName" class="pname">Foydalanuvchi</h2>
+        <div class="pmail">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          <span id="userEmail">—</span>
+        </div>
       </div>
-      <div class="text-left flex-1">
-        <div class="font-semibold text-sm">Akkauntni o'chirish</div>
-        <div class="text-[10px] text-red-400/60">Saytdan akkauntni to'liq o'chirish</div>
-      </div>
-      <svg class="w-4 h-4 text-red-900/50 group-hover:text-red-400/80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-    </button>
+    </section>
 
-  </div>
-  
-  <div class="px-6 pb-6 pt-2">
-    <a href="/" class="block w-full py-3 rounded-xl font-medium text-xs text-zinc-500 hover:text-zinc-300 hover:bg-white/5 transition-all text-center border border-transparent hover:border-white/5">
-      ← Asosiy sahifaga qaytish
-    </a>
-  </div>
+    <!-- Sozlamalar -->
+    <section id="view-settings" class="hidden fade">
+      <h1 class="title">Sozlamalar</h1>
+      <div class="panel">
+        <button id="logoutBtn" type="button" class="row">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg></span>
+          <span><b>Chiqish</b><small>Saytdagi akkauntdan chiqish</small></span>
+        </button>
+        <button id="deleteAccountBtn" type="button" class="row danger">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></span>
+          <span><b>Akkauntni o'chirish</b><small>Saytdan akkauntni to'liq o'chirish</small></span>
+        </button>
+      </div>
+    </section>
+  </main>
 </div>
-<!-- ================= КОНЕЦ ДАШБОРДА ================= -->
+
+<!-- Gamburger menyu -->
+<div id="scrim"></div>
+<nav id="drawer" aria-label="Asosiy menyu" aria-hidden="true">
+  <div class="drawer-head">
+    <span>Menyu</span>
+    <button id="closeMenu" class="burger" type="button" aria-label="Menyuni yopish">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <button class="nav" type="button" data-view="account">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.1a7.5 7.5 0 0115 0A17.9 17.9 0 0112 21.75c-2.68 0-5.22-.58-7.5-1.65z"/></svg>
+    Akkaunt
+  </button>
+  <button class="nav" type="button" data-view="settings">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    Sozlamalar
+  </button>
+</nav>
 
 <script>
+(() => {
+  "use strict";
+
   const WORKER_URL = "https://auth.prank-as.uz";
   const GOOGLE_CLIENT_ID = "712013430650-f0ospumog4obguv9cv52rrik753ok928.apps.googleusercontent.com";
   const TG_BOT_ID = "8214352355";
+  const RECAPTCHA_SITEKEY = "6LctEEEsAAAAAIYEMkFvKyCVj6ftjhm3iVPkwQyY";
 
-  // Элементы оригинального входа
-  const loginContainer = document.getElementById("loginContainer");
-  const loginBox = document.getElementById("loginBox");
-  const captchaBox = document.getElementById("captchaBox");
-
-  // Элементы нового дашборда
-  const dashboardContainer = document.getElementById("dashboardContainer");
-  const userAvatar = document.getElementById("userAvatar");
-  const userName = document.getElementById("userName");
-  const userEmail = document.getElementById("userEmail");
-
-  const BTN_WIDTH = Math.min(320, window.innerWidth - 96);
-  document.getElementById("tgLoginBtn").style.width = BTN_WIDTH + "px";
-
-  // ---------- reCAPTCHA ----------
-  window.onCaptchaSuccess = function (token) {
-    if (token) {
-      loginBox.classList.remove("opacity-20", "pointer-events-none", "scale-95");
-      captchaBox.classList.add("hidden");
-    }
+  const $ = (id) => document.getElementById(id);
+  const el = {
+    loader: $("loader"), loginView: $("loginView"), appView: $("appView"),
+    loginBox: $("loginBox"), captchaBox: $("captchaBox"), captchaWrap: $("captchaWrap"),
+    tgBtn: $("tgLoginBtn"), avatar: $("userAvatar"), name: $("userName"), email: $("userEmail"),
+    drawer: $("drawer"), scrim: $("scrim"), menuBtn: $("menuBtn")
   };
 
-  // ---------- Google ----------
-  async function handleCredentialResponse(response) {
+  let captchaToken = "";
+  let captchaId = null;
+  let busy = false;
+
+  // ---------- Xavfsiz localStorage ----------
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+    del(k) { try { localStorage.removeItem(k); } catch {} }
+  };
+  const clearSession = () => { store.del("session_token"); store.del("user_data"); };
+
+  // ---------- API ----------
+  async function api(path, body, method = "POST") {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 15000);
     try {
-      const res = await fetch(`${WORKER_URL}/api/google-auth`, {
-        method: "POST",
+      const res = await fetch(WORKER_URL + path, {
+        method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ credential: response.credential })
+        body: JSON.stringify(body),
+        signal: ctrl.signal
       });
-      const data = await res.json();
-      if (data.success) {
-        localStorage.setItem("session_token", data.token);
-        localStorage.setItem("user_data", JSON.stringify(data.user));
-        switchToDashboard(data.user);
-      } else {
-        alert("Google orqali kirishda xatolik yuz berdi");
-      }
-    } catch (e) {
-      console.error(e);
-    }
+      let data = {};
+      try { data = await res.json(); } catch {}
+      return { ok: res.ok, status: res.status, data };
+    } finally { clearTimeout(t); }
   }
 
+  // ---------- Oyna (alert / confirm o'rniga) ----------
+  let lastFocus = null;
+  function dialog({ title, text = "", type = "info", ok = "OK", cancel = null, danger = false }) {
+    return new Promise((resolve) => {
+      lastFocus = document.activeElement;
+      const wrap = document.createElement("div");
+      wrap.id = "modal";
+      const icon = type === "error"
+        ? '<path d="M12 9v4m0 4h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/>'
+        : '<path d="M12 8v4m0 4h.01M22 12a10 10 0 11-20 0 10 10 0 0120 0z"/>';
+      wrap.innerHTML =
+        '<div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgT">' +
+        '<div class="mi ' + (type === "error" || danger ? "err" : "") + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + icon + '</svg></div>' +
+        '<h3 id="dlgT"></h3><p></p><div class="acts"></div></div>';
+      wrap.querySelector("h3").textContent = title;
+      const p = wrap.querySelector("p");
+      if (text) p.textContent = text; else p.remove();
+
+      const acts = wrap.querySelector(".acts");
+      const close = (val) => {
+        document.removeEventListener("keydown", onKey, true);
+        wrap.remove();
+        if (lastFocus && lastFocus.focus) lastFocus.focus();
+        resolve(val);
+      };
+      if (cancel) {
+        const c = document.createElement("button");
+        c.type = "button"; c.className = "b-cancel"; c.textContent = cancel;
+        c.onclick = () => close(false);
+        acts.appendChild(c);
+      }
+      const o = document.createElement("button");
+      o.type = "button"; o.className = danger ? "b-danger" : "b-ok"; o.textContent = ok;
+      o.onclick = () => close(true);
+      acts.appendChild(o);
+
+      const onKey = (e) => {
+        if (e.key === "Escape") { e.stopPropagation(); close(false); }
+        else if (e.key === "Tab") {
+          const f = wrap.querySelectorAll("button");
+          const first = f[0], last = f[f.length - 1];
+          if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+          else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        }
+      };
+      document.addEventListener("keydown", onKey, true);
+      wrap.addEventListener("click", (e) => { if (e.target === wrap && cancel) close(false); });
+      document.body.appendChild(wrap);
+      (cancel ? acts.firstChild : o).focus();
+    });
+  }
+  const showError = (text, title = "Xatolik") => dialog({ title, text, type: "error", ok: "Yopish" });
+
+  // ---------- reCAPTCHA (explicit render) ----------
+  function fitCaptcha() {
+    const w = el.captchaBox.clientWidth || window.innerWidth;
+    const s = Math.min(1, (w - 8) / 304);
+    el.captchaWrap.style.transform = s < 1 ? "scale(" + s + ")" : "";
+    el.captchaWrap.style.height = s < 1 ? Math.round(78 * s) + "px" : "";
+  }
+  window.onRecaptchaLoad = function () {
+    if (captchaId !== null) return;
+    captchaId = grecaptcha.render("recaptcha", {
+      sitekey: RECAPTCHA_SITEKEY,
+      theme: "dark",
+      callback: (token) => {
+        captchaToken = token || "";
+        if (captchaToken) {
+          el.loginBox.classList.add("on");
+          el.captchaBox.classList.add("hidden");
+        }
+      },
+      "expired-callback": resetCaptcha,
+      "error-callback": resetCaptcha
+    });
+    fitCaptcha();
+  };
+  function resetCaptcha() {
+    captchaToken = "";
+    el.loginBox.classList.remove("on");
+    el.captchaBox.classList.remove("hidden");
+    try { if (captchaId !== null) grecaptcha.reset(captchaId); } catch {}
+  }
+  window.addEventListener("resize", fitCaptcha, { passive: true });
+  fitCaptcha();
+
+  // ---------- Ekranlarni almashtirish ----------
+  function showLogin() {
+    el.loader.classList.add("hidden");
+    el.appView.classList.add("hidden");
+    el.loginView.classList.remove("hidden");
+    fitCaptcha();
+  }
+
+  function initials(name, email) {
+    const s = (name || email || "?").trim();
+    const parts = s.split(/\s+/).slice(0, 2);
+    return parts.map((x) => x[0]).join("").toUpperCase() || "?";
+  }
+
+  function showApp(user) {
+    user = user || {};
+    el.name.textContent = user.name || "Foydalanuvchi";
+    el.email.textContent = user.email || (user.username ? "@" + user.username : "—");
+
+    el.avatar.textContent = "";
+    const fallback = () => { el.avatar.textContent = initials(user.name, user.email); };
+    if (typeof user.picture === "string" && /^https:\/\//i.test(user.picture)) {
+      const img = new Image();
+      img.alt = "";
+      img.referrerPolicy = "no-referrer";
+      img.decoding = "async";
+      img.onerror = fallback;
+      img.src = user.picture;
+      el.avatar.appendChild(img);
+    } else fallback();
+
+    el.loader.classList.add("hidden");
+    el.loginView.classList.add("hidden");
+    el.appView.classList.remove("hidden");
+    setView("account");
+  }
+
+  // ---------- Gamburger menyu ----------
+  function setMenu(open) {
+    el.drawer.classList.toggle("on", open);
+    el.scrim.classList.toggle("on", open);
+    el.drawer.setAttribute("aria-hidden", String(!open));
+    el.menuBtn.setAttribute("aria-expanded", String(open));
+    document.body.classList.toggle("lock", open);
+    if (open) el.drawer.querySelector(".nav").focus(); else el.menuBtn.focus({ preventScroll: true });
+  }
+  function setView(name) {
+    ["account", "settings"].forEach((v) => $("view-" + v).classList.toggle("hidden", v !== name));
+    el.drawer.querySelectorAll(".nav").forEach((b) => {
+      if (b.dataset.view === name) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+    });
+    window.scrollTo(0, 0);
+  }
+  el.menuBtn.onclick = () => setMenu(true);
+  $("closeMenu").onclick = () => setMenu(false);
+  el.scrim.onclick = () => setMenu(false);
+  el.drawer.querySelectorAll(".nav").forEach((b) => {
+    b.onclick = () => { setView(b.dataset.view); setMenu(false); };
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && el.drawer.classList.contains("on") && !$("modal")) setMenu(false);
+  });
+
+  // ---------- Muvaffaqiyatli kirish ----------
+  function onAuthSuccess(data) {
+    store.set("session_token", data.token);
+    store.set("user_data", JSON.stringify(data.user || {}));
+    showApp(data.user);
+  }
+
+  async function authRequest(path, payload, failText) {
+    if (busy) return;
+    if (!captchaToken) { showError("Avval \"Men robot emasman\" belgisini tasdiqlang."); return; }
+    busy = true;
+    try {
+      const { data } = await api(path, Object.assign({}, payload, { captcha: captchaToken }));
+      if (data && data.success && data.token) onAuthSuccess(data);
+      else { await showError(failText); resetCaptcha(); }
+    } catch (e) {
+      console.error(e);
+      await showError("Server bilan aloqa yo'q. Internetni tekshirib, qayta urinib ko'ring.");
+      resetCaptcha();
+    } finally { busy = false; }
+  }
+
+  // ---------- Google ----------
+  function handleCredentialResponse(response) {
+    authRequest("/api/google-auth", { credential: response.credential }, "Google orqali kirishda xatolik yuz berdi.");
+  }
+  let googleTries = 0;
   function initGoogle() {
     if (!window.google || !google.accounts || !google.accounts.id) {
-      setTimeout(initGoogle, 150);
+      if (++googleTries < 100) setTimeout(initGoogle, 150);
       return;
     }
     google.accounts.id.initialize({
@@ -200,127 +476,107 @@
       use_fedcm_for_prompt: true,
       auto_select: false
     });
-    google.accounts.id.renderButton(document.getElementById("googleButtonDiv"), {
-      type: "standard",
-      shape: "pill",
-      theme: "filled_black",
-      text: "continue_with",
-      size: "large",
-      logo_alignment: "left",
-      width: BTN_WIDTH
+    google.accounts.id.renderButton($("googleButtonDiv"), {
+      type: "standard", shape: "pill", theme: "filled_black",
+      text: "continue_with", size: "large", logo_alignment: "left",
+      width: Math.max(200, Math.min(320, window.innerWidth - 80))
     });
   }
   initGoogle();
 
-  // ---------- Telegram ----------
-  window.onTelegramAuth = async function (user) {
+  // ---------- Telegram (skript bosilganda yuklanadi) ----------
+  const tgWidth = () => Math.max(200, Math.min(320, window.innerWidth - 80));
+  el.tgBtn.style.width = tgWidth() + "px";
+  let tgLoading = null;
+  function loadTelegram() {
+    if (window.Telegram && Telegram.Login) return Promise.resolve();
+    if (tgLoading) return tgLoading;
+    tgLoading = new Promise((resolve, reject) => {
+      const s = document.createElement("script");
+      s.src = "https://telegram.org/js/telegram-widget.js?22";
+      s.async = true;
+      s.onload = resolve;
+      s.onerror = () => { tgLoading = null; reject(new Error("tg")); };
+      document.head.appendChild(s);
+    });
+    return tgLoading;
+  }
+  // tezroq bo'lishi uchun brauzer bo'sh turganda oldindan yuklaymiz
+  (window.requestIdleCallback || ((f) => setTimeout(f, 1500)))(() => loadTelegram().catch(() => {}));
+
+  el.tgBtn.onclick = async () => {
+    if (!captchaToken) { showError("Avval \"Men robot emasman\" belgisini tasdiqlang."); return; }
+    try { await loadTelegram(); }
+    catch { showError("Telegram yuklanmadi. Internetni tekshirib, qayta urinib ko'ring."); return; }
+    Telegram.Login.auth({ bot_id: TG_BOT_ID, request_access: true }, (user) => {
+      if (user) authRequest("/api/telegram-auth", user, "Telegram orqali kirishda xatolik yuz berdi.");
+    });
+  };
+
+  // ---------- Chiqish ----------
+  $("logoutBtn").onclick = async () => {
+    const yes = await dialog({ title: "Chiqishni xohlaysizmi?", text: "Akkauntingizdan chiqasiz.", ok: "Chiqish", cancel: "Bekor qilish" });
+    if (!yes) return;
+    const token = store.get("session_token");
+    try { if (token) await api("/api/logout", { token }); } catch (e) { console.error(e); }
+    clearSession();
+    try { if (window.google && google.accounts && google.accounts.id) google.accounts.id.disableAutoSelect(); } catch {}
+    location.reload();
+  };
+
+  // ---------- Akkauntni o'chirish ----------
+  $("deleteAccountBtn").onclick = async () => {
+    const yes = await dialog({
+      title: "Akkauntni o'chirasizmi?",
+      text: "Bu amalni qaytarib bo'lmaydi. Barcha ma'lumotlaringiz o'chiriladi.",
+      ok: "Ha, o'chirish", cancel: "Bekor qilish", danger: true
+    });
+    if (!yes) return;
+    const token = store.get("session_token");
+    if (!token) { clearSession(); location.reload(); return; }
     try {
-      const res = await fetch(`${WORKER_URL}/api/telegram-auth`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(user)
-      });
-      const data = await res.json();
-      if (data.success) {
-        localStorage.setItem("session_token", data.token);
-        localStorage.setItem("user_data", JSON.stringify(data.user));
-        switchToDashboard(data.user);
+      const { data } = await api("/api/delete-account", { token }, "DELETE");
+      if (data && data.success) {
+        clearSession();
+        await dialog({ title: "Akkaunt o'chirildi", text: "Sizni yana ko'rishdan xursand bo'lamiz.", ok: "OK" });
+        location.reload();
+      } else {
+        await showError("Akkauntni o'chirib bo'lmadi. Keyinroq qayta urinib ko'ring.");
       }
     } catch (e) {
       console.error(e);
+      await showError("Server bilan aloqa yo'q. Qayta urinib ko'ring.");
     }
   };
 
-  document.getElementById("tgLoginBtn").onclick = () => {
-    if (!window.Telegram || !Telegram.Login) {
-      alert("Telegram hali yuklanmadi, bir soniyadan keyin qayta urinib ko'ring.");
-      return;
-    }
-    Telegram.Login.auth(
-      { bot_id: TG_BOT_ID, request_access: true },
-      (user) => { if (user) window.onTelegramAuth(user); }
-    );
-  };
+  // ---------- Sessiyani tekshirish ----------
+  (async () => {
+    const token = store.get("session_token");
+    if (!token) { showLogin(); return; }
 
-  // ---------- Логика переключения и управления аккаунтом ----------
-  
-  function switchToDashboard(user) {
-    // Скрываем оригинальный вход
-    loginContainer.classList.add("hidden");
-    // Показываем новый дашборд
-    dashboardContainer.classList.remove("hidden");
-    
-    if (user?.name) userName.textContent = user.name;
-    if (user?.email) userEmail.textContent = user.email;
-    
-    if (user?.picture) {
-      userAvatar.innerHTML = `<img src="${user.picture}" class="w-full h-full object-cover">`;
-    }
-  }
-
-  document.getElementById("logoutBtn").onclick = async () => {
-    const token = localStorage.getItem("session_token");
-    if (token) {
-      await fetch(`${WORKER_URL}/api/logout`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token })
-      });
-    }
-    localStorage.removeItem("session_token");
-    localStorage.removeItem("user_data");
-    if (window.google && google.accounts && google.accounts.id) {
-      google.accounts.id.disableAutoSelect();
-    }
-    location.reload(); // Перезагрузка для возврата к оригинальному дизайну
-  };
-
-  document.getElementById("deleteAccountBtn").onclick = async () => {
-    const isConfirmed = confirm("Rostdan ham hisobni o'chirmoqchimisiz? Bu amalni qaytarib bo'lmaydi.");
-    if (!isConfirmed) return;
-
-    const token = localStorage.getItem("session_token");
-    const userData = JSON.parse(localStorage.getItem("user_data") || "{}");
-    
+    // tez ko'rsatish uchun keshdagi ma'lumot
     try {
-      const res = await fetch(`${WORKER_URL}/api/delete-account`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, userId: userData.id })
-      });
-      const data = await res.json();
-      if (data.success) {
-        localStorage.clear();
-        location.reload();
+      const cached = JSON.parse(store.get("user_data") || "null");
+      if (cached) showApp(cached);
+    } catch {}
+
+    try {
+      const { data } = await api("/api/me", { token });
+      if (data && data.user) {
+        store.set("user_data", JSON.stringify(data.user));
+        showApp(data.user);
+      } else {
+        clearSession();
+        showLogin();
       }
     } catch (e) {
-      alert("Xatolik yuz berdi.");
-    }
-  };
-
-  // Проверка сессии при загрузке
-  (async () => {
-    const token = localStorage.getItem("session_token");
-    if (token) {
-      try {
-        const res = await fetch(`${WORKER_URL}/api/me`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token })
-        });
-        const data = await res.json();
-        if (data.user) {
-          switchToDashboard(data.user);
-        }
-      } catch (e) {
-        console.error(e);
-      }
+      console.error(e);
+      if (el.appView.classList.contains("hidden")) showLogin();
     }
   })();
+})();
 </script>
-<script src="/metrika-code-paster.js" data-prank-as="metrika"></script>
-<script src="/auto-menu.js" data-prank-as="menu"></script>
-<script src="/tracker.js" data-prank-as="tracker"></script>
-<script src="auto-menu.js"></script>
+<script src="/metrika-code-paster.js" data-prank-as="metrika" defer></script>
+<script src="/tracker.js" data-prank-as="tracker" defer></script>
 </body>
 </html>
