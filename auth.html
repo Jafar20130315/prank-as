@@ -13,15 +13,15 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0}
 :root{
-  --bg:#020617;--card:rgba(255,255,255,.04);--line:rgba(255,255,255,.1);
-  --text:#fff;--muted:#94a3b8;--danger:#f87171;--accent:#54a9eb;--ok:#10b981;
+  --bg:#0c1027;--card:rgba(255,255,255,.04);--line:rgba(20, 66, 218, 0.1);
+  --text:#fff;--muted:#94a3b8;--danger:#0f0f0f;--accent:#1e2022;--ok:#10b981;
   --safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px);
 }
 html{-webkit-text-size-adjust:100%}
 body{
   min-height:100vh;min-height:100dvh;color:var(--text);
   font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  background:radial-gradient(circle at center,#1e293b 0%,#020617 100%) fixed;
+  background:radial-gradient(circle at center,#30353f 0%,#363636 100%) fixed;
   display:flex;flex-direction:column;
   -webkit-tap-highlight-color:transparent;
 }
@@ -71,7 +71,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .bar{
   position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;
   padding:calc(10px + var(--safe-t)) 16px 10px;
-  background:rgba(2,6,23,.75);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+  background: #30353f;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
   border-bottom:1px solid var(--line);
 }
 .bar .logo{font-size:1.5rem}
@@ -118,7 +118,7 @@ main{flex:1;width:100%;max-width:32rem;margin:0 auto;padding:24px 16px calc(24px
 #drawer{
   position:fixed;top:0;right:0;bottom:0;z-index:40;width:min(82vw,20rem);
   padding:calc(12px + var(--safe-t)) 12px calc(12px + var(--safe-b));
-  background:#0b1220;border-left:1px solid var(--line);
+  background:#000000;border-left:1px solid var(--line);
   transform:translateX(100%);visibility:hidden;transition:transform .28s ease,visibility 0s .28s;
   display:flex;flex-direction:column;gap:6px;overflow-y:auto;
 }
@@ -152,6 +152,23 @@ main{flex:1;width:100%;max-width:32rem;margin:0 auto;padding:24px 16px calc(24px
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+/* Кабинет по центру экрана и крупнее на компьютере */
+main{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding-bottom:calc(8vh + var(--safe-b, 0px));
+}
+
+@media (min-width:900px){
+  main{max-width:44rem}
+  .profile{padding:56px 40px}
+  .avatar{width:140px;height:140px;font-size:3.25rem}
+  .pname{font-size:1.75rem}
+  .pmail{font-size:.9375rem;padding:8px 18px}
+  .row{min-height:84px;padding:18px 22px}
+  .title{font-size:1.5rem;margin-bottom:20px}
 }
 </style>
 </head>
@@ -551,10 +568,7 @@ main{flex:1;width:100%;max-width:32rem;margin:0 auto;padding:24px 16px calc(24px
 
   // ---------- Sessiyani tekshirish ----------
   (async () => {
-    const token = store.get("session_token");
-    if (!token) { showLogin(); return; }
-
-    // tez ko'rsatish uchun keshdagi ma'lumot
+// tez ko'rsatish uchun keshdagi ma'lumot
     try {
       const cached = JSON.parse(store.get("user_data") || "null");
       if (cached) showApp(cached);
@@ -574,6 +588,7 @@ main{flex:1;width:100%;max-width:32rem;margin:0 auto;padding:24px 16px calc(24px
       if (el.appView.classList.contains("hidden")) showLogin();
     }
   })();
+  
 })();
 </script>
 <script src="/metrika-code-paster.js" data-prank-as="metrika" defer></script>
