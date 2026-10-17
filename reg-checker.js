@@ -1,8 +1,3 @@
-/*!
- * reg-checker.js — защита VIP-страниц Prank-as
- * Подключать в <head> БЕЗ defer/async, самым первым скриптом:
- *   <script src="/reg-checker.js"></script>
- */
 (function () {
   "use strict";
 
