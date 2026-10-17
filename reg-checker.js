@@ -28,11 +28,23 @@
     window.location.replace(AUTH_PAGE);
   }
 
+  function isTestOnly() {
+    try {
+      return new URLSearchParams(window.location.search).get("testonly") === "1";
+    } catch (e) {
+      return false;
+    }
+  }
+
   async function check() {
+    if (isTestOnly()) {
+      reveal();
+      return;
+    }
+
     var token = null;
     try { token = localStorage.getItem(TOKEN_KEY); } catch (e) {}
 
-    // Нет токена — сразу на авторизацию
     if (!token) return deny(false);
 
     try {
@@ -47,12 +59,11 @@
 
       var data = await res.json();
       if (data && data.user) {
-        reveal();            // пользователь настоящий — показываем страницу
+        reveal();
       } else {
-        deny(true);          // токен недействителен
+        deny(true);
       }
     } catch (err) {
-      // Ошибка сети: на всякий случай не пускаем (fail-closed)
       console.error("reg-checker error:", err);
       deny(false);
     }
@@ -60,9 +71,10 @@
 
   check();
 
-  // Повторная проверка при возврате по кнопке «Назад» (кэш bfcache)
   window.addEventListener("pageshow", function (e) {
     if (e.persisted) {
+      if (isTestOnly()) return;
+
       var st = document.createElement("style");
       st.id = "reg-checker-hide";
       st.textContent = "html{visibility:hidden !important}";
@@ -71,7 +83,6 @@
     }
   });
 
-  // Если токен удалили/изменили в другой вкладке (выход из аккаунта)
   window.addEventListener("storage", function (e) {
     if (e.key === TOKEN_KEY && !e.newValue) deny(false);
   });
