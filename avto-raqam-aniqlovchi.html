@@ -195,7 +195,7 @@
         <div class="bg-white rounded-xl shadow-sm p-5 sm:p-6 border border-slate-200">
             <label class="block text-sm font-semibold text-slate-700 mb-3" for="image-upload">Rasmlarni yuklash (bir nechta avto rasm qo'llab-quvvatlanadi)</label>
             <div class="flex items-center justify-center w-full">
-                <label for="image-upload" class="flex flex-col items-center justify-center w-full h-36 sm:h-40 border-2 border-slate-300 border-dashed rounded-lg cursor-pointer bg-slate-50 hover:bg-slate-100 active:bg-slate-200 transition-colors group">
+                <label id="dropzone" for="image-upload" class="flex flex-col items-center justify-center w-full h-36 sm:h-40 border-2 border-slate-300 border-dashed rounded-lg cursor-pointer bg-slate-50 hover:bg-slate-100 active:bg-slate-200 transition-colors group">
                     <div class="flex flex-col items-center justify-center pt-5 pb-6 px-4 text-center">
                         <div class="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center mb-3 group-hover:scale-105 transition-transform border border-slate-200">
                             <i class="fa-solid fa-arrow-up-from-bracket text-lg text-slate-600" aria-hidden="true"></i>
@@ -203,7 +203,7 @@
                         <p class="mb-1 text-sm text-slate-700 font-medium">Rasmlarni shu yerga tashlang yoki tanlash uchun bosing.</p>
                         <p class="text-xs text-slate-400">PNG, JPG, WEBP. Har biri 8MB gacha.</p>
                     </div>
-                    <input id="image-upload" type="file" class="hidden" accept="image/png, image/jpeg, image/webp" multiple />
+                   <input id="image-upload" type="file" class="hidden" accept="image/*" multiple />
                 </label>
             </div>
             <p id="upload-error" class="text-sm text-red-600 mt-3 hidden font-medium" role="alert"></p>
@@ -305,47 +305,53 @@
     }
 
     // ---------- Fayllarni yuklash ----------
-    uploadInput.addEventListener('change', async function (e) {
-        const files = Array.from(e.target.files);
-        if (files.length === 0) return;
+    // ---------- Fayllarni yuklash (tanlash / paste / drop) ----------
+const dropzone = document.getElementById('dropzone');
 
-        uploadError.classList.add('hidden');
+function isSupportedImage(file) {
+    // Ba'zi brauzerlar HEIC uchun bo'sh type beradi, shuning uchun kengaytmani ham tekshiramiz
+    const okType = ['image/png', 'image/jpeg', 'image/webp', 'image/heic', 'image/heif'].includes(file.type);
+    const okExt = /\.(png|jpe?g|webp|heic|heif)$/i.test(file.name || '');
+    return okType || okExt;
+}
 
-        const validFiles = [];
-        const rejected = [];
-        for (const file of files) {
-            const allowedTypes = ['image/png', 'image/jpeg', 'image/webp'];
-            if (!allowedTypes.includes(file.type)) {
-                rejected.push(`${file.name} (noto'g'ri format)`);
-                continue;
-            }
-            if (file.size > MAX_FILE_BYTES) {
-                rejected.push(`${file.name} (hajmi 8MB dan katta)`);
-                continue;
-            }
-            validFiles.push(file);
+async function handleFiles(files) {
+    files = Array.from(files || []);
+    if (files.length === 0) return;
+
+    uploadError.classList.add('hidden');
+
+    const validFiles = [];
+    const rejected = [];
+    for (const file of files) {
+        if (!isSupportedImage(file)) {
+            rejected.push(`${file.name || 'rasm'} (noto'g'ri format)`);
+            continue;
         }
-
-        if (rejected.length) {
-            uploadError.textContent = `Ba'zi fayllar yuklanmadi: ${rejected.join(', ')}`;
-            uploadError.classList.remove('hidden');
+        if (file.size > MAX_FILE_BYTES) {
+            rejected.push(`${file.name || 'rasm'} (hajmi 8MB dan katta)`);
+            continue;
         }
+        validFiles.push(file);
+    }
 
-        if (validFiles.length === 0) {
-            uploadInput.value = '';
-            return;
-        }
+    if (rejected.length) {
+        uploadError.textContent = `Ba'zi fayllar yuklanmadi: ${rejected.join(', ')}`;
+        uploadError.classList.remove('hidden');
+    }
+    if (validFiles.length === 0) return;
 
-        dashboard.classList.remove('hidden');
+    dashboard.classList.remove('hidden');
 
-        const jobs = [];
-        for (const file of validFiles) {
+    const jobs = [];
+    for (const file of validFiles) {
+        try {
             const previewUrl = await fileToDataURL(file);
             const resized = await resizeImageForUpload(file, MAX_UPLOAD_DIMENSION);
 
             const itemIndex = scanResults.length;
             scanResults.push({
-                file: file.name,
+                file: file.name || 'clipboard-image.png',
                 image: previewUrl,
                 status: 'queued',
                 plate: '---',
@@ -357,13 +363,75 @@
                 box_2d: null
             });
             jobs.push({ index: itemIndex, base64: resized.base64, mimeType: resized.mimeType });
+        } catch (err) {
+            console.error(err);
+            rejected.push(`${file.name || 'rasm'} (o'qib bo'lmadi)`);
+            uploadError.textContent = `Ba'zi fayllar yuklanmadi: ${rejected.join(', ')}`;
+            uploadError.classList.remove('hidden');
         }
+    }
 
-        renderResults();
-        runWithConcurrencyLimit(jobs, CONCURRENCY_LIMIT, (job) => processImageWithAI(job.base64, job.mimeType, job.index));
+    if (jobs.length === 0) return;
+    renderResults();
+    runWithConcurrencyLimit(jobs, CONCURRENCY_LIMIT, (job) => processImageWithAI(job.base64, job.mimeType, job.index));
+}
 
-        uploadInput.value = '';
-    });
+// 1) Oddiy tanlash
+uploadInput.addEventListener('change', async (e) => {
+    const files = Array.from(e.target.files);
+    uploadInput.value = '';          // avval nusxa olamiz, keyin tozalaymiz
+    await handleFiles(files);
+});
+
+// 2) Ctrl/Cmd + V
+document.addEventListener('paste', (e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    const files = [];
+    for (const item of items) {
+        if (item.kind === 'file' && item.type.startsWith('image/')) {
+            const f = item.getAsFile();
+            if (f) files.push(f);
+        }
+    }
+    if (files.length) {
+        e.preventDefault();
+        handleFiles(files);
+        showToast(`${files.length} ta rasm qo'shildi`);
+    }
+});
+
+// 3) Drag & Drop (butun sahifaga tashlash mumkin)
+let dragDepth = 0;
+const dragOnClasses = ['border-slate-700', 'bg-slate-100'];
+
+function hasFiles(e) {
+    return Array.from(e.dataTransfer?.types || []).includes('Files');
+}
+
+window.addEventListener('dragenter', (e) => {
+    if (!hasFiles(e)) return;
+    e.preventDefault();
+    dragDepth++;
+    dropzone.classList.add(...dragOnClasses);
+});
+window.addEventListener('dragover', (e) => {
+    if (!hasFiles(e)) return;
+    e.preventDefault();                       // kerak, aks holda drop ishlamaydi
+    e.dataTransfer.dropEffect = 'copy';
+});
+window.addEventListener('dragleave', (e) => {
+    if (!hasFiles(e)) return;
+    dragDepth = Math.max(0, dragDepth - 1);
+    if (dragDepth === 0) dropzone.classList.remove(...dragOnClasses);
+});
+window.addEventListener('drop', (e) => {
+    if (!hasFiles(e)) return;
+    e.preventDefault();                       // brauzer rasmni alohida ochib yubormasin
+    dragDepth = 0;
+    dropzone.classList.remove(...dragOnClasses);
+    handleFiles(e.dataTransfer.files);
+});
 
     function fileToDataURL(file) {
         return new Promise((resolve, reject) => {
