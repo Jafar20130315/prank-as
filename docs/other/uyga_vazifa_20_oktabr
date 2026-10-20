@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="script.js"></script>
+    <style>
+        #red-btn {
+            width: 50px;
+            height: 50px;
+            background-color: red;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        #green-btn {
+            width: 50px;
+            height: 50px;
+            background-color: rgb(38, 194, 77);
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        #blue-btn {
+            width: 50px;
+            height: 50px;
+            background-color: rgb(0, 102, 255);
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        #yellow-btn {
+            width: 50px;
+            height: 50px;
+            background-color: rgb(217, 255, 0);
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        #reset-btn {
+            width: 50px;
+            height: 50px;
+            background-color: rgb(2, 2, 2);
+            color: white;
+            border-radius: 10px;
+            position: absolute;
+            cursor: pointer;
+        }
+
+        #add-nmbr {
+            border: none;
+            background-color: rgb(0, 68, 255);
+            color: white;
+            border-radius: 35px;
+            width: 35px;
+            height: 35px;
+            user-select: none;
+            cursor: pointer;
+        }
+
+        #delete-nmbr {
+            border: none;
+            background-color: rgb(255, 0, 0);
+            color: white;
+            border-radius: 35px;
+            width: 35px;
+            height: 35px;
+            user-select: none;
+            cursor: pointer;
+        }
+
+        #add-nmbr:active {
+            animation: animationTwo 250ms;
+        }
+
+        #delete-nmbr:active {
+            animation: animationTwo 250ms;
+        }
+
+        @keyframes animationTwo {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(0.8);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <hr>
+    <div id="red-btn"></div>
+    <br>
+    <div id="green-btn"></div>
+    <br>
+    <div id="blue-btn"></div>
+    <br>
+    <div id="yellow-btn"></div>
+    <br>
+    <div id="reset-btn"><span style="margin-left: 6px;;">Reset</span></div>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <span id="current-color"></span>
+    <hr>
+    <input id="name" type="text">
+    <button id="add-btn" style="cursor: pointer;">Qo'shish</button>
+    <br>
+    <ul id="royxat"></ul>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <hr>
+    <span id="count-number">0</span>
+    <br>
+    <br>
+    <button id="add-nmbr">+</button>
+    <br>
+    <br>
+    <button id="delete-nmbr">-</button>
+    <br>
+    <br>
+    <button id="reset-cnt" style="cursor: pointer;">Reset</button>
+    <hr>
+    <input id="todolist-input" type="text"> <button id="todolist-addNew" style="cursor: pointer;">Qo'shish</button>
+    <ul id="todolist-royxat"></ul>
+    <hr>
+    <div id="first-product">
+        <h1 id="first-product-name">Soch quritgich, ARTEL, 15000W</h1>
+        <p id="first-product-price">1.200.000</p>
+        <button style="background-color: rgb(0, 153, 255); color: white; border: none; border-radius: 10px;" id="first-product-cart">Savatga</button>
+    </div>
+    <div id="second-product">
+        <h1 id="second-product-name">Kir mashina, BOSCH, qora</h1>
+        <p id="second-product-price">6.500.000</p>
+        <button style="background-color: rgb(0, 153, 255); color: white; border: none; border-radius: 10px;" id="second-product-cart">Savatga</button>
+    </div>
+    <div id="third-product">
+        <h1 id="third-product-name">Samsung Galaxy A57, oq rangli</h1>
+        <p id="third-product-price">4.950.000</p>
+        <button style="background-color: rgb(0, 153, 255); color: white; border: none; border-radius: 10px;" id="third-product-cart">Savatga</button>
+    </div>
+    <br>
+    <br>
+    <br>
+    <span>Savatcha:</span>
+    <div id="cart"></div>
+    <hr>
+    <script>
+        let redBtn = document.getElementById("red-btn");
+        let greenBtn = document.getElementById("green-btn");
+        let blueBtn = document.getElementById("blue-btn");
+        let yellowBtn = document.getElementById("yellow-btn");
+        let resetBtn = document.getElementById("reset-btn");
+        let currentColor = document.getElementById("current-color");
+        let body = document.querySelector("body");
+        let name = document.getElementById("name");
+        let royxat = document.getElementById("royxat");
+        let addBtn = document.getElementById("add-btn");
+        let addNmbr = document.getElementById("add-nmbr");
+        let deleteNmbr = document.getElementById("delete-nmbr");
+        let resetCnt = document.getElementById("reset-cnt");
+        let countNmbr = document.getElementById("count-number");
+        let todolistInput = document.getElementById("todolist-input");
+        let todolistAddNew = document.getElementById("todolist-addNew");
+        let todolistRoyxat = document.getElementById("todolist-royxat");
+        let firstProductDiv = document.getElementById("first-product");
+        let firstProduct = document.getElementById("first-product-name");
+        let firstProductAddToCart = document.getElementById("first-product-cart");
+        let secondProductDiv = document.getElementById("second-product");
+        let secondProduct = document.getElementById("second-product-name");
+        let secondProductAddToCart = document.getElementById("second-product-cart");
+        let thirdProductDiv = document.getElementById("third-product");
+        let thirdProduct = document.getElementById("third-product-name");
+        let thirdProductAddToCart = document.getElementById("third-product-cart");
+        let cart = document.getElementById("cart")
+
+        redBtn.addEventListener('click', function () {
+            body.style.backgroundColor = "red";
+            redBtn.style.backgroundColor = "#4d000b";
+            currentColor.innerHTML = `Xozir fonda qizil rang`;
+        });
+        greenBtn.addEventListener('click', function () {
+            body.style.backgroundColor = "green";
+            greenBtn.style.backgroundColor = "#084d00";
+            currentColor.innerHTML = `Xozir fonda yashil rang`;
+        });
+        blueBtn.addEventListener('click', function () {
+            body.style.backgroundColor = "blue";
+            redBtn.style.backgroundColor = "#00184d";
+            currentColor.innerHTML = `Xozir fonda ko'k rang`;
+        });
+        yellowBtn.addEventListener('click', function () {
+            body.style.backgroundColor = "yellow";
+            redBtn.style.backgroundColor = "#4d4a00";
+            currentColor.innerHTML = `Xozir fonda sariq rang`;
+        });
+        resetBtn.addEventListener('click', function () {
+            body.style.backgroundColor = "white";
+            currentColor.innerHTML = `Xozir fonda standart rang`;
+        });
+
+        // 2-VAZIFA
+
+
+        addBtn.addEventListener('click', function () {
+            if (name.value == "") {
+                location.reload();
+            }
+            const li = document.createElement("li");
+            li.textContent = name.value
+            name.value = ""
+            const delete_btn = document.createElement("button");
+            delete_btn.textContent = "O'chirish"
+            delete_btn.style.marginLeft = "20px"
+            delete_btn.addEventListener('click', function () {
+                li.style.display = "none";
+            })
+            li.appendChild(delete_btn);
+            royxat.appendChild(li)
+        });
+
+
+        // 3-VAZIFA
+
+        let count = 0;
+
+        function updateDisplay() {
+            countNmbr.innerHTML = count;
+
+            if (count < 0) {
+                countNmbr.style.color = "red";
+            } else {
+                countNmbr.style.color = "black";
+            }
+        }
+
+        addNmbr.addEventListener('click', function () {
+            count += 1;
+            updateDisplay();
+        });
+        deleteNmbr.addEventListener('click', function () {
+            count -= 1;
+            updateDisplay();
+        });
+        resetCnt.addEventListener('click', function () {
+            count = 0;
+            updateDisplay();
+        });
+
+
+        // 4-VAZIFA
+
+        todolistAddNew.addEventListener('click', function () {
+            let li = document.createElement("li");
+            let delete_todolist = document.createElement("button");
+            li.textContent = todolistInput.value;
+            todolistInput.value = ''
+            li.style.cursor = "pointer"
+            delete_todolist.textContent = "O'chirish";
+            delete_todolist.style.marginLeft = "20px"
+            delete_todolist.addEventListener('click', function () {
+                li.style.display = 'none'
+            })
+            li.addEventListener('click', function () {
+                li.style.textDecoration = "line-through"
+            })
+            todolistRoyxat.appendChild(li);
+            li.appendChild(delete_todolist)
+        });
+
+        // 5-VAZIFA
+
+firstProductAddToCart.addEventListener('click', function () {
+    let h1 = document.createElement("h1");
+    let dlt_btn = document.createElement("button");
+    dlt_btn.addEventListener('click', function () {
+        h1.style.display = "none";
+    })
+    h1.textContent = "Soch quritgich, ARTEL, 15000W"
+    dlt_btn.textContent = "Savatdan o'chirish";
+    dlt_btn.style.marginLeft = "20px";
+    h1.appendChild(dlt_btn)
+    cart.appendChild(h1)
+})
+secondProductAddToCart.addEventListener('click', function () {
+    let h1 = document.createElement("h1");
+    let dlt_btn = document.createElement("button");
+    dlt_btn.addEventListener('click', function () {
+        h1.style.display = "none";
+    })
+    h1.textContent = "Kir mashina, BOSCH, qora"
+    dlt_btn.textContent = "Savatdan o'chirish";
+    dlt_btn.style.marginLeft = "20px";
+    h1.appendChild(dlt_btn)
+    cart.appendChild(h1)
+})
+thirdProductAddToCart.addEventListener('click', function () {
+    let h1 = document.createElement("h1");
+    let dlt_btn = document.createElement("button");
+    dlt_btn.addEventListener('click', function () {
+        h1.style.display = "none";
+    })
+    h1.textContent = "Samsung Galaxy A57, oq rangli"
+    dlt_btn.textContent = "Savatdan o'chirish";
+    dlt_btn.style.marginLeft = "20px";
+    h1.appendChild(dlt_btn)
+    cart.appendChild(h1)
+});
+
+
+    </script>
+</body>
+
+</html>
