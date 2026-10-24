@@ -25,7 +25,7 @@
 
   function isTestOnly() {
     try {
-      return new URLSearchParams(window.location.search).get("testonly") === "1";
+      return new URLSearchParams(window.location.search).get("isauthorized") === "true";
     } catch (e) {
       return false;
     }
