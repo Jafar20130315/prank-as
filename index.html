@@ -415,7 +415,7 @@
   <nav id="dropdown-menu" class="dropdown-menu-small" aria-label="Asosiy menyu">
     <div class="menu-title">Prank-as</div>
 
-    <a href="#" id="installAppBtn" hidden>📱 Ilovani o‘rnatish</a>
+    <a href="/ilovani-yuklab-oliş">Ilovani o‘rnatish</a>
     <a href="/baholash">Fikr qoldirish</a>
     <a href="https://help.prank-as.uz">Yordam</a>
     <a href="https://old.prank-as.uz">Oldingi saytga qaytish</a>
@@ -508,33 +508,6 @@
       });
 
       window.addEventListener('resize', () => { if (window.innerWidth >= 1200) closeMenu(false); });
-
-      // ===== PWA install: кнопка видна, только если установка доступна =====
-      const installBtn = document.getElementById('installAppBtn');
-      let installPrompt = null;
-
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        installPrompt = e;
-        installBtn.hidden = false;
-      });
-
-      window.addEventListener('appinstalled', () => {
-        installPrompt = null;
-        installBtn.hidden = true;
-      });
-
-      installBtn.addEventListener('click', async (e) => {
-        e.preventDefault();
-        if (!installPrompt) return;
-        closeMenu(false);
-        installPrompt.prompt();
-        const { outcome } = await installPrompt.userChoice;
-        showMessage(outcome === 'accepted' ? '✅ Ilova o‘rnatilmoqda...' : '❌ O‘rnatish bekor qilindi');
-        installPrompt = null;
-        installBtn.hidden = true;
-      });
-    })();
 
     // Часы
     function updateClock() {
