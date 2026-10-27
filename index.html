@@ -787,6 +787,121 @@
     })();
   </script>
 
+  <!-- VAQTINÇA! PUSH UÇUN  -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    if (urlParams.get('newalphabetpush') === 'true') {
+        // Подключаем стили модального окна, если их еще нет на странице
+        if (!document.getElementById('pas-modal-style')) {
+            const style = document.createElement('style');
+            style.id = 'pas-modal-style';
+            style.innerHTML = `
+                .pas-modal-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.65);
+                    backdrop-filter: blur(6px);
+                    -webkit-backdrop-filter: blur(6px);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 99999;
+                    animation: pasFadeIn 0.25s ease forwards;
+                }
+                .pas-modal-box {
+                    background: #141419;
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 20px;
+                    padding: 28px;
+                    width: 90%;
+                    max-width: 380px;
+                    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+                    font-family: system-ui, -apple-system, sans-serif;
+                    color: #ffffff;
+                    text-align: center;
+                    animation: pasScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                }
+                .pas-modal-title {
+                    font-size: 19px;
+                    font-weight: 700;
+                    margin-bottom: 10px;
+                    letter-spacing: -0.01em;
+                }
+                .pas-modal-text {
+                    font-size: 14px;
+                    color: #9ba1a6;
+                    margin-bottom: 24px;
+                    line-height: 1.5;
+                }
+                .pas-modal-btn {
+                    background: #3b82f6;
+                    color: #ffffff;
+                    border: none;
+                    border-radius: 12px;
+                    padding: 12px 24px;
+                    font-size: 15px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    width: 100%;
+                    transition: background 0.2s, transform 0.1s;
+                }
+                .pas-modal-btn:hover {
+                    background: #2563eb;
+                }
+                .pas-modal-btn:active {
+                    transform: scale(0.98);
+                }
+                @keyframes pasFadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                @keyframes pasScaleIn {
+                    from { transform: scale(0.92); opacity: 0; }
+                    to { transform: scale(1); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Создаем элементы модального окна
+        const overlay = document.createElement('div');
+        overlay.className = 'pas-modal-overlay';
+
+        const box = document.createElement('div');
+        box.className = 'pas-modal-box';
+
+        const title = document.createElement('div');
+        title.className = 'pas-modal-title';
+        title.textContent = 'Alifbo yangilandi';
+
+        const text = document.createElement('div');
+        text.className = 'pas-modal-text';
+        text.textContent = 'ÖZR ning yangi alifbosi böyiça, Prank-as ham asta-sekin yangilanib borişini aytmoqçimiz. Yangi alifbo tartibi: Sh - ş, Ch - ç, G\' - Ğ, O\' - Ö';
+
+        const button = document.createElement('button');
+        button.className = 'pas-modal-btn';
+        button.textContent = 'OK';
+
+        // Событие закрытия при клике на OK
+        button.addEventListener('click', () => {
+            overlay.style.animation = 'pasFadeIn 0.2s ease reverse forwards';
+            setTimeout(() => overlay.remove(), 200);
+        });
+
+        // Собираем конструкцию воедино
+        box.appendChild(title);
+        box.appendChild(text);
+        box.appendChild(button);
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
+    }
+});
+
   <script src="/auto-menu.js" data-prank-as="menu"></script>
   <script src="/tracker.js" data-prank-as="tracker"></script>
   <script src="/metrika-code-paster.js" data-prank-as="metrika"></script>
