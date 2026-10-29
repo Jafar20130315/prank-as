@@ -176,7 +176,7 @@
   /* ---------- Переключатель в меню ---------- */
   function updateToggle() {
     var a = document.getElementById('perfToggle');
-    if (a) a.textContent = current === 'low' ? 'Grafikani pasaytiriş' : 'Grafikani asliga qaytariş';
+    if (a) a.textContent = current === 'low' ? 'Grafikani asliga qaytariş' : 'Grafikani pasaytiriş';
   }
 
   function initToggle() {
