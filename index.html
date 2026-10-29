@@ -68,9 +68,9 @@
             await OneSignal.User.PushSubscription.optIn();
             if (Notification.permission === "granted") {
               if (wrapper) wrapper.style.display = "none";
-              alert("✔️ Bildirishnomalar yoqildi!");
+              alert("✔️ Bildirişnomalar yoqildi!");
             } else if (Notification.permission === "denied") {
-              alert("❌ Bildirishnomalar bloklangan. Brauzer sozlamalaridan ruxsat berishingiz mumkin.");
+              alert("❌ Bildirişnomalar bloklangan. Brauzer sozlamalaridan ruxsat berişingiz mumkin.");
             }
           } catch (err) { console.error("OneSignal optIn error:", err); }
         };
@@ -296,7 +296,7 @@
     <div class="custom-modal-box">
       <div class="custom-modal-icon">🔔</div>
       <div class="custom-modal-title">Bildirişnomalar yoqilsinmi?</div>
-      <div class="custom-modal-desc">Yangiliklardan xabardor bölish uçun.</div>
+      <div class="custom-modal-desc">Yangiliklardan xabardor böliş uçun.</div>
       <div class="custom-modal-buttons">
         <button class="custom-modal-btn cancel" id="modalCancel">Bekor qiliş</button>
         <button class="custom-modal-btn ok" id="modalOk">OK</button>
@@ -309,8 +309,8 @@
 
   <header class="top-bar">
     <div class="top-bar-right">
-      <div class="desktop-clock" id="desktopClock">Hozir</div>
-      <a href="/auth" class="user-icon" id="userIcon" title="Kirish">
+      <div class="desktop-clock" id="desktopClock">Hozir...</div>
+      <a href="/auth" class="user-icon" id="userIcon" title="Kiriş">
         <svg viewBox="0 0 24 24">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
           <circle cx="12" cy="7" r="4"></circle>
@@ -338,12 +338,12 @@
           <div class="button-container">
             <a class="btn" href="/soxta-parol-aniqlovchi">Soxta parol aniqlovçi</a>
             <a class="btn" href="/soxta-balans-aniqlovchi">Soxta balans aniqlovçi</a>
-            <a class="btn" href="/soxta-ulanish-sistemasi">Soxta ulanish sistemasi</a>
-            <a class="btn" href="/soxta-uyin-bank-kartasi">Soxta o‘yin bank kartasi</a>
+            <a class="btn" href="/soxta-ulanish-sistemasi">Soxta ulaniş sistemasi</a>
+            <a class="btn" href="/soxta-uyin-bank-kartasi">Soxta öyin bank kartasi</a>
             <a class="btn" href="/soxta-wifi-parol-aniqlovchi">Soxta Wi-Fi parol aniqlovçi</a>
-            <a class="btn" href="/soxta-joylashuv-aniqlochi">Soxta joylashuv aniqlovçi</a>
-            <a class="btn" href="/soxta-random-yashash-joyi">Soxta random yashash joyi</a>
-            <a class="btn" href="/soxta-shaxs-aniqlovchi">Soxta shaxs aniqlovçi</a>
+            <a class="btn" href="/soxta-joylashuv-aniqlochi">Soxta joylaşuv aniqlovçi</a>
+            <a class="btn" href="/soxta-random-yashash-joyi">Soxta random yaşaş joyi</a>
+            <a class="btn" href="/soxta-shaxs-aniqlovchi">Soxta şaxs aniqlovçi</a>
             <a class="btn" href="/soxta-wifi-parol-joylashuv-aniqlovchi">Soxta Wi-Fi parol aniqlovçi PRO</a>
           </div>
         </div>
@@ -382,31 +382,31 @@
     <p>Saytda röyxatdan ötiş va şaxsiy profil oçiş nima uçun kerak? Quyida sizga şaxsiy akkauntning asosiy qulayliklari va afzalliklarini keltirib ötamiz.</p>
 
     <h3>1️⃣ Şaxsiy profil va qulaylik</h3>
-    <p>Ro‘yxatdan o‘tiş saytda o‘zingizning şaxsiy makoningizni yaratiş imkonini beradi. Bu orqali interfeys va barcha imkoniyatlar aynan sizning xohişingizga moslaşadi.</p>
-    <h3>2️⃣ Xavfsiz va işonchli kiriş</h3>
+    <p>Röyxatdan ötiş saytda özingizning şaxsiy makoningizni yaratiş imkonini beradi. Bu orqali interfeys va barça imkoniyatlar aynan sizning xohişingizga moslaşadi.</p>
+    <h3>2️⃣ Xavfsiz va işonçli kiriş</h3>
     <p>Zamonaviy şifrlaş texnologiyalari ma'lumotlaringizning maxfiyligini va şaxsiy sahifangiz begona şaxslardan himoyalanganini kafolatlaydi.</p>
     <h3>3️⃣ Qurilmalararo sinxronizatsiya</h3>
-    <p>Istalgan qurilmadan — xoh telefon, xoh kompyuterdan kiring, barcha şaxsiy sozlamalaringiz va ma'lumotlaringiz doimo o'zingiz bilan birga bo'ladi.</p>
+    <p>Istalgan qurilmadan — xoh telefon, xoh kompyuterdan kiring, barça şaxsiy sozlamalaringiz va ma'lumotlaringiz doimo özingiz bilan birga böladi.</p>
     <h3>4️⃣ Tezkor avtorizatsiya (OAuth)</h3>
-    <p>Har safar murakkab formalar to'ldiriş yoki uzun parollar yodda saqlaş şart emas — Google yoki Telegram orqali birgina tugma bosiş bilan tezda kiriş mumkin.</p>
+    <p>Har safar murakkab formalar töldiriş yoki uzun parollar yodda saqlaş şart emas — Google yoki Telegram orqali birgina tugma bosiş bilan tezda kiriş mumkin.</p>
     <h3>5️⃣ Faollik va vaqtni kuzatiş</h3>
-    <p>Tizim saytda qancha vaqt o'tkazganingizni va qaysi qiziqarli bo'limlardan ko'proq foydalanganingizni qulay tarzda hisoblab borişga yordam beradi.</p>
+    <p>Tizim saytda qança vaqt ötkazganingizni va qaysi qiziqarli bölimlardan köproq foydalanganingizni qulay tarzda hisoblab borişga yordam beradi.</p>
     <h3>6️⃣ Maxsus xabarnomalar va yangiliklar</h3>
-    <p>Saytda yangi pranklar, qiziqarli funksiyalar yoki o'zgarişlar paydo bo'lganda, ulardan birinchilardan bo'lib xabardor bo'liş imkoniyati yaratiladi.</p>
+    <p>Saytda yangi pranklar, qiziqarli funksiyalar yoki özgarişlar paydo bölganda, ulardan birinçilardan bölib xabardor böliş imkoniyati yaratiladi.</p>
     <h3>7️⃣ Botlar va spamdan himoya</h3>
-    <p>Ro'yxatdan o'tiş tizimi platformani turli xil avtomatlaştirilgan spam-hujumlar va soxta akkauntlardan toza saqlaşga xizmat qiladi.</p>
+    <p>Röyxatdan ötiş tizimi platformani turli xil avtomatlaştirilgan spam-hujumlar va soxta akkauntlardan toza saqlaşga xizmat qiladi.</p>
     <h3>8️⃣ Kelgusidagi yangi imkoniyatlar</h3>
-    <p>Saytga qo'şiladigan reytinglar, yutuqlar yoki şaxsiy bonuslar tizimida o'z o'rningizga ega bo'liş uchun şaxsiy akkaunt muhim asos hisoblanadi.</p>
+    <p>Saytga qöşiladigan reytinglar, yutuqlar yoki şaxsiy bonuslar tizimida öz örningizga ega böliş uçun şaxsiy akkaunt muhim asos hisoblanadi.</p>
     <h3>9️⃣ Qayta aloqa qulayligi</h3>
-    <p>Sayt ma'muriyati bilan bog'laniş, fikr-mulohazalar qoldiriş va yordam oliş jarayonlari ro'yxatdan o'tgan foydalanuvchilar uchun ancha osonlaşadi.</p>
-    <h3>🔟 To'liq nazorat</h3>
-    <p>O'z profilingizdagi ma'lumotlarni istalgan vaqtda o'zgartiriş, yangilaş yoki sozlamalarni o'zingizga moslab boşqariş imkoniga ega bo'lasiz.</p>
+    <p>Sayt ma'muriyati bilan boğlaniş, fikr-mulohazalar qoldiriş va yordam oliş jarayonlari röyxatdan ötgan foydalanuvçilar uçun ança osonlaşadi.</p>
+    <h3>🔟 Töliq nazorat</h3>
+    <p>öz profilingizdagi ma'lumotlarni istalgan vaqtda özgartiriş, yangilaş yoki sozlamalarni özingizga moslab boşqariş imkoniga ega bölasiz.</p>
 
-    <p style="margin-top:30px; font-weight:600;">🔚 Xulosa: şaxsiy akkaunt yaratiş platformadan yanada xavfsiz, qulay va to'laqonli foydalaniş imkonini beradi.</p>
+    <p style="margin-top:30px; font-weight:600;">🔚 Xulosa: şaxsiy akkaunt yaratiş platformadan yanada xavfsiz, qulay va tölaqonli foydalaniş imkonini beradi.</p>
   </section>
 
   <!-- ===== Hamburger + Drawer ===== -->
-  <button class="top-left-menu-toggle" id="menuToggle" aria-label="Menyuni ochish" aria-expanded="false" aria-controls="dropdown-menu">
+  <button class="top-left-menu-toggle" id="menuToggle" aria-label="Menyuni oçiş" aria-expanded="false" aria-controls="dropdown-menu">
     <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
   </button>
 
@@ -415,10 +415,11 @@
   <nav id="dropdown-menu" class="dropdown-menu-small" aria-label="Asosiy menyu">
     <div class="menu-title">Prank-as</div>
 
-    <a href="/ilovani-yuklab-oliş">Ilovani o‘rnatish</a>
-    <a href="/baholash">Fikr qoldirish</a>
+    <a href="/ilovani-yuklab-oliş">Ilovani örnatiş
+    </a>
+    <a href="/baholash">Fikr qoldiriş</a>
     <a href="https://help.prank-as.uz">Yordam</a>
-    <a href="https://old.prank-as.uz">Oldingi saytga qaytish</a>
+    <a href="https://old.prank-as.uz">Oldingi saytga qaytiş</a>
 
     <div class="menu-divider"></div>
 
@@ -774,7 +775,7 @@
           openVipModal();
         } catch (err) {
           console.error("Plus check error:", err);
-          showMessage("Server bilan aloqa yo'q. Keyinroq urinib ko'ring.");
+          showMessage("Server bilan aloqa yöq. Keyinroq urinib köring.");
         } finally {
           checking = false;
         }
