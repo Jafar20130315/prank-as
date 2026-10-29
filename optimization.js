@@ -167,7 +167,7 @@
     lsSet(KEY_USER, mode);
     apply(mode);
     if (typeof window.showMessage === 'function') {
-      window.showMessage(mode === 'low' ? '⚡ Yengil rejim yoqildi' : '✨ To‘liq rejim yoqildi');
+      window.showMessage(mode === 'low' ? 'Yengil rejim yoqildi' : 'Grafika asliga qaytarildi');
     }
     // листья остановлены — для их возврата нужна перезагрузка
     if (mode === 'high' && fxStopped) setTimeout(function () { location.reload(); }, 700);
@@ -176,7 +176,7 @@
   /* ---------- Переключатель в меню ---------- */
   function updateToggle() {
     var a = document.getElementById('perfToggle');
-    if (a) a.textContent = current === 'low' ? '⚡ Yengil rejim: yoqilgan' : '⚡ Yengil rejim: o‘chirilgan';
+    if (a) a.textContent = current === 'low' ? 'Grafikani pasaytiriş' : 'Grafikani asliga qaytariş';
   }
 
   function initToggle() {
