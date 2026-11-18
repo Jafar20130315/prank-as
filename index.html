@@ -432,10 +432,282 @@
   <div class="top-message" id="topMsg"></div>
 
   <button class="notify-btn" aria-label="Bildirishnomalar">🔔</button>
+  
+<script>
+/* ==========================================================================
+   BAYROQ KUNI · 18-noyabr
+   --------------------------------------------------------------------------
+   Интро ко дню принятия государственного флага (18.11.1991, закон № 407-XII).
+   Флаг рисуется на canvas по официальному построению, волнуется синусоидальной
+   «тканью» и уходит вправо, стирая затемнение слева направо — сайт открывается.
 
+   · Только 18 ноября, не чаще раза в день. Превью в любой день: ?bayroq=1
+   · Скип: клик / Esc / кнопка. prefers-reduced-motion — статичный показ.
+   · Уважает режим техработ (isMaintenanceMode) и economy-режим трафика.
+   ========================================================================== */
+(() => {
+  'use strict';
+
+  const CFG = {
+    month: 10, day: 18,            // ноябрь (месяцы с нуля)
+    adoptedYear: 1991,
+    storageKey: 'pas:bayroq-kuni',
+    holdMs: 2900,                  // от появления до начала ухода
+    wipeMs: 950,                   // длительность стирания занавеса
+    waveSpeed: 3.0,                // скорость «ветра», рад/с
+    waveAmp: 0.10                  // амплитуда волны, доля высоты флага
+  };
+
+  /* ----- Условия показа ----- */
+  const now = new Date();
+  const forced = new URLSearchParams(location.search).get('bayroq') === '1';
+  const maintenance = typeof isMaintenanceMode !== 'undefined' && isMaintenanceMode;
+
+  if (!forced) {
+    if (now.getMonth() !== CFG.month || now.getDate() !== CFG.day) return;
+    if (maintenance) return;
+    if (navigator.connection && navigator.connection.saveData) return;
+    const stamp = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+    try {
+      if (localStorage.getItem(CFG.storageKey) === stamp) return;
+      localStorage.setItem(CFG.storageKey, stamp);
+    } catch (_) { /* приватный режим — показываем без лимита */ }
+  }
+  if (document.hidden) return;
+
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const years = now.getFullYear() - CFG.adoptedYear;
+
+  /* ----- Геометрия флага:官方 построение, единицы — см на полотне 250×125 -----
+     Полосы 40, каймы 2.5; полумесяц и звёзды в прямоугольнике 75×30
+     в 20 см от древка; звёзды Ø6 с шагом 12, ряды 3-4-5 прижаты вправо. */
+  const GEO = {
+    w: 250, h: 125, stripe: 40, fimb: 2.5,
+    blue: '#0099B5', white: '#FFFFFF', green: '#1EB53A', red: '#CE1126',
+    moon: { cx: 35, cy: 20, r: 15, shift: 5 },
+    starR: 3,
+    stars: [[68,8],[80,8],[92,8],
+            [56,20],[68,20],[80,20],[92,20],
+            [44,32],[56,32],[68,32],[80,32],[92,32]]
+  };
+
+  function paintFlag(g, s) {
+    const band = (y, h, c) => { g.fillStyle = c; g.fillRect(0, y * s, GEO.w * s, h * s); };
+    band(0, 40, GEO.blue);
+    band(40, 2.5, GEO.red);
+    band(42.5, 40, GEO.white);
+    band(82.5, 2.5, GEO.red);
+    band(85, 40, GEO.green);
+
+    // Полумесяц: белый диск минус синий, сдвинутый к свободному краю
+    g.fillStyle = GEO.white;
+    g.beginPath(); g.arc(35 * s, 20 * s, 15 * s, 0, Math.PI * 2); g.fill();
+    g.fillStyle = GEO.blue;
+    g.beginPath(); g.arc(40 * s, 20 * s, 15 * s, 0, Math.PI * 2); g.fill();
+
+    // 12 звёзд: правильная пентаграмма, вершина вверх
+    g.fillStyle = GEO.white;
+    const inner = GEO.starR * 0.381966;
+    for (const [x, y] of GEO.stars) {
+      g.beginPath();
+      for (let i = 0; i < 10; i++) {
+        const a = -Math.PI / 2 + i * Math.PI / 5;
+        const r = (i % 2 ? inner : GEO.starR) * s;
+        i ? g.lineTo(x * s + r * Math.cos(a), y * s + r * Math.sin(a))
+          : g.moveTo(x * s + r * Math.cos(a), y * s + r * Math.sin(a));
+      }
+      g.closePath(); g.fill();
+    }
+  }
+
+  // Исходник флага в повышенном разрешении — из него нарезаются срезы волны
+  const off = document.createElement('canvas');
+  off.width = 1250; off.height = 625;
+  paintFlag(off.getContext('2d'), 5);
+
+  /* ----- Разметка и стили (изолированный префикс bk-) ----- */
+  const styleEl = document.createElement('style');
+  styleEl.textContent = `
+    .bk-overlay{position:fixed;inset:0;z-index:1000000;display:flex;align-items:center;justify-content:center;
+      background:radial-gradient(120% 90% at 12% -10%,rgba(0,153,181,.18),transparent 55%),
+                 radial-gradient(130% 100% at 88% 110%,rgba(30,181,58,.14),transparent 55%),#0a0e12;
+      opacity:0;clip-path:inset(0 0 0 0);transition:opacity .45s ease;
+      overflow:hidden;user-select:none;-webkit-user-select:none;outline:none;--bk-wipe:${CFG.wipeMs}ms}
+    .bk-overlay.is-in{opacity:1}
+    .bk-overlay.is-leaving{clip-path:inset(0 0 0 100%);
+      transition:clip-path var(--bk-wipe) cubic-bezier(.65,.05,.86,.35);will-change:clip-path}
+    .bk-stage{display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 24px;
+      transform:translateX(-118vw);transition:transform 1s cubic-bezier(.16,1,.3,1);will-change:transform}
+    .bk-overlay.is-in .bk-stage{transform:translateX(0)}
+    .bk-overlay.is-leaving .bk-stage{transform:translateX(118vw);
+      transition:transform calc(var(--bk-wipe) - 100ms) cubic-bezier(.5,0,.75,.2)}
+    .bk-flag{display:block;filter:drop-shadow(0 26px 44px rgba(0,0,0,.55));
+      animation:bkSway 5.2s ease-in-out infinite alternate}
+    @keyframes bkSway{from{transform:rotate(-1.1deg)}to{transform:rotate(1.1deg)}}
+    .bk-copy{margin-top:34px}
+    .bk-copy>*{opacity:0;transform:translateY(16px);
+      transition:opacity .55s ease,transform .55s cubic-bezier(.16,1,.3,1)}
+    .bk-overlay.is-in .bk-copy>*{opacity:1;transform:none}
+    .bk-overlay.is-in .bk-eyebrow{transition-delay:.4s}
+    .bk-overlay.is-in .bk-title{transition-delay:.55s}
+    .bk-overlay.is-in .bk-line{transition-delay:.7s}
+    .bk-overlay.is-leaving .bk-copy{opacity:0;transition:opacity .2s ease}
+    .bk-eyebrow{font-size:12px;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:#8fd8e6}
+    .bk-title{margin:10px 0 12px;font-size:clamp(34px,7.5vw,62px);font-weight:900;line-height:1.05;
+      letter-spacing:-.02em;color:#fff;text-shadow:0 2px 24px rgba(0,153,181,.35)}
+    .bk-line{font-size:15px;line-height:1.6;color:rgba(255,255,255,.62);max-width:44ch;margin:0 auto}
+    .bk-skip{position:absolute;left:50%;bottom:calc(26px + env(safe-area-inset-bottom,0px));
+      transform:translateX(-50%);font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;
+      color:rgba(255,255,255,.75);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);
+      padding:10px 22px;border-radius:999px;cursor:pointer;touch-action:manipulation;
+      backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+      opacity:0;transition:opacity .5s ease 1.15s,background .2s ease;-webkit-tap-highlight-color:transparent}
+    .bk-overlay.is-in .bk-skip{opacity:1}
+    .bk-skip:hover{background:rgba(255,255,255,.14);color:#fff}
+    .bk-skip:focus-visible{outline:2px solid #8fd8e6;outline-offset:3px}
+    .bk-overlay.is-leaving .bk-skip{opacity:0;transition:opacity .15s ease}
+    @media (max-height:500px){
+      .bk-copy{margin-top:18px}
+      .bk-title{font-size:clamp(26px,6vw,40px)}
+      .bk-line{font-size:13px}
+    }
+    @media (prefers-reduced-motion:reduce){
+      .bk-stage,.bk-overlay.is-in .bk-stage,.bk-overlay.is-leaving .bk-stage{transform:none;transition:none}
+      .bk-flag{animation:none}
+      .bk-copy>*{transform:none}
+      .bk-overlay.is-leaving{clip-path:none;opacity:0;transition:opacity .45s ease}
+    }`;
+  document.head.appendChild(styleEl);
+
+  const overlay = document.createElement('div');
+  overlay.className = 'bk-overlay';
+  overlay.tabIndex = -1;
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.setAttribute('aria-labelledby', 'bk-title');
+  overlay.innerHTML = `
+    <div class="bk-stage">
+      <canvas class="bk-flag" aria-hidden="true"></canvas>
+      <div class="bk-copy">
+        <div class="bk-eyebrow">18-noyabr — Davlat bayroği kuni</div>
+        <h2 class="bk-title" id="bk-title">Bayroğimizga ${years} yil</h2>
+        <p class="bk-line">1991-yilning şu kunida Özbekiston öz davlat bayroğini qabul qilgan.</p>
+      </div>
+    </div>
+    <button class="bk-skip" type="button">Ötkazib yuboriş</button>`;
+
+  const canvas = overlay.querySelector('.bk-flag');
+  const ctx = canvas.getContext('2d');
+  if (!ctx) { styleEl.remove(); return; }
+
+  /* ----- Размеры canvas с учётом вьюпорта и Retina ----- */
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  let cw = 0, ch = 0, flagH = 0, amp = 0;
+
+  function fit() {
+    const byWidth = innerWidth * (innerWidth < 600 ? .84 : .62);
+    const byHeight = Math.max(230, (innerHeight - 230) / .67);
+    const w = Math.min(byWidth, 540, byHeight);
+    flagH = w / 2;
+    canvas.style.width = w + 'px';
+    canvas.style.height = flagH * 1.34 + 'px';
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(flagH * 1.34 * dpr);
+    cw = canvas.width; ch = canvas.height;
+    amp = flagH * CFG.waveAmp * dpr;
+  }
+
+  /* ----- Волна: вертикальные срезы + светотень по фазе ----- */
+  function draw(t) {
+    ctx.clearRect(0, 0, cw, ch);
+    const baseH = flagH * dpr;
+
+    if (reduced) { // статичный кадр без искажений
+      ctx.drawImage(off, 0, 0, off.width, off.height, 0, (ch - baseH) / 2, cw, baseH);
+      return;
+    }
+    const slice = Math.max(2, Math.round(2 * dpr));
+    const midY = ch / 2;
+    for (let x = 0; x < cw; x += slice) {
+      const p = x / cw;
+      const ph = p * Math.PI * 2 * 1.15 - t * CFG.waveSpeed;
+      const env = .35 + .65 * p; // у древка спокойнее, свободный край живее
+      const dy = amp * env * (.75 * Math.sin(ph) + .25 * Math.sin(ph * 2.15 + 1.7));
+      const h = baseH * (1 - .05 * env * (.5 + .5 * Math.cos(ph)));
+      const y = midY + dy - h / 2;
+      const sw = Math.min(slice + 1, cw - x);
+      const sx = p * off.width;
+      const srcW = Math.min(off.width * sw / cw, off.width - sx);
+      ctx.drawImage(off, sx, 0, srcW, off.height, x, y, sw, h);
+
+      const light = Math.cos(ph) * env;
+      if (light > .03) {
+        ctx.fillStyle = `rgba(255,255,255,${(light * .14).toFixed(3)})`;
+        ctx.fillRect(x, y, sw, h);
+      } else if (light < -.03) {
+        ctx.fillStyle = `rgba(4,18,28,${(-light * .2).toFixed(3)})`;
+        ctx.fillRect(x, y, sw, h);
+      }
+    }
+  }
+
+  /* ----- Таймлайн и события ----- */
+  let raf = 0, t0 = 0, holdTimer = 0, killTimer = 0;
+  let leaving = false, destroyed = false;
+  const prevFocus = document.activeElement;
+
+  const frame = ts => {
+    if (!t0) t0 = ts;
+    draw((ts - t0) / 1000);
+    raf = requestAnimationFrame(frame);
+  };
+
+  function destroy() {
+    if (destroyed) return;
+    destroyed = true;
+    cancelAnimationFrame(raf);
+    clearTimeout(holdTimer); clearTimeout(killTimer);
+    document.removeEventListener('keydown', onKey);
+    document.removeEventListener('visibilitychange', onVis);
+    removeEventListener('resize', onResize);
+    overlay.remove();
+    styleEl.remove();
+    document.documentElement.classList.remove('menu-open');
+    if (prevFocus && prevFocus.isConnected && prevFocus.focus) prevFocus.focus({ preventScroll: true });
+  }
+
+  function leave() {
+    if (leaving || destroyed) return;
+    leaving = true;
+    clearTimeout(holdTimer);
+    overlay.classList.add('is-leaving');
+    killTimer = setTimeout(destroy, (reduced ? 450 : CFG.wipeMs) + 120);
+  }
+
+  const onKey = e => { if (e.key === 'Escape') leave(); };
+  const onVis = () => { if (document.hidden) destroy(); };
+  const onResize = () => { fit(); if (reduced) draw(0); };
+
+  overlay.addEventListener('pointerdown', leave);
+  document.addEventListener('keydown', onKey);
+  document.addEventListener('visibilitychange', onVis);
+  addEventListener('resize', onResize);
+
+  /* ----- Старт ----- */
+  fit();
+  document.documentElement.classList.add('menu-open'); // блокировка прокрутки, как у меню
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    overlay.classList.add('is-in');
+    overlay.focus({ preventScroll: true });
+  }));
+  if (reduced) draw(0); else raf = requestAnimationFrame(frame);
+  holdTimer = setTimeout(leave, reduced ? 2300 : CFG.holdMs);
+})();
+</script>
   <script>
     // 🔴 ТУМБЛЕР ТЕХРАБОТ: true — закрыть сайт, false — сайт работает
-    const isMaintenanceMode = true;
+    const isMaintenanceMode = false;
 
     document.addEventListener("DOMContentLoaded", () => {
       const overlay = document.getElementById("maintenanceOverlay");
